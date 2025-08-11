@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 
@@ -9,6 +9,7 @@ export default function Page() {
   const [results, setResults] = useState([]);
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
   const [message, setMessage] = useState(null);
+  const searchInputRef = useRef(null);
 
   async function doSearch(e) {
     e.preventDefault();
@@ -70,6 +71,7 @@ export default function Page() {
       <form onSubmit={doSearch} className="mt-5 flex gap-2 relative">
         <div className="relative w-full">
           <input
+            ref={searchInputRef}
             name="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
@@ -80,7 +82,13 @@ export default function Page() {
             <button
               type="button"
               aria-label="Clear search"
-              onClick={() => setQ("")}
+              onClick={() => {
+                setQ("");
+                setResults([]);
+                if (searchInputRef.current) {
+                  searchInputRef.current.focus();
+                }
+              }}
               className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-400 focus:outline-none"
               style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
             >
