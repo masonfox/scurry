@@ -15,8 +15,11 @@ cp .env.example .env
 mkdir -p secrets
 echo "PASTE_MAM_TOKEN_HERE" > secrets/mam_api_token
 
-# Run
-docker compose up
+# Install dependencies
+npm install
+
+# Run Den
+npm run dev
 # visit http://localhost:3000
 ```
 
