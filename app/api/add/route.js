@@ -1,0 +1,22 @@
+import { NextResponse } from "next/server";
+import { config } from "@/src/lib/config";
+import { qbAddUrl, qbLogin } from "@/src/lib/qbittorrent";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export async function POST(req) {
+  const body = await req.json();
+  const urlOrMagnet = body.downloadUrl;
+  if (!urlOrMagnet) {
+    return NextResponse.json({ ok: false, error: "No magnet or torrentUrl provided" }, { status: 400 });
+  }
+  try {
+    const cookie = await qbLogin(config.qbUrl, config.qbUser, config.qbPass);
+    // TODO: clean up params
+    await qbAddUrl(config.qbUrl, cookie, urlOrMagnet, config.qbCategory);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    return NextResponse.json({ ok: false, error: err?.message || "Add failed" }, { status: 500 });
+  }
+}

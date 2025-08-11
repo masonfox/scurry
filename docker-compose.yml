@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  web:
+    build: .
+    ports: ["3000:3000"]
+    env_file: .env
+    secrets:
+      - mam_api_token
+    environment:
+      MAM_TOKEN_FILE: secrets/mam_api_token
+      APP_QB_URL: ${APP_QB_URL:-http://qbittorrent:8080}
+      APP_QB_USERNAME: ${APP_QB_USERNAME:-admin}
+      APP_QB_PASSWORD: ${APP_QB_PASSWORD:-adminadmin}
+      APP_MAM_TOKEN_FILE: ${APP_MAM_TOKEN_FILE:-secrets/mam_api_token}
+      APP_MAM_USER_AGENT: ${APP_MAM_USER_AGENT:-Scurry/1.0 (+contact)}
+    restart: unless-stopped
+
+secrets:
+  mam_api_token:
+    file: ./secrets/mam_api_token

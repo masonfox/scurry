@@ -1,0 +1,10 @@
+node_modules
+.next
+out
+.env
+secrets/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.log
+.DS_Store
