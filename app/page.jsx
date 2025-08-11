@@ -67,14 +67,27 @@ export default function Page() {
         </h1>
         <p className="mt-2 text-gray-500">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent</p>
       </div>
-      <form onSubmit={doSearch} className="mt-5 flex gap-2">
-        <input
-          name="search"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search books..."
-          className="block w-full rounded-md bg-white px-4 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6"
-        />
+      <form onSubmit={doSearch} className="mt-5 flex gap-2 relative">
+        <div className="relative w-full">
+          <input
+            name="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search books..."
+            className="block w-full rounded-md bg-white px-4 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6 pr-10"
+          />
+          {q && (
+            <button
+              type="button"
+              aria-label="Clear search"
+              onClick={() => setQ("")}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-400 focus:outline-none"
+              style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          )}
+        </div>
         <button className="rounded-md bg-pink-400 px-5 py-1.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 cursor-pointer" disabled={loading || !q.trim()}>{loading ? "Searching..." : "Search"}</button>
       </form>
 
