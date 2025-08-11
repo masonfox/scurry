@@ -18,7 +18,7 @@ echo "PASTE_MAM_TOKEN_HERE" > secrets/mam_api_token
 # Install dependencies
 npm install
 
-# Run Den
+# Run Dev
 npm run dev
 # visit http://localhost:3000
 ```
