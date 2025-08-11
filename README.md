@@ -2,7 +2,8 @@
 A quick little mouse that zips through MAM and slips your torrents straight into qBittorrent.
 
 ## Todos
-- Update your MAM session ID from the app Ui
+- Load and toggle torrent description
+- Update your MAM session ID from the app UI
 - Add some form of basic authentication, like app access key
 - Track snatches locally, since they take 20 min from MAM
 - Make `srchIn` field configurable
