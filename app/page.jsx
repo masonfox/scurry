@@ -84,7 +84,7 @@ export default function Page() {
 
       <ul className="list-none p-0 mt-6">
         {results.map((r) => (
-          <li key={r.id} className="px-4 py-3 rounded-sm border-2 border-gray-100 mb-4">
+          <li key={r.id} className="px-4 py-3 rounded-sm border-2 border-gray-100 hover:border-pink-200 mb-4">
             <div className="flex justify-between items-center w-full gap-6">
               <div>
                 {/* Basic torrent information */}
