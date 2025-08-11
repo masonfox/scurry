@@ -1,5 +1,5 @@
 # Scurry
-A quick little mouse that zips through MAM and slips your torrents straight into qBittorrent.
+A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent.
 
 ## Todos
 - Load and toggle torrent description
