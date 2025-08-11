@@ -107,7 +107,7 @@ export default function Page() {
               </div>
               {/* Torrent action buttons */}
               <div className="flex gap-4 items-center flex-col md:flex-row">
-                <a className="text-pink-400 hover:text-pink-500" href={ r.torrentUrl }>View</a>
+                <a className="text-pink-400 hover:text-pink-500" target="blank" href={ r.torrentUrl }>View</a>
                 <button
                   className="rounded-md bg-pink-50 px-2.5 py-1.5 text-sm font-semibold text-pink-500 shadow-xs hover:bg-pink-100 cursor-pointer"
                   disabled={r.snatched}
