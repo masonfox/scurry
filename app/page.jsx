@@ -75,7 +75,7 @@ export default function Page() {
           placeholder="Search books..."
           className="block w-full rounded-md bg-white px-4 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6"
         />
-        <button className="rounded-md bg-pink-400 px-2.5 py-1.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 cursor-pointer" disabled={loading || !q.trim()}>{loading ? "Searching..." : "Search"}</button>
+        <button className="rounded-md bg-pink-400 px-5 py-1.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 cursor-pointer" disabled={loading || !q.trim()}>{loading ? "Searching..." : "Search"}</button>
       </form>
 
       {message && <p className="my-5 p-4 bg-gray-100 rounded-md" style={{ border: "1px solid #eee" }} ><strong> {message}</strong></p>}
