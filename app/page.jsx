@@ -80,9 +80,9 @@ export default function Page() {
       </div>
 
       {!mamTokenExists ? (
-        <div className="my-8 p-6 bg-yellow-100 border border-yellow-300 rounded-md text-yellow-900 text-center">
-          <strong>Missing mam_api_token!</strong><br />
-          Please add your MAM API token to <code>secrets/mam_api_token</code> on the server to enable search.
+        <div className="my-8 p-6 bg-yellow-100 border border-yellow-300 rounded-md text-yellow-900 text-left">
+          <strong>Missing MAM API Token!</strong><br />
+          Please add your MAM API token to "<code>secrets/mam_api_token</code>" on the server to enable search.
         </div>
       ) : (
         <>
