@@ -19,4 +19,9 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package.json ./package.json
 EXPOSE 3000
+
+# Healthcheck: ping the /api/health endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+	CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
+
 CMD ["npm", "start"]
