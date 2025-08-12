@@ -5,6 +5,8 @@ import fs from "node:fs";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+console.log("Checking for MAM token at:", config.mamTokenFile);
+
 export async function GET() {
   try {
     if (fs.existsSync(config.mamTokenFile)) {

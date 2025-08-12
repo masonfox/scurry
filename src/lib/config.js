@@ -7,8 +7,6 @@ function need(name) {
   return v;
 }
 
-console.log("Using MAM token file from:", process.env.MAM_TOKEN_FILE || "secrets/mam_api_token");
-
 const cfg = {
   qbUrl: need("APP_QB_URL"),
   qbCategory: process.env.APP_QB_CATEGORY || "books",
