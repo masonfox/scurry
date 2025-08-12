@@ -16,6 +16,7 @@ WORKDIR /app
 ENV NODE_ENV=production
 ARG APP_QB_URL
 ENV APP_QB_URL=$APP_QB_URL
+# Add bash for debugging
 RUN apk add --no-cache bash
 RUN addgroup -S app && adduser -S app -G app
 USER app
