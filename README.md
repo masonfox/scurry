@@ -4,7 +4,6 @@ A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torren
 ## Todos
 - Load and toggle torrent description
 - Update your MAM session ID from the app UI
-- Add some form of basic authentication, like app access key
 - Track snatches locally, since they take 20 min from MAM
 - Make `srchIn` field configurable
 - Support audiobooks - MAM search and qBit categories
