@@ -9,7 +9,7 @@ function need(name) {
 
 const cfg = {
   qbUrl: need("APP_QB_URL"),
-  qbCategory: need("APP_QB_CATEGORY"),
+  qbCategory: "books",
   qbUser: process.env.APP_QB_USERNAME || "admin",
   qbPass: process.env.APP_QB_PASSWORD || "adminadmin",
 
