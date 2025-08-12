@@ -72,10 +72,19 @@ export default function Page() {
 
   return (
     <main className="my-5 p-4 w-full max-w-4xl mx-auto">
-      <div className="p-8 bg-gray-100 rounded-lg">
-        <h1 className="text-3xl font-bold" style={{ margin: 0, marginLeft: -8 }}>
-          <span className="mr-1">🐁</span>
-          <span>Scurry</span>
+      <div className="p-8 rounded-lg bg-gray-50">
+        <h1 className="text-3xl font-bold flex items-center -ml-1">
+          <span className="mr-1">
+            <Image
+              src="/images/logo.png"
+              alt="Scurry Logo"
+              width={36}
+              height={36}
+              style={{ display: 'inline', verticalAlign: 'middle', height: 36 }}
+              priority
+            />
+          </span>
+          <span className="text-gray-800">Scurry</span>
         </h1>
         <p className="mt-2 text-gray-500">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent</p>
       </div>
