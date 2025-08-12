@@ -13,7 +13,7 @@ const cfg = {
   qbUser: process.env.APP_QB_USERNAME || "admin",
   qbPass: process.env.APP_QB_PASSWORD || "adminadmin",
 
-  mamTokenFile: process.env.APP_MAM_TOKEN_FILE || "secrets/mam_api_token",
+  mamTokenFile: "secrets/mam_api_token",
   mamUA: process.env.APP_MAM_USER_AGENT || "Scurry/1.0 (+contact)",
 };
 
