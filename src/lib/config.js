@@ -1,3 +1,4 @@
+// App configuration
 import "server-only";
 import fs from "node:fs";
 
@@ -8,6 +9,7 @@ function need(name) {
 }
 
 const cfg = {
+  appPassword: process.env.APP_PASSWORD || "cheeseplease",
   qbUrl: need("APP_QB_URL"),
   qbCategory: process.env.APP_QB_CATEGORY || "books",
   qbUser: process.env.APP_QB_USERNAME || "admin",
