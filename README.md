@@ -8,7 +8,6 @@ A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torren
 - Track snatches locally, since they take 20 min from MAM
 - Make `srchIn` field configurable
 - Support audiobooks - MAM search and qBit categories
-- Add Health check route
 
 ## Quick Start
 ```bash
