@@ -1,5 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
+import Image from 'next/image'
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 
@@ -130,10 +131,21 @@ export default function Page() {
                     <div>
                       <span style={{ fontWeight: '600' }}>{r.title}</span>
                       <span style={{ color: "#555" }}>
-                        <span style={{ marginLeft: 4, marginRight: 4 }}>by</span>
+                        <span className="mx-1">by</span>
                         <span>{r.author}</span>
-                        {r.vip && <span style={{ marginLeft: 4 }}><img style={{ height: 14 }} src="https://cdn.myanonamouse.net/pic/vip.png" alt="VIP" /></span>}
                       </span>
+                      {r.vip && (
+                          <span className="inline-flex ml-1 relative top-0.25">
+                            <Image
+                              src="https://cdn.myanonamouse.net/pic/vip.png"
+                              alt="VIP"
+                              width={14}
+                              height={14}
+                              style={{ height: 14 }}
+                              unoptimized
+                            />
+                          </span>
+                       )}
                     </div>
                     {/* Torrent metadata */}
                     <div style={{ fontSize: 13, color: "#777", marginTop: 4 }}>
