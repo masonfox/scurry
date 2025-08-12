@@ -11,6 +11,7 @@ services:
       APP_QB_URL: ${APP_QB_URL:-http://qbittorrent:8080}
       APP_QB_USERNAME: ${APP_QB_USERNAME:-admin}
       APP_QB_PASSWORD: ${APP_QB_PASSWORD:-adminadmin}
+      MAM_TOKEN_FILE: /secrets/mam_api_token
       APP_MAM_USER_AGENT: ${APP_MAM_USER_AGENT:-Scurry/1.0 (+contact)}
     volumes:
       - ./mam_api_token:/secrets/mam_api_token:ro
