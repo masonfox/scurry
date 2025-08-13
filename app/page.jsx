@@ -88,6 +88,7 @@ export default function Page() {
                 height={36}
                 style={{ display: 'inline', verticalAlign: 'middle', height: 36 }}
                 priority
+                unoptimized
               />
             </span>
             <span className="text-gray-800">Scurry</span>

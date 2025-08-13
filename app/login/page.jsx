@@ -37,6 +37,7 @@ export default function LoginPage() {
              className="inline vertical-align-middle mb-1"
              style={{ height: 36 }}
              priority
+             unoptimized
            />
            <h1 className="text-2xl font-bold text-center text-gray-800">Scurry Password</h1>
         </div>
