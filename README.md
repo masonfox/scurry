@@ -1,6 +1,8 @@
 # Scurry
 A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent.
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/masonfox/scurry)](https://hub.docker.com/r/masonfox/scurry)
+
 ## Todos
 - Load and toggle torrent description
 - Update your MAM session ID from the app UI
