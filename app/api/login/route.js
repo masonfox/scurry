@@ -1,8 +1,8 @@
 // API route for login: checks password and sets session cookie
 import { NextResponse } from 'next/server';
 import { config } from '@/src/lib/config';
+import { SESSION_COOKIE } from '@/src/lib/constants.js';
 
-const SESSION_COOKIE = 'scurry_session';
 const SESSION_SECRET = config.appPassword;
 
 export async function POST(req) {

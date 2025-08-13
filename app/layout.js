@@ -1,3 +1,4 @@
+import React from "react";
 export const metadata = {
   title: "Scurry",
   description: "A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent",

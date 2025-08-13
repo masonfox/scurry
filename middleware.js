@@ -1,12 +1,12 @@
 // Middleware to check for session cookie and redirect to /login if not present
 import { NextResponse } from 'next/server';
+import { SESSION_COOKIE, ALLOWED_PATHS } from './src/lib/constants.js';
 
-const SESSION_COOKIE = 'scurry_session';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
   // Allow API routes and static files
-  if (pathname.startsWith('/api') || pathname.startsWith('/_next') || pathname.startsWith('/favicon.ico') || pathname.startsWith('/apple-icon.png') || pathname.startsWith('/logo.png')) {
+  if (ALLOWED_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
   }
   // Allow login page
