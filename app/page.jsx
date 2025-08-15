@@ -1,6 +1,7 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
 import Image from 'next/image'
+import MessageBanner from './MessageBanner'
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 
@@ -9,6 +10,7 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
+  // message: { type: 'info' | 'error' | 'success', text: string }
   const [message, setMessage] = useState(null);
   const [mamTokenExists, setMamTokenExists] = useState(true); // default true for SSR hydration
   const searchInputRef = useRef(null);
@@ -31,11 +33,11 @@ export default function Page() {
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Search failed");
       if (data.results.length === 0) {
-        setMessage("No results found... Try a different search");
+        setMessage({ type: "info", text: "No results found... Try a different search" });
       }
       setResults(data.results || []);
     } catch (err) {
-      setMessage(err?.message || "Search failed");
+      setMessage({ type: "error", text: err?.message || "Search failed" });
     } finally {
       setLoading(false);
     }
@@ -54,7 +56,7 @@ export default function Page() {
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Add failed");
-      setMessage(`Queued: ${item.title}`);
+      setMessage({ type: "success", text: `Queued: ${item.title}` });
       // clear search and scroll top
       setQ("");
       setResults([]);
@@ -64,7 +66,7 @@ export default function Page() {
         setMessage(null);
       }, 3000);
     } catch (err) {
-      setMessage(err?.message || "Add failed");
+      setMessage({ type: "error", text: err?.message || "Add failed" });
     }
   }
 
@@ -104,10 +106,10 @@ export default function Page() {
       </div>
 
       {!mamTokenExists ? (
-        <div className="my-8 p-6 bg-yellow-100 border border-yellow-300 rounded-md text-yellow-900 text-left">
-          <strong>Missing MAM API Token!</strong><br />
-          Please add your MAM API token to &quot;<code>secrets/mam_api_token</code>&quot; on the server to enable search.
-        </div>
+        <MessageBanner
+          type="error"
+          text={"Missing MAM API Token! Please add your MAM API token. See docs."}
+        />
       ) : (
         <>
           <form onSubmit={doSearch} className="mt-5 flex gap-2 relative">
@@ -141,7 +143,9 @@ export default function Page() {
             <button className="rounded-md bg-pink-400 px-5 py-1.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 cursor-pointer" disabled={loading || !q.trim()}>{loading ? "Searching..." : "Search"}</button>
           </form>
 
-          {message && <p className="my-5 p-4 bg-gray-100 rounded-md" style={{ border: "1px solid #eee" }} ><strong> {message}</strong></p>}
+          {message && (
+            <MessageBanner type={message.type} text={message.text} />
+          )}
 
           {!loading && results.length === 0 && <p className="text-gray-500 mt-5">☝️ Try a search to see results...</p>}
 
@@ -199,3 +203,4 @@ export default function Page() {
     </main>
   );
 }
+
