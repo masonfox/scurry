@@ -77,6 +77,11 @@ export async function GET(req) {
     return NextResponse.json({ results: [] }, { status: 200 });
   }
 
+  // Utility to format numbers with commas
+  function formatNumberWithCommas(num) {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
   // map the results to a simpler format
   const results = data.data.map(item => ({
     id: item.id,
@@ -87,9 +92,9 @@ export async function GET(req) {
     vip: item.vip == 1,
     snatched: item.my_snatched == 1,
     author: Object.values(JSON.parse(item.author_info))[0] || null,
-    seeders: item.seeders.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    leechers: item.leechers.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    downloads: item.times_completed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    seeders: formatNumberWithCommas(item.seeders),
+    leechers: formatNumberWithCommas(item.leechers),
+    downloads: formatNumberWithCommas(item.times_completed),
     downloadUrl: buildMamDownloadUrl(item.dl),
     torrentUrl: buildMamTorrentUrl(item.id.toString())
   }));
