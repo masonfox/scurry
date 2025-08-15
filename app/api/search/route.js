@@ -1,40 +1,10 @@
 import { NextResponse } from "next/server";
 import { config, readMamToken } from "@/src/lib/config";
+import { buildPayload, buildMamDownloadUrl, buildMamTorrentUrl, formatNumberWithCommas, parseAuthorInfo } from "@/src/lib/utilities";
+import { MAM_BASE } from "@/src/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-export const MAM_BASE = "https://www.myanonamouse.net";
-
-/**
- * Construct the search payload for MAM
- * @param {string} q - query value to search
- * @returns constructed request body
- */
-function buildPayload(q) {
-  return {
-    tor: {
-      text: q,
-      srchIn: ["title", "author"],
-      searchType: "all",
-      main_cat: [14],
-      browseFlagsHideVsShow: "0",
-      sortType: "seedersDesc",
-      startNumber: "0"
-    },
-    dlLink: "",
-  };
-}
-
-export function buildMamDownloadUrl(dl) {
-  if (!dl || typeof dl !== "string") return undefined;
-  return `${MAM_BASE}/tor/download.php/${dl}`;
-}
-
-export function buildMamTorrentUrl(id) {
-  if (!id || typeof id !== "string") return undefined;
-  return `${MAM_BASE}/t/${id}`;
-}
 
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
@@ -77,26 +47,21 @@ export async function GET(req) {
     return NextResponse.json({ results: [] }, { status: 200 });
   }
 
-  // Utility to format numbers with commas
-  function formatNumberWithCommas(num) {
-    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  }
-
   // map the results to a simpler format
   const results = data.data.map(item => ({
-    id: item.id,
-    title: item.title,
-    size: item.size,
-    filetypes: item.filetype,
-    addedDate: item.added,
-    vip: item.vip == 1,
-    snatched: item.my_snatched == 1,
-    author: Object.values(JSON.parse(item.author_info))[0] || null,
-    seeders: formatNumberWithCommas(item.seeders),
-    leechers: formatNumberWithCommas(item.leechers),
-    downloads: formatNumberWithCommas(item.times_completed),
-    downloadUrl: buildMamDownloadUrl(item.dl),
-    torrentUrl: buildMamTorrentUrl(item.id.toString())
+    id: item.id ?? null,
+    title: item.title ?? "",
+    size: item.size ?? "",
+    filetypes: item.filetype ?? "",
+    addedDate: item.added ?? "",
+    vip: Boolean(item.vip == 1),
+    snatched: Boolean(item.my_snatched == 1),
+    author: parseAuthorInfo(item.author_info),
+    seeders: formatNumberWithCommas(item.seeders ?? 0),
+    leechers: formatNumberWithCommas(item.leechers ?? 0),
+    downloads: formatNumberWithCommas(item.times_completed ?? 0),
+    downloadUrl: buildMamDownloadUrl(item.dl ?? ""),
+    torrentUrl: buildMamTorrentUrl((item.id ?? ""))
   }));
 
   return NextResponse.json({ results });

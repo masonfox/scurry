@@ -4,7 +4,7 @@ import { POST as logoutPOST } from '../app/api/logout/route.js';
 import { config } from '../src/lib/config.js';
 import { SESSION_COOKIE } from '../src/lib/constants.js';
 
-describe('Auth API', () => {
+describe('auth API', () => {
   describe('login', () => {
     test('POST returns error if no password', async () => {
       const req = { json: async () => ({}) };

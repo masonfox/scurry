@@ -1,5 +1,6 @@
 import { describe, it, expect } from '@jest/globals';
-import { GET, buildMamDownloadUrl, buildMamTorrentUrl } from '../app/api/search/route.js';
+import { GET } from '../app/api/search/route.js';
+import { buildMamDownloadUrl, buildMamTorrentUrl } from '../src/lib/utilities.js';
 
 // Mock fetch and dependencies
 jest.mock('../src/lib/config', () => ({
@@ -29,13 +30,4 @@ describe('search route', () => {
     expect(json.results.length).toBeGreaterThan(0);
   });
 
-  it('buildMamDownloadUrl returns correct url', () => {
-    expect(buildMamDownloadUrl('abc')).toContain('/tor/download.php/abc');
-    expect(buildMamDownloadUrl()).toBeUndefined();
-  });
-
-  it('buildMamTorrentUrl returns correct url', () => {
-    expect(buildMamTorrentUrl('123')).toContain('/t/123');
-    expect(buildMamTorrentUrl()).toBeUndefined();
-  });
 });

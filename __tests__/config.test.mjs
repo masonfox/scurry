@@ -25,4 +25,14 @@ describe('readMamToken', () => {
     expect(token.length).toBeGreaterThan(0);
     expect(token).toBe(fakeToken);
   });
+
+  it('readMamToken throws if file read fails', () => {
+    jest.spyOn(require('node:fs'), 'readFileSync').mockImplementation(() => { throw new Error('fail'); });
+    expect(() => readMamToken()).toThrow('fail');
+  });
+
+  it('readMamToken returns null if file is empty', () => {
+    jest.spyOn(require('node:fs'), 'readFileSync').mockReturnValue('');
+    expect(readMamToken()).toBeNull();
+  });
 });
