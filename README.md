@@ -9,6 +9,7 @@ A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torren
 - Track snatches locally, since they take 20 min from MAM
 - Make `srchIn` field configurable
 - Support audiobooks - MAM search and qBit categories
+- Add [Hardcover.app](https://hardcover.app/) integration to auto-grab books from your "Want To Read" list
 
 ## Quick Start
 ```bash
