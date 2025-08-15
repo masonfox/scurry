@@ -3,7 +3,9 @@
 import { GET } from '../app/api/mam-token-exists/route.js';
 import fs from 'node:fs';
 
-describe('mam-token-exists API', () => {
+import { readMamToken } from '../src/lib/config.js';
+
+describe('mam-token-exists API and readMamToken', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -24,5 +26,15 @@ describe('mam-token-exists API', () => {
     const data = await res.json();
     expect(data.exists).toBe(false);
     expect(typeof data.location).toBe('string');
+  });
+
+  it('readMamToken throws if file read fails', () => {
+    jest.spyOn(require('node:fs'), 'readFileSync').mockImplementation(() => { throw new Error('fail'); });
+    expect(() => readMamToken()).toThrow('fail');
+  });
+
+  it('readMamToken returns null if file is empty', () => {
+    jest.spyOn(require('node:fs'), 'readFileSync').mockReturnValue('');
+    expect(readMamToken()).toBeNull();
   });
 });
