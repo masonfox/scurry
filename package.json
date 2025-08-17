@@ -6,24 +6,30 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "cross-env ENABLE_CRON=false next dev",
+    "dev:cron": "cross-env ENABLE_CRON=true next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "npx jest"
   },
   "dependencies": {
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.2.0",
+    "nano": "^10.1.4",
     "next": "14.2.5",
+    "node-cron": "^4.2.1",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "@babel/preset-react": "^7.27.1",
     "@babel/preset-env": "^7.28.0",
+    "@babel/preset-react": "^7.27.1",
     "@jest/globals": "^30.0.5",
     "@tailwindcss/postcss": "^4.1.11",
     "autoprefixer": "^10.4.21",
     "babel-jest": "^30.0.5",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.5",
     "jest": "^30.0.5",

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import { config, readMamToken } from "@/src/lib/config";
+import { config } from "@/src/lib/config";
 import { buildPayload, buildMamDownloadUrl, buildMamTorrentUrl, formatNumberWithCommas, parseAuthorInfo } from "@/src/lib/utilities";
 import { MAM_BASE } from "@/src/lib/constants";
+import { getMamToken } from "@/src/lib/database";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export async function GET(req) {
   const q = (searchParams.get("q") || "").trim();
   if (!q) return NextResponse.json({ results: [] });
 
-  const token = readMamToken();
+  const token = await getMamToken();
 
   const res = await fetch(`${MAM_BASE}/tor/js/loadSearchJSONbasic.php`, {
     method: "POST",

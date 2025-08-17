@@ -1,4 +1,6 @@
 import React from "react";
+import '../src/lib/startup.js'; // Auto-initializes on server-side import
+
 export const metadata = {
   title: "Scurry",
   description: "A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent",

@@ -1,6 +1,5 @@
 // App configuration
 import "server-only";
-import fs from "node:fs";
 
 function need(name) {
   const v = process.env[name];
@@ -15,12 +14,11 @@ const cfg = {
   qbUser: process.env.APP_QB_USERNAME || "admin",
   qbPass: process.env.APP_QB_PASSWORD || "adminadmin",
 
-  mamTokenFile: process.env.MAM_TOKEN_FILE || "secrets/mam_api_token",
   mamUA: process.env.APP_MAM_USER_AGENT || "Scurry/1.0 (+contact)",
-};
 
-export function readMamToken() {
-  return fs.readFileSync(cfg.mamTokenFile, "utf8").trim() || null;
-}
+  couchdbUrl: process.env.COUCHDB_URL || "http://localhost:5984",
+  couchdbUser: process.env.COUCHDB_USER || "admin",
+  couchdbPassword: process.env.COUCHDB_PASSWORD || "password",
+};
 
 export const config = cfg;

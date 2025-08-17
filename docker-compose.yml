@@ -12,12 +12,23 @@ services:
       APP_QB_URL: ${APP_QB_URL:-http://qbittorrent:8080}
       APP_QB_USERNAME: ${APP_QB_USERNAME:-admin}
       APP_QB_PASSWORD: ${APP_QB_PASSWORD:-adminadmin}
-      MAM_TOKEN_FILE: /secrets/mam_api_token
       APP_MAM_USER_AGENT: ${APP_MAM_USER_AGENT:-Scurry/1.0 (+contact)}
-    volumes:
-      - ./mam_api_token:/secrets/mam_api_token:ro
+      COUCHDB_URL: ${COUCHDB_URL:-http://couchdb:5984}
+      COUCHDB_USER: ${COUCHDB_USER:-admin}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-password}
+    depends_on:
+      - couchdb
     restart: unless-stopped
 
-secrets:
-  mam_api_token:
-    file: ./secrets/mam_api_token
+  couchdb:
+    image: couchdb:3.3
+    ports: ["5984:5984"]
+    environment:
+      COUCHDB_USER: ${COUCHDB_USER:-admin}
+      COUCHDB_PASSWORD: ${COUCHDB_PASSWORD:-password}
+    volumes:
+      - couchdb_data:/opt/couchdb/data
+    restart: unless-stopped
+
+volumes:
+  couchdb_data:

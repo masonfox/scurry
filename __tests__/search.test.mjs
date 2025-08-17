@@ -4,8 +4,11 @@ import { buildMamDownloadUrl, buildMamTorrentUrl } from '../src/lib/utilities.js
 
 // Mock fetch and dependencies
 jest.mock('../src/lib/config', () => ({
-  readMamToken: jest.fn(() => 'fake-token'),
   config: { qbUrl: '', qbUser: '', qbPass: '', qbCategory: '' }
+}));
+
+jest.mock('../src/lib/database', () => ({
+  getMamToken: jest.fn(() => Promise.resolve('fake-token'))
 }));
 
 global.fetch = jest.fn(async () => ({
