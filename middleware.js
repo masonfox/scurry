@@ -4,7 +4,7 @@ import { SESSION_COOKIE, ALLOWED_PATHS } from './src/lib/constants.js';
 
 
 export function middleware(request) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
   // Allow API routes and static files
   if (ALLOWED_PATHS.some((p) => pathname.startsWith(p))) {
     return NextResponse.next();
@@ -17,6 +17,13 @@ export function middleware(request) {
   if (!session) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
+    // Clear existing search params first
+    url.search = '';
+    // Preserve query string by adding original URL as a redirect parameter
+    if (pathname !== '/' || search) {
+      const originalUrl = pathname + search;
+      url.searchParams.set('redirect', originalUrl);
+    }
     return NextResponse.redirect(url);
   }
   return NextResponse.next();

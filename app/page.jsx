@@ -1,11 +1,12 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from 'next/image'
 import MessageBanner from './MessageBanner'
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 
-export default function Page() {
+function SearchPage() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
@@ -14,6 +15,19 @@ export default function Page() {
   const [message, setMessage] = useState(null);
   const [mamTokenExists, setMamTokenExists] = useState(true); // default true for SSR hydration
   const searchInputRef = useRef(null);
+  const searchParams = useSearchParams();
+
+  // Check for query parameter and auto-fill search field
+  useEffect(() => {
+    const queryParam = searchParams.get('q');
+    if (queryParam) {
+      setQ(queryParam);
+      // Remove the query parameter from URL after setting the search field
+      const url = new URL(window.location);
+      url.searchParams.delete('q');
+      window.history.replaceState({}, '', url.pathname);
+    }
+  }, [searchParams]);
 
   // Check if MAM token file exists on mount
   useEffect(() => {
@@ -201,6 +215,14 @@ export default function Page() {
         </>
       )}
     </main>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPage />
+    </Suspense>
   );
 }
 

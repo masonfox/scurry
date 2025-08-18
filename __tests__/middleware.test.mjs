@@ -3,9 +3,9 @@ import { SESSION_COOKIE, ALLOWED_PATHS } from '../src/lib/constants.js';
 import { NextResponse } from 'next/server';
 
 describe('middleware', () => {
-  function mockRequest(pathname, cookieValue) {
+  function mockRequest(pathname, cookieValue, search = '') {
     // Use a real URL object for nextUrl
-    const url = new URL('http://localhost' + pathname);
+    const url = new URL('http://localhost' + pathname + search);
     return {
       nextUrl: Object.assign(url, {
         clone() {
@@ -41,7 +41,19 @@ describe('middleware', () => {
   test('redirects to /login if no session cookie', () => {
     const req = mockRequest('/protected');
     const res = middleware(req);
-  expect(res.headers.get('location')).toBe('http://localhost/login');
+    expect(res.headers.get('location')).toBe('http://localhost/login?redirect=%2Fprotected');
+  });
+
+  test('redirects to /login with query string preserved', () => {
+    const req = mockRequest('/', '', '?q=test+search');
+    const res = middleware(req);
+    expect(res.headers.get('location')).toBe('http://localhost/login?redirect=%2F%3Fq%3Dtest%2Bsearch');
+  });
+
+  test('redirects to /login without redirect param for root without query', () => {
+    const req = mockRequest('/');
+    const res = middleware(req);
+    expect(res.headers.get('location')).toBe('http://localhost/login');
   });
 
   test('allows if session cookie is present', () => {
