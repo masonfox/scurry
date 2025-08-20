@@ -3,16 +3,15 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from 'next/image'
 import MessageBanner from './MessageBanner'
-import { FRONTEND_CATEGORIES, FRONTEND_TO_QB_CATEGORY } from "@/src/lib/constants";
 
-const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? FRONTEND_CATEGORIES.BOOKS;
+const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 
 function SearchPage() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
   // search category: 'books' | 'audiobooks'
-  const [searchCategory, setSearchCategory] = useState(FRONTEND_CATEGORIES.BOOKS);
+  const [searchCategory, setSearchCategory] = useState("books");
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
   // message: { type: 'info' | 'error' | 'success', text: string }
   const [message, setMessage] = useState(null);
@@ -23,7 +22,7 @@ function SearchPage() {
   // Load saved category from localStorage on mount
   useEffect(() => {
     const savedCategory = localStorage.getItem('scurry_search_category');
-    if (savedCategory && (savedCategory === FRONTEND_CATEGORIES.BOOKS || savedCategory === FRONTEND_CATEGORIES.AUDIOBOOKS)) {
+    if (savedCategory && (savedCategory === 'books' || savedCategory === 'audiobooks')) {
       setSearchCategory(savedCategory);
     }
   }, []);
@@ -79,15 +78,15 @@ function SearchPage() {
   async function addItem(item) {
     setMessage(null);
     try {
-      // Use proper category mapping instead of magic strings
-      const qbCategory = FRONTEND_TO_QB_CATEGORY[searchCategory];
+      // Map search category to qBittorrent category
+      const qbCategory = searchCategory === "audiobooks" ? "audiobooks" : "books";
       
       const res = await fetch(`/api/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           downloadUrl: item.downloadUrl,
-          category: searchCategory // Send the frontend category, let the API validate and map it
+          category: qbCategory
         })
       });
       const data = await res.json();
@@ -188,8 +187,8 @@ function SearchPage() {
                   backgroundPosition: 'right 0.5rem center'
                 }}
               >
-                <option value={FRONTEND_CATEGORIES.BOOKS}>📚 Books</option>
-                <option value={FRONTEND_CATEGORIES.AUDIOBOOKS}>🎧 Audiobooks</option>
+                <option value="books">📚 Books</option>
+                <option value="audiobooks">🎧 Audiobooks</option>
               </select>
             </div>
             <button className="rounded-md bg-pink-400 px-5 py-1.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 cursor-pointer" disabled={loading || !q.trim()}>{loading ? "Searching..." : "Search"}</button>
