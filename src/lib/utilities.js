@@ -1,16 +1,17 @@
-import { MAM_BASE } from "./constants.js";
+import { MAM_BASE, MAM_CATEGORIES } from "./constants.js";
 /**
  * Construct the search payload for MAM
  * @param {string} q - query value to search
+ * @param {number} categoryId - MAM category ID (default: books)
  * @returns constructed request body
  */
-export function buildPayload(q) {
+export function buildPayload(q, categoryId = MAM_CATEGORIES.BOOKS) {
   return {
     tor: {
       text: q,
       srchIn: ["title", "author"],
       searchType: "all",
-      main_cat: [14],
+      main_cat: [categoryId],
       browseFlagsHideVsShow: "0",
       sortType: "seedersDesc",
       startNumber: "0"

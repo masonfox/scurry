@@ -41,7 +41,6 @@ This makes it easy to bookmark searches or integrate with other tools and browse
 - Update your MAM session ID from the app UI
 - Track snatches locally, since they take 20 min from MAM
 - Make `srchIn` field configurable
-- Support audiobooks - MAM search and qBit categories
 - Add [Hardcover.app](https://hardcover.app/) integration to auto-grab books from your "Want To Read" list
 
 ## Quick Start

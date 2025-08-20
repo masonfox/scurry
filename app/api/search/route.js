@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { config, readMamToken } from "@/src/lib/config";
 import { buildPayload, buildMamDownloadUrl, buildMamTorrentUrl, formatNumberWithCommas, parseAuthorInfo } from "@/src/lib/utilities";
-import { MAM_BASE } from "@/src/lib/constants";
+import { MAM_BASE, VALID_FRONTEND_CATEGORIES, FRONTEND_TO_MAM_CATEGORY, FRONTEND_CATEGORIES } from "@/src/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,7 +9,18 @@ export const dynamic = "force-dynamic";
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const q = (searchParams.get("q") || "").trim();
+  const category = searchParams.get("category") || FRONTEND_CATEGORIES.BOOKS;
+  
   if (!q) return NextResponse.json({ results: [] });
+
+  // Validate and map category string to MAM category ID
+  if (!VALID_FRONTEND_CATEGORIES.includes(category)) {
+    return NextResponse.json({ 
+      error: `Invalid category: ${category}. Valid categories: ${VALID_FRONTEND_CATEGORIES.join(', ')}` 
+    }, { status: 400 });
+  }
+  
+  const categoryId = FRONTEND_TO_MAM_CATEGORY[category];
 
   const token = readMamToken();
 
@@ -22,7 +33,7 @@ export async function GET(req) {
       "Origin": "https://www.myanonamouse.net",
       "Referer": "https://www.myanonamouse.net/"
     },
-    body: JSON.stringify(buildPayload(q)),
+    body: JSON.stringify(buildPayload(q, categoryId)),
     cache: "no-store"
   });
 

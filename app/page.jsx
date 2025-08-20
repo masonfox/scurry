@@ -3,19 +3,38 @@ import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from 'next/image'
 import MessageBanner from './MessageBanner'
+import { FRONTEND_CATEGORIES, FRONTEND_TO_QB_CATEGORY } from "@/src/lib/constants";
 
-const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
+const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? FRONTEND_CATEGORIES.BOOKS;
 
 function SearchPage() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
+  // search category: 'books' | 'audiobooks'
+  const [searchCategory, setSearchCategory] = useState(FRONTEND_CATEGORIES.BOOKS);
   const [category, setCategory] = useState(DEFAULT_CATEGORY);
   // message: { type: 'info' | 'error' | 'success', text: string }
   const [message, setMessage] = useState(null);
   const [mamTokenExists, setMamTokenExists] = useState(true); // default true for SSR hydration
   const searchInputRef = useRef(null);
   const searchParams = useSearchParams();
+
+  // Load saved category from localStorage on mount
+  useEffect(() => {
+    const savedCategory = localStorage.getItem('scurry_search_category');
+    if (savedCategory && (savedCategory === FRONTEND_CATEGORIES.BOOKS || savedCategory === FRONTEND_CATEGORIES.AUDIOBOOKS)) {
+      setSearchCategory(savedCategory);
+    }
+  }, []);
+
+  // Save category to localStorage whenever it changes
+  const handleCategoryChange = (newCategory) => {
+    setSearchCategory(newCategory);
+    setResults([]);
+    setMessage(null);
+    localStorage.setItem('scurry_search_category', newCategory);
+  };
 
   // Check for query parameter and auto-fill search field
   useEffect(() => {
@@ -43,7 +62,7 @@ function SearchPage() {
     setResults([]);
     setMessage(null);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(searchCategory)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Search failed");
       if (data.results.length === 0) {
@@ -60,12 +79,15 @@ function SearchPage() {
   async function addItem(item) {
     setMessage(null);
     try {
+      // Use proper category mapping instead of magic strings
+      const qbCategory = FRONTEND_TO_QB_CATEGORY[searchCategory];
+      
       const res = await fetch(`/api/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           downloadUrl: item.downloadUrl,
-          category
+          category: searchCategory // Send the frontend category, let the API validate and map it
         })
       });
       const data = await res.json();
@@ -109,7 +131,7 @@ function SearchPage() {
             </span>
             <span className="text-gray-800">Scurry</span>
           </h1>
-          <p className="mt-2 text-gray-500">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent</p>
+          <p className="mt-2 text-gray-500">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks books & audiobooks into qBittorrent</p>
           <button
             onClick={handleLogout}
             className="mt-4 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded cursor-pointer"
@@ -126,33 +148,49 @@ function SearchPage() {
         />
       ) : (
         <>
-          <form onSubmit={doSearch} className="mt-5 flex gap-2 relative">
-            <div className="relative w-full">
-              <input
-                ref={searchInputRef}
-                name="search"
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Search books..."
-                className="block w-full rounded-md bg-white px-4 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6 pr-10"
-              />
-              {q && (
-                <button
-                  type="button"
-                  aria-label="Clear search"
-                  onClick={() => {
-                    setQ("");
-                    setResults([]);
-                    if (searchInputRef.current) {
-                      searchInputRef.current.focus();
-                    }
-                  }}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-400 focus:outline-none"
-                  style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 6 6 18M6 6l12 12"/></svg>
-                </button>
-              )}
+          <form onSubmit={doSearch} className="mt-5 flex flex-col sm:flex-row gap-2 relative">
+            <div className="relative w-full flex flex-col sm:flex-row">
+              <div className="relative flex-1">
+                <input
+                  ref={searchInputRef}
+                  name="search"
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder={`Search ${searchCategory}...`}
+                  className="block w-full rounded-md sm:rounded-l-md sm:rounded-r-none bg-white px-4 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6 pr-10"
+                />
+                {q && (
+                  <button
+                    type="button"
+                    aria-label="Clear search"
+                    onClick={() => {
+                      setQ("");
+                      setResults([]);
+                      if (searchInputRef.current) {
+                        searchInputRef.current.focus();
+                      }
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-400 focus:outline-none"
+                    style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 6 6 18M6 6l12 12"/></svg>
+                  </button>
+                )}
+              </div>
+              <select
+                value={searchCategory}
+                onChange={(e) => {
+                  handleCategoryChange(e.target.value);
+                }}
+                className="bg-gray-100 border-t border-gray-200 sm:border-t-0 sm:border-l px-3 py-2.5 mt-2 sm:mt-0 text-sm text-gray-700 rounded-md sm:rounded-l-none sm:rounded-r-md outline-1 -outline-offset-1 outline-gray-200 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 cursor-pointer w-full sm:w-auto sm:min-w-36 appearance-none bg-no-repeat bg-right bg-[length:16px_16px]"
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.5rem center'
+                }}
+              >
+                <option value={FRONTEND_CATEGORIES.BOOKS}>📚 Books</option>
+                <option value={FRONTEND_CATEGORIES.AUDIOBOOKS}>🎧 Audiobooks</option>
+              </select>
             </div>
             <button className="rounded-md bg-pink-400 px-5 py-1.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 cursor-pointer" disabled={loading || !q.trim()}>{loading ? "Searching..." : "Search"}</button>
           </form>
