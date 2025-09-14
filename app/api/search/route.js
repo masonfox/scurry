@@ -33,6 +33,19 @@ export async function GET(req) {
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
+    
+    // Check for MAM token expiration
+    if (res.status === 403 && text.toLowerCase().includes("you are not signed in")) {
+      return NextResponse.json(
+        { 
+          results: [], 
+          error: `Your MAM token has expired. Please update your token in the "${config.mamTokenFile}" file.`,
+          tokenExpired: true
+        },
+        { status: 401 }
+      );
+    }
+    
     return NextResponse.json(
       { results: [], error: `Search failed: ${res.status} ${text.slice(0, 200)}` },
       { status: 502 }
@@ -43,6 +56,18 @@ export async function GET(req) {
   try {
     data = await res.json();
   } catch {
+    // If we can't parse JSON, check if it's an HTML response indicating token issues
+    const text = await res.text().catch(() => "");
+    if (text.toLowerCase().includes("html") || text.toLowerCase().includes("<!doctype")) {
+      return NextResponse.json(
+        { 
+          results: [], 
+          error: `Your MAM token has expired or is invalid. Please update your token in the "${config.mamTokenFile}" file.`,
+          tokenExpired: true
+        },
+        { status: 401 }
+      );
+    }
     return NextResponse.json({ results: [], error: "Invalid JSON from endpoint" }, { status: 502 });
   }
 

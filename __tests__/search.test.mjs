@@ -5,7 +5,13 @@ import { buildMamDownloadUrl, buildMamTorrentUrl } from '../src/lib/utilities.js
 // Mock fetch and dependencies
 jest.mock('../src/lib/config', () => ({
   readMamToken: jest.fn(() => 'fake-token'),
-  config: { qbUrl: '', qbUser: '', qbPass: '', qbCategory: '' }
+  config: { 
+    qbUrl: '', 
+    qbUser: '', 
+    qbPass: '', 
+    qbCategory: '',
+    mamTokenFile: 'secrets/mam_api_token'
+  }
 }));
 
 global.fetch = jest.fn(async () => ({
@@ -29,5 +35,118 @@ describe('search route', () => {
     const json = await res.json();
     expect(json.results.length).toBeGreaterThan(0);
   });
+});
 
+describe('token expiration handling', () => {
+  beforeEach(() => {
+    // Reset the mock before each test
+    global.fetch.mockClear();
+  });
+
+  it('returns 401 with tokenExpired flag for 403 "not signed in" response', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({}),
+      text: async () => "Error, you are not signed in <br />Other error"
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(401);
+    expect(json.tokenExpired).toBe(true);
+    expect(json.error).toBe('Your MAM token has expired. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.results).toEqual([]);
+  });
+
+  it('returns 401 with tokenExpired flag for HTML response (Cloudflare scenario)', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => { throw new Error('Invalid JSON'); },
+      text: async () => "<!DOCTYPE html><html><head><title>Error</title></head><body>Bad gateway</body></html>"
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(401);
+    expect(json.tokenExpired).toBe(true);
+    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.results).toEqual([]);
+  });
+
+  it('returns 401 with tokenExpired flag for lowercase html response', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => { throw new Error('Invalid JSON'); },
+      text: async () => "<html><body>Some html content</body></html>"
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(401);
+    expect(json.tokenExpired).toBe(true);
+    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.results).toEqual([]);
+  });
+
+  it('returns 502 for 403 without "not signed in" message', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({}),
+      text: async () => "Forbidden - some other error"
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(json.tokenExpired).toBeUndefined();
+    expect(json.error).toBe('Search failed: 403 Forbidden - some other error');
+    expect(json.results).toEqual([]);
+  });
+
+  it('returns 502 for non-HTML JSON parse errors', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => { throw new Error('Invalid JSON'); },
+      text: async () => "Invalid JSON response"
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(502);
+    expect(json.tokenExpired).toBeUndefined();
+    expect(json.error).toBe('Invalid JSON from endpoint');
+    expect(json.results).toEqual([]);
+  });
+
+  it('handles case-insensitive "not signed in" detection', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: false,
+      status: 403,
+      json: async () => ({}),
+      text: async () => "ERROR, YOU ARE NOT SIGNED IN <BR />OTHER ERROR"
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(401);
+    expect(json.tokenExpired).toBe(true);
+    expect(json.error).toBe('Your MAM token has expired. Please update your token in the "secrets/mam_api_token" file.');
+  });
 });

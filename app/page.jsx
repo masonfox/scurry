@@ -63,7 +63,13 @@ function SearchPage() {
     try {
       const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(searchCategory)}`);
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Search failed");
+      if (!res.ok) {
+        // Handle specific token expiration error with dynamic message
+        if (data.tokenExpired) {
+          throw new Error(`🔑 ${data.error}`);
+        }
+        throw new Error(data?.error || "Search failed");
+      }
       if (data.results.length === 0) {
         setMessage({ type: "info", text: "No results found... Try a different search" });
       }
