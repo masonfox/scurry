@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef, useEffect, Suspense } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from 'next/image'
 import MessageBanner from './MessageBanner'
@@ -277,10 +277,6 @@ function SearchPage() {
 }
 
 export default function Page() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <SearchPage />
-    </Suspense>
-  );
+  return <SearchPage />;
 }
 
