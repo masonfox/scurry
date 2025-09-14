@@ -33,6 +33,11 @@ function SearchPage() {
     setResults([]);
     setMessage(null);
     localStorage.setItem('scurry_search_category', newCategory);
+    
+    // If there's a search query, automatically trigger a search with the new category change
+    if (q.trim()) {
+      doSearch();
+    }
   };
 
   // Check for query parameter and auto-fill search field
@@ -56,7 +61,7 @@ function SearchPage() {
   }, []);
 
   async function doSearch(e) {
-    e.preventDefault();
+    e?.preventDefault();
     setLoading(true);
     setResults([]);
     setMessage(null);
