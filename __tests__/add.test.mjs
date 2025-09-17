@@ -19,7 +19,7 @@ describe('add route', () => {
   });
 
   it('returns ok true for valid downloadUrl', async () => {
-    const req = { json: async () => ({ downloadUrl: 'magnet:?xt=...' }) };
+    const req = { json: async () => ({ title: 'test', downloadUrl: 'magnet:?xt=...', category: 'cat' }) };
     const res = await POST(req);
     const json = await res.json();
     expect(json.ok).toBe(true);
@@ -28,9 +28,11 @@ describe('add route', () => {
   it('returns 500 if qbittorrent throws', async () => {
     const { qbAddUrl } = require('../src/lib/qbittorrent');
     qbAddUrl.mockImplementationOnce(() => { throw new Error('fail'); });
-    const req = { json: async () => ({ downloadUrl: 'magnet:?xt=...' }) };
+    
+    const req = { json: async () => ({ title: 'test', downloadUrl: 'magnet:?xt=...', category: 'cat' }) };
     const res = await POST(req);
     const json = await res.json();
+    
     expect(json.ok).toBe(false);
     expect(json.error).toMatch(/fail/);
   });
