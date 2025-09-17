@@ -36,6 +36,7 @@ export async function GET(req) {
     
     // Check for MAM token expiration
     if (res.status === 403 && text.toLowerCase().includes("you are not signed in")) {
+      console.error("MAM token has expired");
       return NextResponse.json(
         { 
           results: [], 
@@ -59,6 +60,7 @@ export async function GET(req) {
     // If we can't parse JSON, check if it's an HTML response indicating token issues
     const text = await res.text().catch(() => "");
     if (text.toLowerCase().includes("html") || text.toLowerCase().includes("<!doctype")) {
+      console.error("Detected HTML response, likely due to invalid/expired token");
       return NextResponse.json(
         { 
           results: [], 
@@ -73,7 +75,7 @@ export async function GET(req) {
 
   // if no data, return empty results
   if (data.error) {
-    console.log("No results found");
+    console.log(`No results found query: '${q}' (${category})`);
     return NextResponse.json({ results: [] }, { status: 200 });
   }
 
@@ -93,6 +95,8 @@ export async function GET(req) {
     downloadUrl: buildMamDownloadUrl(item.dl ?? ""),
     torrentUrl: buildMamTorrentUrl((item.id ?? ""))
   }));
+
+  console.log(`Returning ${results.length} results for query: '${q}' (${category})`);
 
   return NextResponse.json({ results });
 }

@@ -16,8 +16,10 @@ export async function POST(req) {
     const cookie = await qbLogin(config.qbUrl, config.qbUser, config.qbPass);
     // TODO: clean up params
     await qbAddUrl(config.qbUrl, cookie, urlOrMagnet, category);
+    console.log(`Added to qBittorrent: ${urlOrMagnet}`);
     return NextResponse.json({ ok: true });
   } catch (err) {
+    console.error(err);
     return NextResponse.json({ ok: false, error: err?.message || "Add failed" }, { status: 500 });
   }
 }
