@@ -6,3 +6,9 @@ process.env.APP_QB_PASSWORD = 'adminadmin';
 process.env.MAM_TOKEN_FILE = 'secrets/mam_api_token';
 process.env.APP_MAM_USER_AGENT = 'Scurry/1.0 (+contact)';
 process.env.APP_PASSWORD = 'cheese';
+
+// Suppress console output during tests
+console.log = jest.fn();
+console.error = jest.fn();
+console.warn = jest.fn();
+console.info = jest.fn();
