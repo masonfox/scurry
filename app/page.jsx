@@ -96,6 +96,7 @@ function SearchPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          title: item.title,
           downloadUrl: item.downloadUrl,
           category: qbCategory
         })
