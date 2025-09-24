@@ -37,11 +37,7 @@ You can pre-fill search terms by adding a `q` parameter to the URL:
 This makes it easy to bookmark searches or integrate with other tools and browser extensions.
 
 ## Todos
-- Load and toggle torrent description
 - Update your MAM session ID from the app UI
-- Track snatches locally, since they take 20 min from MAM
-- Make `srchIn` field configurable
-- Add [Hardcover.app](https://hardcover.app/) integration to auto-grab books from your "Want To Read" list
 
 ## Quick Start
 ```bash
