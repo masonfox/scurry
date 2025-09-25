@@ -67,7 +67,7 @@ function SearchPage() {
     if (q.trim() && searchCategory) {
       doSearch();
     }
-  }, [searchCategory]); // Re-run when category
+  }, [searchCategory, doSearch, q]); // Re-run when category
 
   // Check for query parameter and auto-fill search field
   useEffect(() => {
@@ -170,7 +170,7 @@ function SearchPage() {
             <span className="text-2xl mr-3">⚠️</span>
             <div>
               <h3 className="text-lg font-semibold text-yellow-800">MAM Token Required</h3>
-              <p className="text-yellow-700">Please add your MAM session token using the "Add Token" button above to begin searching.</p>
+              <p className="text-yellow-700">Please add your MAM session token using the &quot;Add Token&quot; button above to begin searching.</p>
             </div>
           </div>
         </div>
