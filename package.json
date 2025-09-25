@@ -1,10 +1,11 @@
 {
   "name": "scurry",
   "author": {
-    "name": "Mason Fox"
+    "name": "Mason Fox",
+    "email": "masonfox22@gmail.com"
   },
   "private": true,
-  "version": "1.0.0",
+  "version": "2.0.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
