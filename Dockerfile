@@ -19,6 +19,8 @@ ENV APP_QB_URL=$APP_QB_URL
 # Add bash for debugging
 RUN apk add --no-cache bash
 RUN addgroup -S app && adduser -S app -G app
+# Create secrets directory with proper ownership before switching to app user
+RUN mkdir -p secrets && chown -R app:app secrets
 USER app
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next ./.next
