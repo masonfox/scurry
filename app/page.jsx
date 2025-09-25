@@ -28,13 +28,16 @@ function SearchPage() {
     }
   }, []);
 
-  const doSearch = useCallback(async (e) => {
+  const doSearch = useCallback(async (e, queryOverride = null, categoryOverride = null) => {
     e?.preventDefault();
+    const searchQuery = queryOverride !== null ? queryOverride : q;
+    const searchCat = categoryOverride !== null ? categoryOverride : searchCategory;
+    
     setLoading(true);
     setResults([]);
     setMessage(null);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&category=${encodeURIComponent(searchCategory)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(searchCat)}`);
       const data = await res.json();
       if (!res.ok) {
         // Handle specific token expiration error with dynamic message
@@ -60,14 +63,12 @@ function SearchPage() {
     setResults([]);
     setMessage(null);
     localStorage.setItem('scurry_search_category', newCategory);
-  };
-
-  // Auto-search when category changes (if there's a query)
-  useEffect(() => {
-    if (q.trim() && searchCategory) {
-      doSearch();
+    
+    // Only auto-search if there's already a query and we're switching categories
+    if (q.trim()) {
+      doSearch(null, q, newCategory);
     }
-  }, [searchCategory, doSearch, q]); // Re-run when category
+  };
 
   // Check for query parameter and auto-fill search field
   useEffect(() => {
