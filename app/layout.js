@@ -1,11 +1,15 @@
 import React from "react";
-export const metadata = {
-  title: "Scurry",
-  description: "A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent",
+
+export const viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ec4899" }, // pink-500
     { media: "(prefers-color-scheme: dark)",  color: "#0a0a0a" }, // zinc-950
   ],
+};
+
+export const metadata = {
+  title: "Scurry",
+  description: "A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent", // "default" | "black" | "black-translucent"
