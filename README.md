@@ -39,8 +39,6 @@ This makes it easy to bookmark searches or integrate with other tools and browse
 ## Quick Start
 ```bash
 cp .env.example .env
-mkdir -p secrets
-echo "PASTE_MAM_TOKEN_HERE" > secrets/mam_api_token
 
 # Install dependencies
 npm install
