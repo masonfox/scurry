@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback, Suspense } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import MessageBanner from './MessageBanner';
 import Header from './components/Header';
@@ -28,47 +28,94 @@ function SearchPage() {
     }
   }, []);
 
-  const doSearch = useCallback(async (e, queryOverride = null, categoryOverride = null) => {
-    e?.preventDefault();
-    const searchQuery = queryOverride !== null ? queryOverride : q;
-    const searchCat = categoryOverride !== null ? categoryOverride : searchCategory;
+  // Track current search to handle concurrency
+  const currentSearchRef = useRef(null);
+
+  // Pure search function with proper concurrency handling
+  const performSearch = useCallback(async (searchQuery, searchCategory, options = {}) => {
+    if (!searchQuery?.trim()) return;
+    
+    const { immediate = false } = options;
+    
+    // Cancel any ongoing search
+    if (currentSearchRef.current) {
+      currentSearchRef.current.cancel = true;
+    }
+    
+    // Create new search context with unique ID for debugging
+    const searchContext = { 
+      cancel: false, 
+      id: `search-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      query: searchQuery,
+      category: searchCategory
+    };
+    currentSearchRef.current = searchContext;
     
     setLoading(true);
     setResults([]);
     setMessage(null);
+    
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(searchCat)}`);
+      const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(searchCategory)}`);
+      
+      // Check if this search was cancelled
+      if (searchContext.cancel) {
+        console.log(`Search ${searchContext.id} was cancelled`);
+        return;
+      }
+      
       const data = await res.json();
+      
+      // Check again after async operation
+      if (searchContext.cancel) {
+        console.log(`Search ${searchContext.id} was cancelled after fetch`);
+        return;
+      }
+      
       if (!res.ok) {
-        // Handle specific token expiration error with dynamic message
         if (data.tokenExpired) {
           throw new Error(`🔑 ${data.error}`);
         }
         throw new Error(data?.error || "Search failed");
       }
+      
       if (data.results.length === 0) {
         setMessage({ type: "info", text: "No results found... Try a different search" });
       }
+      
       setResults(data.results || []);
+      console.log(`Search ${searchContext.id} completed successfully with ${data.results?.length || 0} results`);
+      
     } catch (err) {
-      setMessage({ type: "error", text: err?.message || "Search failed" });
+      if (!searchContext.cancel) {
+        console.error(`Search ${searchContext.id} failed:`, err.message);
+        setMessage({ type: "error", text: err?.message || "Search failed" });
+      }
     } finally {
-      setLoading(false);
+      if (!searchContext.cancel) {
+        setLoading(false);
+      }
     }
-  }, [q, searchCategory]); // Dependencies ensure fresh values
+  }, []);
 
-  // Save category to localStorage whenever it changes
-  const handleCategoryChange = (newCategory) => {
+  // Form submission handler
+  const handleSearchSubmit = useCallback((e) => {
+    e?.preventDefault();
+    performSearch(q, searchCategory);
+  }, [q, searchCategory, performSearch]);
+
+  // Category change handler with automatic re-search
+  const handleCategoryChange = useCallback((newCategory) => {
     setSearchCategory(newCategory);
     setResults([]);
     setMessage(null);
     localStorage.setItem('scurry_search_category', newCategory);
     
-    // Only auto-search if there's already a query and we're switching categories
+    // Re-search immediately if there's an active query
     if (q.trim()) {
-      doSearch(null, q, newCategory);
+      performSearch(q, newCategory);
     }
-  };
+  }, [q, performSearch]);
 
   // Check for query parameter and auto-fill search field
   useEffect(() => {
@@ -182,7 +229,7 @@ function SearchPage() {
             setQ={setQ}
             searchCategory={searchCategory}
             onCategoryChange={handleCategoryChange}
-            onSubmit={doSearch}
+            onSubmit={handleSearchSubmit}
             loading={loading}
             onClearResults={clearResults}
           />
