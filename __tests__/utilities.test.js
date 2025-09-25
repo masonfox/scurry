@@ -46,4 +46,29 @@ describe('utilities', () => {
     expect(parseAuthorInfo(null)).toBeNull();
     expect(parseAuthorInfo('{}')).toBeNull();
   });
+
+  it('validateMamToken validates token format correctly', () => {
+    const { validateMamToken } = require('../src/lib/utilities');
+    
+    // Valid tokens
+    expect(validateMamToken('CWX7gfubkHotwItFiZu0QmBNkvXcq_76fR6AZxPmSacmLAmkPEI')).toBe(true);
+    expect(validateMamToken('a'.repeat(51))).toBe(true); // 51 chars
+    
+    // Invalid tokens
+    expect(validateMamToken('short')).toBe(false); // too short
+    expect(validateMamToken('')).toBe(false); // empty
+    expect(validateMamToken(null)).toBe(false); // null
+    expect(validateMamToken(undefined)).toBe(false); // undefined
+    expect(validateMamToken('contains spaces and symbols!')).toBe(false); // invalid chars
+  });
+
+  it('maskToken masks tokens correctly', () => {
+    const { maskToken } = require('../src/lib/utilities');
+    
+    expect(maskToken('1234567890abcdef')).toBe('123456...cdef');
+    expect(maskToken('short')).toBe('***');
+    expect(maskToken('')).toBe('');
+    expect(maskToken(null)).toBe('');
+    expect(maskToken(undefined)).toBe('');
+  });
 });

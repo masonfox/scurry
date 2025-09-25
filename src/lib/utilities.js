@@ -44,3 +44,27 @@ export function parseAuthorInfo(authorInfo) {
     return null;
   }
 }
+
+/**
+ * Validate a MAM API token format
+ * @param {string} token - The token to validate
+ * @returns {boolean} - Whether the token appears to be valid format
+ */
+export function validateMamToken(token) {
+  if (!token || typeof token !== "string") return false;
+  const trimmed = token.trim();
+  // MAM tokens are typically long base64-like strings
+  return trimmed.length > 50 && /^[A-Za-z0-9_-]+$/.test(trimmed);
+}
+
+/**
+ * Mask a token for display purposes
+ * @param {string} token - The token to mask
+ * @returns {string} - Masked token showing only first/last chars
+ */
+export function maskToken(token) {
+  if (!token || typeof token !== "string") return "";
+  const trimmed = token.trim();
+  if (trimmed.length <= 10) return "***";
+  return `${trimmed.slice(0, 6)}...${trimmed.slice(-4)}`;
+}

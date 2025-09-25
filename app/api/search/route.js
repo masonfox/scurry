@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { config, readMamToken } from "@/src/lib/config";
+import { readMamToken } from "@/src/lib/config";
 import { buildPayload, buildMamDownloadUrl, buildMamTorrentUrl, formatNumberWithCommas, parseAuthorInfo } from "@/src/lib/utilities";
-import { MAM_BASE, MAM_CATEGORIES } from "@/src/lib/constants";
+import { MAM_BASE, MAM_CATEGORIES, MAM_TOKEN_FILE } from "@/src/lib/constants";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -40,7 +40,7 @@ export async function GET(req) {
       return NextResponse.json(
         { 
           results: [], 
-          error: `Your MAM token has expired. Please update your token in the "${config.mamTokenFile}" file.`,
+          error: `Your MAM token has expired or is invalid. Please update your token using the token manager.`,
           tokenExpired: true
         },
         { status: 401 }
@@ -64,7 +64,7 @@ export async function GET(req) {
       return NextResponse.json(
         { 
           results: [], 
-          error: `Your MAM token has expired or is invalid. Please update your token in the "${config.mamTokenFile}" file.`,
+          error: `Your MAM token has expired or is invalid. Please update your token using the token manager.`,
           tokenExpired: true
         },
         { status: 401 }

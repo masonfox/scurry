@@ -18,3 +18,6 @@ export const QBITTORRENT_CATEGORIES = {
   [MAM_CATEGORIES.BOOKS]: 'books',
   [MAM_CATEGORIES.AUDIOBOOKS]: 'audiobooks'
 };
+
+// MAM token file path
+export const MAM_TOKEN_FILE = "secrets/mam_api_token";

@@ -57,7 +57,7 @@ describe('token expiration handling', () => {
 
     expect(res.status).toBe(401);
     expect(json.tokenExpired).toBe(true);
-    expect(json.error).toBe('Your MAM token has expired. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token using the token manager.');
     expect(json.results).toEqual([]);
   });
 
@@ -75,7 +75,7 @@ describe('token expiration handling', () => {
 
     expect(res.status).toBe(401);
     expect(json.tokenExpired).toBe(true);
-    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token using the token manager.');
     expect(json.results).toEqual([]);
   });
 
@@ -93,7 +93,7 @@ describe('token expiration handling', () => {
 
     expect(res.status).toBe(401);
     expect(json.tokenExpired).toBe(true);
-    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token using the token manager.');
     expect(json.results).toEqual([]);
   });
 
@@ -147,6 +147,6 @@ describe('token expiration handling', () => {
 
     expect(res.status).toBe(401);
     expect(json.tokenExpired).toBe(true);
-    expect(json.error).toBe('Your MAM token has expired. Please update your token in the "secrets/mam_api_token" file.');
+    expect(json.error).toBe('Your MAM token has expired or is invalid. Please update your token using the token manager.');
   });
 });
