@@ -36,9 +36,6 @@ You can pre-fill search terms by adding a `q` parameter to the URL:
 
 This makes it easy to bookmark searches or integrate with other tools and browser extensions.
 
-## Todos
-- Update your MAM session ID from the app UI
-
 ## Quick Start
 ```bash
 cp .env.example .env
