@@ -1,7 +1,7 @@
 # Scurry
 A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/masonfox/scurry)](https://hub.docker.com/r/masonfox/scurry)
+[![Docker Pulls](https://img.shields.io/docker/pulls/masonfox/scurry)](https://hub.docker.com/r/masonfox/scurry) [![codecov](https://codecov.io/gh/masonfox/scurry/graph/badge.svg?token=8HEMHYQA4X)](https://codecov.io/gh/masonfox/scurry)
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/masonfox)
 
