@@ -95,8 +95,8 @@ describe('readMamToken', () => {
     expect(() => readMamToken()).toThrow('fail');
   });
 
-  it('readMamToken returns null if file is empty', () => {
+  it('readMamToken returns empty string if file is empty', () => {
     jest.spyOn(require('node:fs'), 'readFileSync').mockReturnValue('');
-    expect(readMamToken()).toBeNull();
+    expect(readMamToken()).toBe('');
   });
 });

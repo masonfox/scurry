@@ -19,7 +19,7 @@ const cfg = {
 };
 
 export function readMamToken() {
-  return fs.readFileSync(MAM_TOKEN_FILE, "utf8").trim() || null;
+  return fs.readFileSync(MAM_TOKEN_FILE, "utf8").trim();
 }
 
 export const config = cfg;

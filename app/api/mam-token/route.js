@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { validateMamToken } from "@/src/lib/utilities";
 import { MAM_TOKEN_FILE } from "@/src/lib/constants";
+import { readMamToken } from "@/src/lib/config";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -20,7 +21,7 @@ export async function GET() {
       });
     }
 
-        const token = fs.readFileSync(MAM_TOKEN_FILE, "utf8").trim();
+    const token = readMamToken();
     
     // Don't send the full token for security - just first/last few chars
     const maskedToken = token.length > 10 
