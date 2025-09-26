@@ -15,5 +15,6 @@ const config = {
   '^@/(.*)$': '<rootDir>/$1',
   '^server-only$': '<rootDir>/__mocks__/server-only.js',
   },
+  "collectCoverage":true,
 };
 export default config;

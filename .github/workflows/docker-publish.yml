@@ -49,6 +49,12 @@ jobs:
       - name: Run test suite
         run: npm test
 
+      # Upload coverage reports to Codecov
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
       - name: Install cosign
