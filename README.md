@@ -49,6 +49,22 @@ npm run dev
 ```
 
 ## Production
+**Via Compose**
 ```bash
 docker compose --build -d
+```
+
+**Via Docker Run Script**
+```bash
+docker run -d \
+  --name scurry \
+  --pull=always \
+  -p 3000:3000 \
+  -e APP_PASSWORD=PASSWORD \
+  -e APP_QB_URL=URL \
+  -e APP_QB_USERNAME=admin \
+  -e APP_QB_PASSWORD=PASSWORD \
+  -v /VOLUME/scurry:/app/secrets \
+  --restart always \
+  masonfox/scurry:main
 ```
