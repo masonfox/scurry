@@ -8,3 +8,4 @@ yarn-debug.log*
 pnpm-debug.log*
 *.log
 .DS_Store
+/coverage
