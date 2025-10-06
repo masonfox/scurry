@@ -1,25 +1,14 @@
-// App configuration
+// App configuration (Next.js server-only wrapper)
 import "server-only";
-import fs from "node:fs";
-import { MAM_TOKEN_FILE } from "./constants.js";
+import { config as coreConfig, readMamToken as coreReadMamToken } from "./config-core.js";
 
-function need(name) {
-  const v = process.env[name];
-  if (!v) throw new Error(`Missing env: ${name}`);
-  return v;
-}
+// Re-export core functionality with server-only protection
+export const config = coreConfig;
 
-const cfg = {
-  appPassword: process.env.APP_PASSWORD || "cheese",
-  qbUrl: need("APP_QB_URL"),
-  qbCategory: process.env.APP_QB_CATEGORY || "books",
-  qbUser: process.env.APP_QB_USERNAME || "admin",
-  qbPass: process.env.APP_QB_PASSWORD || "adminadmin",
-  mamUA: process.env.APP_MAM_USER_AGENT || "Scurry/1.0 (+contact)",
-};
-
+/**
+ * Read MAM token from file (throws on error for Next.js routes)
+ * @returns {string} The MAM token
+ */
 export function readMamToken() {
-  return fs.readFileSync(MAM_TOKEN_FILE, "utf8").trim();
+  return coreReadMamToken(true); // throwOnError = true for Next.js
 }
-
-export const config = cfg;
