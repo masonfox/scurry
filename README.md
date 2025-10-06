@@ -19,6 +19,7 @@ Scurry is a self-hosted web application that bridges MyAnonamouse (MAM) and qBit
 - **Download Management**: Automatic categorization and organization in qBittorrent
 - **Authentication**: Simple password protection for your instance
 - **Docker Ready**: Easy deployment with Docker Compose
+- **🤖 MCP Server**: Interface with Claude or ChatGPT to search and download books conversationally (see [MCP_SETUP.md](MCP_SETUP.md))
 
 ### How It Works
 
@@ -35,6 +36,20 @@ You can pre-fill search terms by adding a `q` parameter to the URL:
 - `http://localhost:3000/?q=series+name` - Search for a book series
 
 This makes it easy to bookmark searches or integrate with other tools and browser extensions.
+
+## MCP Server (AI Integration)
+
+Scurry includes an MCP (Model Context Protocol) server that allows you to search for and download books through natural conversation with Claude or ChatGPT!
+
+**Example conversation:**
+```
+You: Find audiobooks about ancient Rome
+Claude: [Searches and shows results]
+You: Download the one by Mary Beard
+Claude: [Downloads it to qBittorrent]
+```
+
+See the complete setup guide in **[MCP_SETUP.md](MCP_SETUP.md)** for detailed instructions on connecting Scurry to Claude Desktop or other MCP-compatible AI assistants.
 
 ## Quick Start
 ```bash

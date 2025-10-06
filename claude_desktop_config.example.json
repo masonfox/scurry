@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "scurry": {
+      "command": "node",
+      "args": [
+        "/ABSOLUTE/PATH/TO/YOUR/SCURRY/mcp-server.js"
+      ],
+      "env": {
+        "APP_QB_URL": "http://your-qbittorrent:8080",
+        "APP_QB_USERNAME": "admin",
+        "APP_QB_PASSWORD": "your-qbittorrent-password",
+        "APP_QB_CATEGORY": "books"
+      }
+    }
+  }
+}
