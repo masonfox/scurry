@@ -6,7 +6,7 @@ This document summarizes the MCP (Model Context Protocol) server integration for
 
 ## Files Created
 
-### 1. `mcp-server.js` (Main MCP Server)
+### 1. `mcp-server.mjs` (Main MCP Server)
 The core MCP server implementation that:
 - Exposes `search_books` and `download_book` tools to AI assistants
 - Uses the existing Scurry API logic for MAM searches and qBittorrent integration
@@ -39,9 +39,8 @@ Summary of changes for reference.
 ## Files Modified
 
 ### 1. `package.json`
-- Added `"type": "module"` for ES module support
 - Added `@modelcontextprotocol/sdk` dependency (^0.5.0)
-- Added `"mcp"` script: `node mcp-server.js`
+- Added `"mcp"` script: `node mcp-server.mjs`
 
 ### 2. `README.md`
 - Added MCP Server to key features list
@@ -69,7 +68,7 @@ Summary of changes for reference.
            ▼
 ┌──────────────────────┐
 │                      │
-│   mcp-server.js      │
+│   mcp-server.mjs     │
 │                      │
 │  ┌────────────────┐  │
 │  │ search_books   │──┼───▶ MyAnonamouse API

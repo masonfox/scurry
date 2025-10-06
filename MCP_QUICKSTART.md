@@ -32,7 +32,7 @@ npm install
     "scurry": {
       "command": "node",
       "args": [
-        "/FULL/PATH/TO/YOUR/scurry/mcp-server.js"
+        "/FULL/PATH/TO/YOUR/scurry/mcp-server.mjs"
       ],
       "env": {
         "APP_QB_URL": "http://your-qbittorrent:8080",
@@ -45,7 +45,7 @@ npm install
 }
 ```
 
-**Important**: Use the FULL absolute path (e.g., `/Users/john/projects/scurry/mcp-server.js`)
+**Important**: Use the FULL absolute path (e.g., `/Users/john/projects/scurry/mcp-server.mjs`)
 
 ### Step 3: Restart Claude Desktop (30 seconds)
 

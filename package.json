@@ -6,14 +6,13 @@
   },
   "private": true,
   "version": "2.0.0",
-  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "test": "npx jest",
-    "mcp": "node mcp-server.js"
+    "mcp": "node mcp-server.mjs"
   },
   "dependencies": {
     "next": "14.2.5",

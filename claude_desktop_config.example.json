@@ -3,7 +3,7 @@
     "scurry": {
       "command": "node",
       "args": [
-        "/ABSOLUTE/PATH/TO/YOUR/SCURRY/mcp-server.js"
+        "/ABSOLUTE/PATH/TO/YOUR/SCURRY/mcp-server.mjs"
       ],
       "env": {
         "APP_QB_URL": "http://your-qbittorrent:8080",

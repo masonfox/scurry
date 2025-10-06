@@ -76,7 +76,7 @@ Add this configuration:
       "args": [
         "-y",
         "node",
-        "/absolute/path/to/your/scurry/mcp-server.js"
+        "/absolute/path/to/your/scurry/mcp-server.mjs"
       ],
       "env": {
         "APP_QB_URL": "http://your-qbittorrent:8080",
@@ -210,7 +210,7 @@ The server communicates via stdio (standard input/output) and expects MCP protoc
          │ MCP Protocol (stdio)
          │
 ┌────────▼────────┐
-│   mcp-server.js │
+│   mcp-server.mjs│
 │                 │
 │  ┌───────────┐  │
 │  │search_books│  │──▶ MyAnonamouse API
@@ -270,7 +270,7 @@ WorkingDirectory=/path/to/scurry
 Environment="APP_QB_URL=http://localhost:8080"
 Environment="APP_QB_USERNAME=admin"
 Environment="APP_QB_PASSWORD=password"
-ExecStart=/usr/bin/node mcp-server.js
+ExecStart=/usr/bin/node mcp-server.mjs
 Restart=always
 
 [Install]
