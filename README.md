@@ -39,7 +39,12 @@ This makes it easy to bookmark searches or integrate with other tools and browse
 
 ## MCP Server (AI Integration)
 
-Scurry includes an MCP (Model Context Protocol) server that allows you to search for and download books through natural conversation with Claude or ChatGPT!
+Scurry includes a **fully MCP-compliant** server that allows you to search for and download books through natural conversation with Claude or ChatGPT!
+
+**Capabilities:**
+- 🔧 **Tools**: Search books, download torrents
+- 📚 **Resources**: Fetch configuration, browse categories
+- 🤖 **Full Protocol Support**: Compatible with any MCP client
 
 **Example conversation:**
 ```

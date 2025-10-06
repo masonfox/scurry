@@ -8,10 +8,12 @@ This document summarizes the MCP (Model Context Protocol) server integration for
 
 ### 1. `mcp-server.mjs` (Main MCP Server)
 The core MCP server implementation that:
-- Exposes `search_books` and `download_book` tools to AI assistants
+- **Tools**: Exposes `search_books` and `download_book` tools for actions
+- **Resources**: Exposes `scurry://config` and `scurry://categories` for fetching data
 - Uses the existing Scurry API logic for MAM searches and qBittorrent integration
 - Communicates via stdio (standard input/output) using the MCP protocol
 - Formats search results in a human-readable format for AI assistants
+- Fully MCP-compliant with both tools and resources capabilities
 
 ### 2. `src/lib/config-core.js` (Shared Core Module)
 Core configuration logic shared between Next.js and MCP server:

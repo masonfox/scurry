@@ -16,6 +16,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
+  ListResourcesRequestSchema,
+  ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
 // Import core utility functions (shared with Next.js app)
@@ -39,6 +41,7 @@ const server = new Server(
   {
     capabilities: {
       tools: {},
+      resources: {},
     },
   }
 );
@@ -129,6 +132,84 @@ async function downloadBook(title, downloadUrl, category) {
     throw new Error(`Failed to add to qBittorrent: ${err?.message || err}`);
   }
 }
+
+// Handle list resources request
+server.setRequestHandler(ListResourcesRequestSchema, async () => {
+  return {
+    resources: [
+      {
+        uri: "scurry://config",
+        name: "Scurry Configuration",
+        description: "Current configuration including available categories and qBittorrent settings",
+        mimeType: "application/json",
+      },
+      {
+        uri: "scurry://categories",
+        name: "Available Categories",
+        description: "List of available search categories (books, audiobooks)",
+        mimeType: "application/json",
+      },
+    ],
+  };
+});
+
+// Handle read resource request
+server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+  const uri = request.params.uri;
+
+  if (uri === "scurry://config") {
+    const configData = {
+      qbittorrent: {
+        url: config.qbUrl,
+        defaultCategory: config.qbCategory,
+      },
+      mam: {
+        tokenConfigured: !!readMamToken(false),
+      },
+      categories: {
+        books: MAM_CATEGORIES.BOOKS,
+        audiobooks: MAM_CATEGORIES.AUDIOBOOKS,
+      },
+    };
+
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "application/json",
+          text: JSON.stringify(configData, null, 2),
+        },
+      ],
+    };
+  }
+
+  if (uri === "scurry://categories") {
+    const categories = [
+      {
+        name: "books",
+        id: MAM_CATEGORIES.BOOKS,
+        description: "eBooks in various formats (EPUB, PDF, MOBI, etc.)",
+      },
+      {
+        name: "audiobooks",
+        id: MAM_CATEGORIES.AUDIOBOOKS,
+        description: "Audiobooks in various formats (MP3, M4B, etc.)",
+      },
+    ];
+
+    return {
+      contents: [
+        {
+          uri,
+          mimeType: "application/json",
+          text: JSON.stringify(categories, null, 2),
+        },
+      ],
+    };
+  }
+
+  throw new Error(`Unknown resource: ${uri}`);
+});
 
 // Handle list tools request
 server.setRequestHandler(ListToolsRequestSchema, async () => {

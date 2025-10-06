@@ -223,9 +223,11 @@ The server communicates via stdio (standard input/output) and expects MCP protoc
 └─────────────────┘
 ```
 
-## Available Tools
+## Available Capabilities
 
-### `search_books`
+### Tools (Actions)
+
+#### `search_books`
 
 Search for books or audiobooks on MyAnonamouse.
 
@@ -235,7 +237,7 @@ Search for books or audiobooks on MyAnonamouse.
 
 **Returns:** List of results with title, author, size, seeders, download URL, etc.
 
-### `download_book`
+#### `download_book`
 
 Add a book to qBittorrent for download.
 
@@ -245,6 +247,43 @@ Add a book to qBittorrent for download.
 - `category` (optional): qBittorrent category (default: from config)
 
 **Returns:** Success or error message
+
+### Resources (Fetch/Read Data)
+
+Resources allow the AI to read configuration and metadata without performing actions.
+
+#### `scurry://config`
+
+Fetch current Scurry configuration.
+
+**Returns:** JSON with:
+- qBittorrent URL and default category
+- MAM token status
+- Available category IDs
+
+**Example usage in Claude:**
+```
+You: What's my current Scurry configuration?
+Claude: [Reads scurry://config resource]
+Your qBittorrent is at http://localhost:8080, default category is "books", 
+and your MAM token is configured.
+```
+
+#### `scurry://categories`
+
+Fetch available search categories.
+
+**Returns:** JSON array with category details:
+- `name`: Category name ("books" or "audiobooks")
+- `id`: MAM category ID
+- `description`: What the category contains
+
+**Example usage in Claude:**
+```
+You: What categories can I search?
+Claude: [Reads scurry://categories resource]
+You can search in "books" (eBooks) or "audiobooks" (audio formats).
+```
 
 ## Security Considerations
 
