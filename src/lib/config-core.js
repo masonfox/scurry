@@ -1,4 +1,4 @@
-// MCP Server configuration (without server-only restriction)
+// Core configuration logic (shared between Next.js and MCP server)
 import fs from "node:fs";
 import { MAM_TOKEN_FILE } from "./constants.js";
 
@@ -17,10 +17,18 @@ const cfg = {
   mamUA: process.env.APP_MAM_USER_AGENT || "Scurry/1.0 (+contact)",
 };
 
-export function readMamToken() {
+/**
+ * Read MAM token from file
+ * @param {boolean} throwOnError - If true, throws on error. If false, returns null on error.
+ * @returns {string|null} The MAM token or null if error and throwOnError is false
+ */
+export function readMamToken(throwOnError = true) {
   try {
     return fs.readFileSync(MAM_TOKEN_FILE, "utf8").trim();
   } catch (error) {
+    if (throwOnError) {
+      throw error;
+    }
     console.error(`Error reading MAM token from ${MAM_TOKEN_FILE}:`, error.message);
     return null;
   }

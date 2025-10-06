@@ -13,11 +13,17 @@ The core MCP server implementation that:
 - Communicates via stdio (standard input/output) using the MCP protocol
 - Formats search results in a human-readable format for AI assistants
 
-### 2. `src/lib/config-mcp.js`
-Modified version of the config module without the `server-only` restriction, allowing it to run in the MCP server context.
+### 2. `src/lib/config-core.js` (Shared Core Module)
+Core configuration logic shared between Next.js and MCP server:
+- Contains `config` object with environment variables
+- `readMamToken(throwOnError)` with flexible error handling
+- No `"server-only"` restriction - can be used in any context
 
-### 3. `src/lib/qbittorrent-mcp.js`
-Modified version of qBittorrent functions without the `server-only` restriction.
+### 3. `src/lib/qbittorrent-core.js` (Shared Core Module)
+Core qBittorrent functions shared between Next.js and MCP server:
+- `qbLogin()` - Authenticate with qBittorrent
+- `qbAddUrl()` - Add torrents to qBittorrent
+- No `"server-only"` restriction - can be used in any context
 
 ### 4. `MCP_SETUP.md`
 Comprehensive setup guide covering:
@@ -38,11 +44,21 @@ Summary of changes for reference.
 
 ## Files Modified
 
-### 1. `package.json`
+### 1. `src/lib/config.js` (Next.js Wrapper)
+- Now imports from `config-core.js`
+- Maintains `"server-only"` protection for Next.js routes
+- Re-exports core functionality with Next.js-appropriate error handling
+
+### 2. `src/lib/qbittorrent.js` (Next.js Wrapper)
+- Now imports from `qbittorrent-core.js`
+- Maintains `"server-only"` protection for Next.js routes
+- Re-exports core functionality
+
+### 3. `package.json`
 - Added `@modelcontextprotocol/sdk` dependency (^0.5.0)
 - Added `"mcp"` script: `node mcp-server.mjs`
 
-### 2. `README.md`
+### 4. `README.md`
 - Added MCP Server to key features list
 - Added new section explaining the MCP integration with example usage
 - Links to MCP_SETUP.md for detailed instructions
@@ -85,17 +101,21 @@ Summary of changes for reference.
 
 ## Architecture Decisions
 
-### Why separate -mcp.js files?
+### Why use core + wrapper pattern?
 
-The original `config.js` and `qbittorrent.js` files import `"server-only"`, which is a Next.js package that prevents code from running outside of Next.js server contexts. Since the MCP server runs as a standalone Node.js process, we needed versions without this restriction.
+We use a **shared core + thin wrappers** architecture:
 
-### Why not modify the originals?
+1. **Core modules** (`-core.js`): Contain all business logic, no `"server-only"` restriction
+2. **Wrapper modules** (`.js`): Re-export from core with `"server-only"` protection for Next.js
+3. **MCP server**: Imports core modules directly
 
-Keeping the original files intact ensures:
-1. No impact on the existing Next.js web application
-2. Clear separation of concerns
-3. Easy to maintain both codebases
-4. The web app keeps its server-only protections
+This approach:
+- ✅ Eliminates code duplication
+- ✅ Maintains `"server-only"` security for Next.js routes
+- ✅ Allows MCP server to use the same battle-tested logic
+- ✅ Single source of truth for all business logic
+
+See `REFACTORING_SUMMARY.md` for detailed architecture explanation.
 
 ### Why stdio transport?
 

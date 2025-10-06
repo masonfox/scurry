@@ -18,8 +18,8 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 
-// Import your existing utility functions
-import { readMamToken, config } from "./src/lib/config-mcp.js";
+// Import core utility functions (shared with Next.js app)
+import { readMamToken, config } from "./src/lib/config-core.js";
 import { 
   buildPayload, 
   buildMamDownloadUrl, 
@@ -28,7 +28,7 @@ import {
   parseAuthorInfo 
 } from "./src/lib/utilities.js";
 import { MAM_BASE, MAM_CATEGORIES } from "./src/lib/constants.js";
-import { qbLogin, qbAddUrl } from "./src/lib/qbittorrent-mcp.js";
+import { qbLogin, qbAddUrl } from "./src/lib/qbittorrent-core.js";
 
 // Create MCP server instance
 const server = new Server(
@@ -51,7 +51,7 @@ async function searchBooks(query, category = "books") {
     ? MAM_CATEGORIES.AUDIOBOOKS 
     : MAM_CATEGORIES.BOOKS;
 
-  const token = readMamToken();
+  const token = readMamToken(false); // Don't throw on error, return null instead
   
   if (!token) {
     throw new Error("MAM token not found. Please configure your MAM token first.");
