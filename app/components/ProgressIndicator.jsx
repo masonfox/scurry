@@ -7,7 +7,7 @@ export default function ProgressIndicator({
   mobile = false,
   actionButton = null
 }) {
-  const stepText = currentStep === 1 ? 'a Book' : 'an Audiobook';
+  const stepText = progress === 100 ? 'Done' : (currentStep === 1 ? 'a Book' : 'an Audiobook');
 
   if (mobile) {
     return (
