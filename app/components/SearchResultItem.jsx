@@ -10,7 +10,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
 
   const borderClasses = selectable
     ? selected
-      ? 'border-3 border-pink-400'
+      ? 'border-3 border-pink-400 cursor-pointer'
       : 'border-2 border-gray-100 hover:border-pink-200 cursor-pointer'
     : 'border-2 border-gray-100 hover:border-pink-200';
 
