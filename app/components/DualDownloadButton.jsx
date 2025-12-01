@@ -35,7 +35,7 @@ export default function DualDownloadButton({
       </div>
 
       {/* Mobile: Sticky at bottom */}
-      <div className="block md:hidden fixed bottom-4 left-4 right-4 z-50">
+      <div className="block md:hidden fixed bottom-4 left-4 right-4 z-50 pointer-events-auto">
         <button
           onClick={onDownload}
           disabled={disabled}

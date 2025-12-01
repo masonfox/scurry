@@ -1,30 +1,37 @@
 import PropTypes from 'prop-types';
 
-export default function ProgressIndicator({ 
-  currentStep, 
-  totalSteps = 2, 
+export default function ProgressIndicator({
+  currentStep,
+  totalSteps = 2,
   progress,
   mobile = false,
-  actionButton = null 
+  actionButton = null
 }) {
   const stepText = currentStep === 1 ? 'a Book' : 'an Audiobook';
-  
+
   if (mobile) {
     return (
-      <div className="fixed bottom-20 left-4 right-4 z-40 bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
-            Step {currentStep} of {totalSteps}: Select {stepText}
-          </span>
-          <span className="text-sm text-gray-500">{progress}%</span>
+      <>
+        {/* Bottom sheet backdrop */}
+        <div className="fixed bottom-0 left-0 right-0 h-40 bg-gray-50 rounded-xl z-40 border-t border-gray-200"></div>
+
+        {/* Progress indicator content */}
+        <div className="fixed bottom-20 left-4 right-4 z-50 bg-white p-3 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm text-gray-700 whitespace-nowrap">
+              <span>Step {currentStep} of {totalSteps}:</span>
+              <span className="ml-1 font-medium">Select {stepText}</span>
+            </span>
+            <span className="text-sm text-gray-500">{progress}%</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div
+              className="bg-pink-400 h-2 rounded-full transition-all duration-500 ease-in-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-pink-400 h-2 rounded-full transition-all duration-500 ease-in-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
+      </>
     );
   }
 
@@ -32,12 +39,14 @@ export default function ProgressIndicator({
   return (
     <div className="mb-6 flex flex-row gap-2">
       <div className="flex-1 flex items-center gap-4 p-3 bg-white rounded-lg border border-gray-200">
-        <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-          Step {currentStep} of {totalSteps}: Select {stepText}
+        <span className="text-sm text-gray-700 whitespace-nowrap">
+          <span>Step {currentStep} of {totalSteps}:</span>
+          <span className="ml-1 font-medium">Select {stepText}</span>
         </span>
+
         <div className="flex-1 relative">
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-pink-400 h-2 rounded-full transition-all duration-500 ease-in-out"
               style={{ width: `${progress}%` }}
             />
