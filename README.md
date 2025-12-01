@@ -1,13 +1,26 @@
 # Scurry
 A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent.
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/masonfox/scurry)](https://hub.docker.com/r/masonfox/scurry) [![codecov](https://codecov.io/gh/masonfox/scurry/graph/badge.svg?token=8HEMHYQA4X)](https://codecov.io/gh/masonfox/scurry)
+[![scurry - ghcr.io](https://img.shields.io/badge/ghcr.io-scurry%3Alatest-green)](https://github.com/masonfox/scurry/pkgs/container/scurry/549862735?tag=latest) [![codecov](https://codecov.io/gh/masonfox/scurry/graph/badge.svg?token=8HEMHYQA4X)](https://codecov.io/gh/masonfox/scurry)
+
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/masonfox)
 
 ## What is Scurry?
 
-Scurry is a self-hosted web application that bridges MyAnonamouse (MAM) and qBittorrent, providing a clean interface to search for and automatically download torrents. Built with Next.js, it offers a modern web UI that makes browsing and downloading content from MAM seamless.
+**Scurry is a lightweight, self-hosted helper app built for one thing: getting ebook and audiobook torrents from MAM to qBittorrent as fast and simply as possible.** Just a clean, mobile-friendly interface where you can search, tap, and send a torrent straight to your client.
+
+Scurry is perfect for those moments when you’re away from your computer and want to quickly grab something without remote-desktop juggling or digging through the full site. It’s intentionally minimal, fast, and designed to stay out of your way. 
+
+**Just search → tap → done.**
+
+![Scurry](./docs/assets/screenshot.png)
+
+<details> <summary>Token Manager UI</summary>
+
+![Token Manager](./docs/assets/token-manager.png)
+
+</details>
 
 ### Key Features
 
@@ -49,6 +62,8 @@ npm run dev
 ```
 
 ## Production
+I recommend that you leverage the [docker image](https://github.com/masonfox/scurry/pkgs/container/scurry/) for production.
+
 **Via Compose**
 ```bash
 docker compose --build -d
@@ -66,5 +81,5 @@ docker run -d \
   -e APP_QB_PASSWORD=PASSWORD \
   -v /VOLUME/scurry:/app/secrets \
   --restart always \
-  masonfox/scurry:main
+  masonfox/scurry:latest
 ```
