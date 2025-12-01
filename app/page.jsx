@@ -412,12 +412,15 @@ function SearchPage() {
 
           {searchCategory === 'both' ? (
             <>
-              <DualDownloadButton
-                audiobookSelected={!!selectedAudiobook}
-                bookSelected={!!selectedBook}
-                onDownload={handleDualDownload}
-                loading={dualDownloadLoading}
-              />
+              {/* Mobile: Download button separate */}
+              <div className="block md:hidden">
+                <DualDownloadButton
+                  audiobookSelected={!!selectedAudiobook}
+                  bookSelected={!!selectedBook}
+                  onDownload={handleDualDownload}
+                  loading={dualDownloadLoading}
+                />
+              </div>
               
               {/* Desktop: side-by-side */}
               <div className="hidden md:block">
@@ -429,6 +432,8 @@ function SearchPage() {
                   onSelectAudiobook={handleSelectAudiobook}
                   onSelectBook={handleSelectBook}
                   loading={loading}
+                  onDownload={handleDualDownload}
+                  downloadLoading={dualDownloadLoading}
                 />
               </div>
               
