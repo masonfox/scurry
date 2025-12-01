@@ -72,7 +72,7 @@ export default function SequentialSearchResults({
               </h3>
               <button 
                 onClick={() => onSelectBook(null)}
-                className="text-sm text-pink-400 hover:text-pink-500 font-medium"
+                className="text-sm text-pink-300 hover:text-pink-500 font-medium"
               >
                 Change
               </button>
@@ -113,24 +113,50 @@ export default function SequentialSearchResults({
       {/* Step 2: Audiobook Selection (only shown after book selected) */}
       {selectedBook && (
         <div ref={bookSectionRef}>
-          <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
-            🎧 Audiobooks
-            <span className="text-sm font-normal text-gray-500">({audiobookResults.length})</span>
-          </h3>
-          {noAudiobooks ? (
-            <p className="text-gray-500 text-sm">No audiobooks found</p>
+          {selectedAudiobook ? (
+            // Collapsed view showing selected audiobook
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                  🎧 Selected Audiobook
+                </h3>
+                <button 
+                  onClick={() => onSelectAudiobook(null)}
+                  className="text-sm text-pink-300 hover:text-pink-500 font-medium"
+                >
+                  Change
+                </button>
+              </div>
+              <SearchResultItem
+                result={selectedAudiobook}
+                selectable={true}
+                selected={true}
+                onSelect={onSelectAudiobook}
+              />
+            </div>
           ) : (
-            <ul className="list-none p-0" role="list" aria-label="Audiobook results">
-              {audiobookResults.map((result) => (
-                <SearchResultItem
-                  key={result.id}
-                  result={result}
-                  selectable={true}
-                  selected={selectedAudiobook?.id === result.id}
-                  onSelect={onSelectAudiobook}
-                />
-              ))}
-            </ul>
+            // Full audiobook list
+            <div>
+              <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                🎧 Audiobooks
+                <span className="text-sm font-normal text-gray-500">({audiobookResults.length})</span>
+              </h3>
+              {noAudiobooks ? (
+                <p className="text-gray-500 text-sm">No audiobooks found</p>
+              ) : (
+                <ul className="list-none p-0" role="list" aria-label="Audiobook results">
+                  {audiobookResults.map((result) => (
+                    <SearchResultItem
+                      key={result.id}
+                      result={result}
+                      selectable={true}
+                      selected={false}
+                      onSelect={onSelectAudiobook}
+                    />
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
         </div>
       )}

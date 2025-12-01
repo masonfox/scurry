@@ -27,7 +27,7 @@ export default function DualDownloadButton({
               Downloading...
             </>
           ) : bothSelected ? (
-            'Download 2 Items'
+            'Download Both'
           ) : (
             'Select one audiobook and one book to continue'
           )}
@@ -50,7 +50,7 @@ export default function DualDownloadButton({
               Downloading...
             </>
           ) : bothSelected ? (
-            'Download 2 Items'
+            'Download Both'
           ) : (
             'Select one from each'
           )}
