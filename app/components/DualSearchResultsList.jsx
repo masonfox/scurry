@@ -1,4 +1,5 @@
 import SearchResultItem from './SearchResultItem';
+import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
 
 export default function DualSearchResultsList({
@@ -32,8 +33,20 @@ export default function DualSearchResultsList({
     return <p className="text-gray-500 mt-5">No results found for either category. Try a different search...</p>;
   }
 
+  // Calculate progress for desktop
+  const progress = selectedBook && selectedAudiobook ? 100 : selectedBook ? 50 : 0;
+  const currentStep = selectedBook ? 2 : 1;
+
   return (
-    <div className="mt-6 grid grid-cols-2 gap-6">
+    <div className="mt-6">
+      {/* Progress Indicator for Desktop */}
+      <ProgressIndicator 
+        currentStep={currentStep}
+        progress={progress}
+        mobile={false}
+      />
+      
+      <div className="grid grid-cols-2 gap-6">
       {/* Left Column: Books */}
       <div>
         <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
@@ -79,6 +92,7 @@ export default function DualSearchResultsList({
           </ul>
         )}
       </div>
+    </div>
     </div>
   );
 }

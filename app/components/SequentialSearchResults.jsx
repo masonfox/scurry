@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import SearchResultItem from './SearchResultItem';
+import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
 
 export default function SequentialSearchResults({
@@ -52,22 +53,13 @@ export default function SequentialSearchResults({
   const currentStep = selectedBook ? 2 : 1;
 
   return (
-    <div className="mt-6 pb-24">
-      {/* Progress Indicator */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">
-            Step {currentStep} of 2: Select {currentStep === 1 ? 'a Book' : 'an Audiobook'}
-          </span>
-          <span className="text-sm text-gray-500">{progress}%</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            className="bg-pink-400 h-2 rounded-full transition-all duration-500 ease-in-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
+    <div className="mt-6 pb-32">
+      {/* Progress Indicator - Fixed at bottom on mobile */}
+      <ProgressIndicator 
+        currentStep={currentStep}
+        progress={progress}
+        mobile={true}
+      />
 
       {/* Step 1: Book Selection */}
       <div className={selectedBook ? 'mb-6' : ''}>
