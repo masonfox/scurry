@@ -1,9 +1,32 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 
-export default function SearchResultItem({ result, onAddItem }) {
+export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect }) {
+  const handleClick = () => {
+    if (selectable && onSelect) {
+      onSelect(result);
+    }
+  };
+
+  const borderClasses = selectable
+    ? selected
+      ? 'border-3 border-pink-400'
+      : 'border-2 border-gray-100 hover:border-pink-200 cursor-pointer'
+    : 'border-2 border-gray-100 hover:border-pink-200';
+
   return (
-    <li className="px-4 py-3 rounded-md border-2 border-gray-100 hover:border-pink-200 mb-4 transition-colors duration-200">
+    <li 
+      className={`px-4 py-3 rounded-md ${borderClasses} mb-4 transition-colors duration-200 relative`}
+      onClick={selectable ? handleClick : undefined}
+      role={selectable ? 'button' : undefined}
+      tabIndex={selectable ? 0 : undefined}
+      onKeyDown={selectable ? (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleClick();
+        }
+      } : undefined}
+    >
       <div className="flex justify-between items-center w-full gap-6">
         <div className="flex-1 min-w-0">
           {/* Basic torrent information */}
@@ -37,25 +60,35 @@ export default function SearchResultItem({ result, onAddItem }) {
             </div>
           )}
         </div>
+        {/* Checkmark for selected items */}
+        {selectable && selected && (
+          <div className="absolute top-3 right-3 bg-pink-400 rounded-full p-1 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+        )}
         {/* Torrent action buttons */}
-        <div className="flex gap-3 items-center flex-shrink-0">
-          <a 
-            className="text-pink-400 hover:text-pink-500 transition-colors duration-200 text-sm cursor-pointer" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            href={result.torrentUrl}
-          >
-            View
-          </a>
-          <button
-            className="rounded-md bg-pink-50 px-3 py-1.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
-            disabled={result.snatched}
-            onClick={() => onAddItem(result)}
-            aria-label={`Download ${result.title}`}
-          >
-            Download
-          </button>
-        </div>
+        {!selectable && (
+          <div className="flex gap-3 items-center flex-shrink-0">
+            <a 
+              className="text-pink-400 hover:text-pink-500 transition-colors duration-200 text-sm cursor-pointer" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              href={result.torrentUrl}
+            >
+              View
+            </a>
+            <button
+              className="rounded-md bg-pink-50 px-3 py-1.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+              disabled={result.snatched}
+              onClick={() => onAddItem(result)}
+              aria-label={`Download ${result.title}`}
+            >
+              Download
+            </button>
+          </div>
+        )}
       </div>
     </li>
   );
@@ -75,5 +108,8 @@ SearchResultItem.propTypes = {
     vip: PropTypes.bool,
     snatched: PropTypes.bool
   }).isRequired,
-  onAddItem: PropTypes.func.isRequired
+  onAddItem: PropTypes.func,
+  selectable: PropTypes.bool,
+  selected: PropTypes.bool,
+  onSelect: PropTypes.func
 };

@@ -69,6 +69,7 @@ export default function SearchForm({
         >
           <option value="books">📚 Books</option>
           <option value="audiobooks">🎧 Audiobooks</option>
+          <option value="both">📚 + 🎧 Both</option>
         </select>
       </div>
       <button 
@@ -91,7 +92,7 @@ export default function SearchForm({
 SearchForm.propTypes = {
   q: PropTypes.string.isRequired,
   setQ: PropTypes.func.isRequired,
-  searchCategory: PropTypes.oneOf(['books', 'audiobooks']).isRequired,
+  searchCategory: PropTypes.oneOf(['books', 'audiobooks', 'both']).isRequired,
   onCategoryChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,

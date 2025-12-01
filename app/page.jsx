@@ -5,6 +5,9 @@ import MessageBanner from './MessageBanner';
 import Header from './components/Header';
 import SearchForm from './components/SearchForm';
 import SearchResultsList from './components/SearchResultsList';
+import DualDownloadButton from './components/DualDownloadButton';
+import DualSearchResultsList from './components/DualSearchResultsList';
+import SequentialSearchResults from './components/SequentialSearchResults';
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 
@@ -12,18 +15,25 @@ function SearchPage() {
   const [q, setQ] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([]);
-  // search category: 'books' | 'audiobooks'
+  // search category: 'books' | 'audiobooks' | 'both'
   const [searchCategory, setSearchCategory] = useState("books");
   // message: { type: 'info' | 'error' | 'success', text: string }
   const [message, setMessage] = useState(null);
   const [mamTokenExists, setMamTokenExists] = useState(false); // default false until we check
   const [tokenLoading, setTokenLoading] = useState(true); // loading state for token check
   const searchParams = useSearchParams();
+  
+  // Dual-mode state
+  const [audiobookResults, setAudiobookResults] = useState([]);
+  const [bookResults, setBookResults] = useState([]);
+  const [selectedAudiobook, setSelectedAudiobook] = useState(null);
+  const [selectedBook, setSelectedBook] = useState(null);
+  const [dualDownloadLoading, setDualDownloadLoading] = useState(false);
 
   // Load saved category from localStorage on mount
   useEffect(() => {
     const savedCategory = localStorage.getItem('scurry_search_category');
-    if (savedCategory && (savedCategory === 'books' || savedCategory === 'audiobooks')) {
+    if (savedCategory && (savedCategory === 'books' || savedCategory === 'audiobooks' || savedCategory === 'both')) {
       setSearchCategory(savedCategory);
     }
   }, []);
@@ -53,38 +63,92 @@ function SearchPage() {
     
     setLoading(true);
     setResults([]);
+    setAudiobookResults([]);
+    setBookResults([]);
+    setSelectedAudiobook(null);
+    setSelectedBook(null);
     setMessage(null);
     
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(searchCategory)}`);
-      
-      // Check if this search was cancelled
-      if (searchContext.cancel) {
-        console.log(`Search ${searchContext.id} was cancelled`);
-        return;
-      }
-      
-      const data = await res.json();
-      
-      // Check again after async operation
-      if (searchContext.cancel) {
-        console.log(`Search ${searchContext.id} was cancelled after fetch`);
-        return;
-      }
-      
-      if (!res.ok) {
-        if (data.tokenExpired) {
-          throw new Error(`🔑 ${data.error}`);
+      // Handle "both" mode with parallel searches
+      if (searchCategory === 'both') {
+        const [audiobookRes, bookRes] = await Promise.all([
+          fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=audiobooks`),
+          fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=books`)
+        ]);
+        
+        // Check if this search was cancelled
+        if (searchContext.cancel) {
+          console.log(`Dual search ${searchContext.id} was cancelled`);
+          return;
         }
-        throw new Error(data?.error || "Search failed");
+        
+        const [audiobookData, bookData] = await Promise.all([
+          audiobookRes.json(),
+          bookRes.json()
+        ]);
+        
+        // Check again after async operation
+        if (searchContext.cancel) {
+          console.log(`Dual search ${searchContext.id} was cancelled after fetch`);
+          return;
+        }
+        
+        // Handle errors
+        if (!audiobookRes.ok && audiobookData.tokenExpired) {
+          throw new Error(`🔑 ${audiobookData.error}`);
+        }
+        if (!bookRes.ok && bookData.tokenExpired) {
+          throw new Error(`🔑 ${bookData.error}`);
+        }
+        
+        const audiobookResults = audiobookData.results || [];
+        const bookResults = bookData.results || [];
+        
+        if (audiobookResults.length === 0 && bookResults.length === 0) {
+          setMessage({ type: "info", text: "No results found in either category... Try a different search" });
+        } else if (audiobookResults.length === 0) {
+          setMessage({ type: "info", text: `No audiobooks found, but found ${bookResults.length} book(s)` });
+        } else if (bookResults.length === 0) {
+          setMessage({ type: "info", text: `No books found, but found ${audiobookResults.length} audiobook(s)` });
+        }
+        
+        setAudiobookResults(audiobookResults);
+        setBookResults(bookResults);
+        console.log(`Dual search ${searchContext.id} completed: ${audiobookResults.length} audiobooks, ${bookResults.length} books`);
+        
+      } else {
+        // Single category search (existing behavior)
+        const res = await fetch(`/api/search?q=${encodeURIComponent(searchQuery)}&category=${encodeURIComponent(searchCategory)}`);
+        
+        // Check if this search was cancelled
+        if (searchContext.cancel) {
+          console.log(`Search ${searchContext.id} was cancelled`);
+          return;
+        }
+        
+        const data = await res.json();
+        
+        // Check again after async operation
+        if (searchContext.cancel) {
+          console.log(`Search ${searchContext.id} was cancelled after fetch`);
+          return;
+        }
+        
+        if (!res.ok) {
+          if (data.tokenExpired) {
+            throw new Error(`🔑 ${data.error}`);
+          }
+          throw new Error(data?.error || "Search failed");
+        }
+        
+        if (data.results.length === 0) {
+          setMessage({ type: "info", text: "No results found... Try a different search" });
+        }
+        
+        setResults(data.results || []);
+        console.log(`Search ${searchContext.id} completed successfully with ${data.results?.length || 0} results`);
       }
-      
-      if (data.results.length === 0) {
-        setMessage({ type: "info", text: "No results found... Try a different search" });
-      }
-      
-      setResults(data.results || []);
-      console.log(`Search ${searchContext.id} completed successfully with ${data.results?.length || 0} results`);
       
     } catch (err) {
       if (!searchContext.cancel) {
@@ -108,6 +172,10 @@ function SearchPage() {
   const handleCategoryChange = useCallback((newCategory) => {
     setSearchCategory(newCategory);
     setResults([]);
+    setAudiobookResults([]);
+    setBookResults([]);
+    setSelectedAudiobook(null);
+    setSelectedBook(null);
     setMessage(null);
     localStorage.setItem('scurry_search_category', newCategory);
     
@@ -178,8 +246,112 @@ function SearchPage() {
 
   const clearResults = useCallback(() => {
     setResults([]);
+    setAudiobookResults([]);
+    setBookResults([]);
+    setSelectedAudiobook(null);
+    setSelectedBook(null);
     setMessage(null);
   }, []);
+
+  // Dual-mode selection handlers
+  const handleSelectAudiobook = useCallback((item) => {
+    setSelectedAudiobook(prev => 
+      prev?.id === item?.id ? null : item
+    );
+  }, []);
+
+  const handleSelectBook = useCallback((item) => {
+    setSelectedBook(prev => 
+      prev?.id === item?.id ? null : item
+    );
+  }, []);
+
+  // Dual download handler
+  const handleDualDownload = useCallback(async () => {
+    if (!selectedAudiobook || !selectedBook) return;
+    
+    setDualDownloadLoading(true);
+    setMessage(null);
+    
+    try {
+      // Download audiobook
+      const audiobookRes = await fetch('/api/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: selectedAudiobook.title,
+          downloadUrl: selectedAudiobook.downloadUrl,
+          category: 'audiobooks'
+        })
+      });
+      
+      // Download book
+      const bookRes = await fetch('/api/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: selectedBook.title,
+          downloadUrl: selectedBook.downloadUrl,
+          category: 'books'
+        })
+      });
+      
+      // Check results
+      const audiobookData = await audiobookRes.json();
+      const bookData = await bookRes.json();
+      
+      const audiobookSuccess = audiobookRes.ok && audiobookData.ok;
+      const bookSuccess = bookRes.ok && bookData.ok;
+      
+      if (audiobookSuccess && bookSuccess) {
+        // Both succeeded
+        setMessage({ 
+          type: 'success', 
+          text: `✓ Queued 2 items: ${selectedBook.title} + ${selectedAudiobook.title}` 
+        });
+        
+        // Clear and reset
+        setQ('');
+        setAudiobookResults([]);
+        setBookResults([]);
+        setSelectedAudiobook(null);
+        setSelectedBook(null);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        
+        setTimeout(() => setMessage(null), 5000);
+        
+      } else if (audiobookSuccess && !bookSuccess) {
+        // Partial success: audiobook ok, book failed
+        setMessage({ 
+          type: 'error', 
+          text: `✓ Audiobook queued successfully. ✗ Book failed: ${bookData.error || 'Unknown error'}` 
+        });
+        // Keep book selection so user can retry
+        setSelectedBook(selectedBook);
+        
+      } else if (!audiobookSuccess && bookSuccess) {
+        // Partial success: book ok, audiobook failed
+        setMessage({ 
+          type: 'error', 
+          text: `✓ Book queued successfully. ✗ Audiobook failed: ${audiobookData.error || 'Unknown error'}` 
+        });
+        // Keep audiobook selection so user can retry
+        setSelectedAudiobook(selectedAudiobook);
+        
+      } else {
+        // Both failed
+        throw new Error(`Audiobook: ${audiobookData.error || 'Unknown error'}. Book: ${bookData.error || 'Unknown error'}`);
+      }
+      
+    } catch (err) {
+      setMessage({ 
+        type: 'error', 
+        text: err?.message || 'Dual download failed' 
+      });
+    } finally {
+      setDualDownloadLoading(false);
+    }
+  }, [selectedAudiobook, selectedBook]);
 
   const handleTokenUpdate = (tokenExists) => {
     setMamTokenExists(tokenExists);
@@ -238,11 +410,48 @@ function SearchPage() {
             <MessageBanner type={message.type} text={message.text} />
           )}
 
-          <SearchResultsList
-            results={results}
-            onAddItem={addItem}
-            loading={loading}
-          />
+          {searchCategory === 'both' ? (
+            <>
+              <DualDownloadButton
+                audiobookSelected={!!selectedAudiobook}
+                bookSelected={!!selectedBook}
+                onDownload={handleDualDownload}
+                loading={dualDownloadLoading}
+              />
+              
+              {/* Desktop: side-by-side */}
+              <div className="hidden md:block">
+                <DualSearchResultsList
+                  audiobookResults={audiobookResults}
+                  bookResults={bookResults}
+                  selectedAudiobook={selectedAudiobook}
+                  selectedBook={selectedBook}
+                  onSelectAudiobook={handleSelectAudiobook}
+                  onSelectBook={handleSelectBook}
+                  loading={loading}
+                />
+              </div>
+              
+              {/* Mobile: sequential */}
+              <div className="block md:hidden">
+                <SequentialSearchResults
+                  audiobookResults={audiobookResults}
+                  bookResults={bookResults}
+                  selectedAudiobook={selectedAudiobook}
+                  selectedBook={selectedBook}
+                  onSelectAudiobook={handleSelectAudiobook}
+                  onSelectBook={handleSelectBook}
+                  loading={loading}
+                />
+              </div>
+            </>
+          ) : (
+            <SearchResultsList
+              results={results}
+              onAddItem={addItem}
+              loading={loading}
+            />
+          )}
         </>
       )}
     </main>
