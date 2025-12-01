@@ -80,7 +80,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
               View
             </a>
             <button
-              className="rounded-md bg-pink-50 px-3 py-1.5 text-sm font-semibold text-pink-500 shadow-sm hover:bg-pink-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
+              className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer"
               disabled={result.snatched}
               onClick={() => onAddItem(result)}
               aria-label={`Download ${result.title}`}
