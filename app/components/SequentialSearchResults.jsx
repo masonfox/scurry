@@ -77,12 +77,14 @@ export default function SequentialSearchResults({
                 Change
               </button>
             </div>
-            <SearchResultItem
-              result={selectedBook}
-              selectable={true}
-              selected={true}
-              onSelect={onSelectBook}
-            />
+            <ul className="list-none p-0">
+              <SearchResultItem
+                result={selectedBook}
+                selectable={true}
+                selected={true}
+                onSelect={onSelectBook}
+              />
+            </ul>
           </div>
         ) : (
           // Full book list
@@ -127,12 +129,14 @@ export default function SequentialSearchResults({
                   Change
                 </button>
               </div>
-              <SearchResultItem
-                result={selectedAudiobook}
-                selectable={true}
-                selected={true}
-                onSelect={onSelectAudiobook}
-              />
+              <ul className="list-none p-0">
+                <SearchResultItem
+                  result={selectedAudiobook}
+                  selectable={true}
+                  selected={true}
+                  onSelect={onSelectAudiobook}
+                />
+              </ul>
             </div>
           ) : (
             // Full audiobook list
