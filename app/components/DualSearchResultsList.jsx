@@ -131,11 +131,25 @@ export default function DualSearchResultsList({
   );
 }
 
+const resultShape = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  title: PropTypes.string.isRequired,
+  author: PropTypes.string.isRequired,
+  size: PropTypes.string.isRequired,
+  filetypes: PropTypes.string.isRequired,
+  seeders: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  downloads: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  torrentUrl: PropTypes.string.isRequired,
+  downloadUrl: PropTypes.string.isRequired,
+  vip: PropTypes.bool,
+  snatched: PropTypes.bool
+});
+
 DualSearchResultsList.propTypes = {
-  audiobookResults: PropTypes.arrayOf(PropTypes.object).isRequired,
-  bookResults: PropTypes.arrayOf(PropTypes.object).isRequired,
-  selectedAudiobook: PropTypes.object,
-  selectedBook: PropTypes.object,
+  audiobookResults: PropTypes.arrayOf(resultShape).isRequired,
+  bookResults: PropTypes.arrayOf(resultShape).isRequired,
+  selectedAudiobook: resultShape,
+  selectedBook: resultShape,
   onSelectAudiobook: PropTypes.func.isRequired,
   onSelectBook: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,

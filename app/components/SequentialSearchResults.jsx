@@ -3,6 +3,9 @@ import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
 
+// Delay before auto-scrolling to next section (ms)
+const AUTO_SCROLL_DELAY_MS = 100;
+
 export default function SequentialSearchResults({
   audiobookResults,
   bookResults,
@@ -22,7 +25,7 @@ export default function SequentialSearchResults({
           behavior: 'smooth', 
           block: 'start' 
         });
-      }, 100);
+      }, AUTO_SCROLL_DELAY_MS);
     }
   }, [selectedBook]);
 
@@ -170,11 +173,25 @@ export default function SequentialSearchResults({
   );
 }
 
+const resultShape = PropTypes.shape({
+  id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  title: PropTypes.string.isRequired,
+  author: PropTypes.string.isRequired,
+  size: PropTypes.string.isRequired,
+  filetypes: PropTypes.string.isRequired,
+  seeders: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  downloads: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+  torrentUrl: PropTypes.string.isRequired,
+  downloadUrl: PropTypes.string.isRequired,
+  vip: PropTypes.bool,
+  snatched: PropTypes.bool
+});
+
 SequentialSearchResults.propTypes = {
-  audiobookResults: PropTypes.arrayOf(PropTypes.object).isRequired,
-  bookResults: PropTypes.arrayOf(PropTypes.object).isRequired,
-  selectedAudiobook: PropTypes.object,
-  selectedBook: PropTypes.object,
+  audiobookResults: PropTypes.arrayOf(resultShape).isRequired,
+  bookResults: PropTypes.arrayOf(resultShape).isRequired,
+  selectedAudiobook: resultShape,
+  selectedBook: resultShape,
   onSelectAudiobook: PropTypes.func.isRequired,
   onSelectBook: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired

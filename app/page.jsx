@@ -10,6 +10,7 @@ import DualSearchResultsList from './components/DualSearchResultsList';
 import SequentialSearchResults from './components/SequentialSearchResults';
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
+const SUCCESS_MESSAGE_DURATION_MS = 5000;
 
 function SearchPage() {
   const [q, setQ] = useState("");
@@ -334,7 +335,7 @@ function SearchPage() {
         setSelectedBook(null);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
-        setTimeout(() => setMessage(null), 5000);
+        setTimeout(() => setMessage(null), SUCCESS_MESSAGE_DURATION_MS);
         
       } else if (audiobookSuccess && !bookSuccess) {
         // Partial success: audiobook ok, book failed
