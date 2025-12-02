@@ -1,7 +1,7 @@
 # Scurry
 A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks torrents into qBittorrent.
 
-[![scurry - ghcr.io](https://img.shields.io/badge/ghcr.io-scurry%3Alatest-green)](https://github.com/masonfox/scurry/pkgs/container/scurry/549862735?tag=latest) [![codecov](https://codecov.io/gh/masonfox/scurry/graph/badge.svg?token=8HEMHYQA4X)](https://codecov.io/gh/masonfox/scurry)
+[![scurry - ghcr.io](https://img.shields.io/badge/ghcr.io-scurry%3Alatest-green)](https://github.com/users/masonfox/packages/container/scurry/596471515?tag=latest) [![codecov](https://codecov.io/gh/masonfox/scurry/graph/badge.svg?token=8HEMHYQA4X)](https://codecov.io/gh/masonfox/scurry)
 
 
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/masonfox)
@@ -95,5 +95,5 @@ docker run -d \
   -e APP_QB_PASSWORD=PASSWORD \
   -v /VOLUME/scurry:/app/secrets \
   --restart always \
-  masonfox/scurry:latest
+  ghcr.io/masonfox/scurry:latest
 ```
