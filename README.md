@@ -20,9 +20,11 @@ Scurry is perfect for those moments when you’re away from your computer and wa
 
 Dual fetch allows you to fetch _both_ ebook and audibooks at the same time in a purpose built, stream-lined UI. Simply select the "Both" option in the search.
 
+**Desktop**
 ![Dual Fetch Web](./docs/assets/dual-web.png)
 
-![Token Manager](./docs/assets/token-manager.png)
+**Mobile**
+![Dual Fetch Mobile](./docs/assets/dual-mobile.png)
 
 </details>
 
