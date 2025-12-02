@@ -73,6 +73,7 @@ export default function SequentialSearchResults({
               <button 
                 onClick={() => onSelectBook(null)}
                 className="text-sm text-pink-300 hover:text-pink-500 font-medium"
+                aria-label="Change selected book"
               >
                 Change
               </button>
@@ -125,6 +126,7 @@ export default function SequentialSearchResults({
                 <button 
                   onClick={() => onSelectAudiobook(null)}
                   className="text-sm text-pink-300 hover:text-pink-500 font-medium"
+                  aria-label="Change selected audiobook"
                 >
                   Change
                 </button>

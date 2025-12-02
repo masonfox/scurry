@@ -47,6 +47,7 @@ export default function DualSearchResultsList({
       onClick={onDownload}
       disabled={disabled}
       className="rounded-md bg-pink-400 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed cursor-pointer min-w-[100px] flex items-center justify-center gap-2 h-full"
+      aria-label="Download selected book and audiobook"
     >
       {downloadLoading ? (
         <>
