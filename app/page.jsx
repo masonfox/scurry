@@ -94,7 +94,7 @@ function SearchPage() {
           return;
         }
         
-        // Handle errors
+        // Handle errors - check for token expiration first
         if (!audiobookRes.ok && audiobookData.tokenExpired) {
           throw new Error(`🔑 ${audiobookData.error}`);
         }
@@ -102,8 +102,22 @@ function SearchPage() {
           throw new Error(`🔑 ${bookData.error}`);
         }
         
-        const audiobookResults = audiobookData.results || [];
-        const bookResults = bookData.results || [];
+        // Handle other API errors
+        if (!audiobookRes.ok && !bookRes.ok) {
+          // Both failed
+          throw new Error(`Both searches failed. Audiobooks: ${audiobookData.error || 'Unknown error'}. Books: ${bookData.error || 'Unknown error'}`);
+        } else if (!audiobookRes.ok) {
+          // Only audiobook failed
+          console.error(`Audiobook search failed: ${audiobookRes.status} ${audiobookRes.statusText}`, audiobookData);
+          setMessage({ type: "error", text: `Audiobook search failed: ${audiobookData.error || audiobookRes.statusText}. Showing book results only.` });
+        } else if (!bookRes.ok) {
+          // Only book failed
+          console.error(`Book search failed: ${bookRes.status} ${bookRes.statusText}`, bookData);
+          setMessage({ type: "error", text: `Book search failed: ${bookData.error || bookRes.statusText}. Showing audiobook results only.` });
+        }
+        
+        const audiobookResults = (!audiobookRes.ok) ? [] : (audiobookData.results || []);
+        const bookResults = (!bookRes.ok) ? [] : (bookData.results || []);
         
         if (audiobookResults.length === 0 && bookResults.length === 0) {
           setMessage({ type: "info", text: "No results found in either category... Try a different search" });
