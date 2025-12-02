@@ -274,31 +274,33 @@ function SearchPage() {
     setMessage(null);
     
     try {
-      // Download audiobook
-      const audiobookRes = await fetch('/api/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: selectedAudiobook.title,
-          downloadUrl: selectedAudiobook.downloadUrl,
-          category: 'audiobooks'
+      // Download audiobook and book in parallel
+      const [audiobookRes, bookRes] = await Promise.all([
+        fetch('/api/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: selectedAudiobook.title,
+            downloadUrl: selectedAudiobook.downloadUrl,
+            category: 'audiobooks'
+          })
+        }),
+        fetch('/api/add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: selectedBook.title,
+            downloadUrl: selectedBook.downloadUrl,
+            category: 'books'
+          })
         })
-      });
-      
-      // Download book
-      const bookRes = await fetch('/api/add', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: selectedBook.title,
-          downloadUrl: selectedBook.downloadUrl,
-          category: 'books'
-        })
-      });
+      ]);
       
       // Check results
-      const audiobookData = await audiobookRes.json();
-      const bookData = await bookRes.json();
+      const [audiobookData, bookData] = await Promise.all([
+        audiobookRes.json(),
+        bookRes.json()
+      ]);
       
       const audiobookSuccess = audiobookRes.ok && audiobookData.ok;
       const bookSuccess = bookRes.ok && bookData.ok;
