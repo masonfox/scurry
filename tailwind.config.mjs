@@ -7,7 +7,11 @@ const config = {
     "./components/**/*.{js,jsx,ts,tsx}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      borderWidth: {
+        '3': '3px',
+      },
+    },
   },
   plugins: [],
 };

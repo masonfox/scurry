@@ -523,4 +523,337 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(mockQbAddUrl).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('Dual-Fetch E2E Workflow', () => {
+    it('should complete full dual-fetch workflow: search both, select both, download both', async () => {
+      // Setup MAM API responses for both categories
+      const bookResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: [
+            {
+              id: 'book-123',
+              dl: 'book-download-link-abc',
+              title: 'Fantasy Novel',
+              size: '2.8 MB',
+              filetype: 'epub',
+              added: '2025-09-25',
+              vip: 0,
+              my_snatched: 0,
+              author_info: '{"author":"Fantasy Author"}',
+              seeders: 20,
+              leechers: 5,
+              times_completed: 45
+            }
+          ]
+        }),
+        text: async () => ""
+      };
+
+      const audiobookResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: [
+            {
+              id: 'audio-456',
+              dl: 'audiobook-download-link-def',
+              title: 'Fantasy Novel Audiobook',
+              size: '520 MB',
+              filetype: 'm4b',
+              added: '2025-09-24',
+              vip: 0,
+              my_snatched: 0,
+              author_info: '{"author":"Fantasy Author"}',
+              seeders: 12,
+              leechers: 3,
+              times_completed: 28
+            }
+          ]
+        }),
+        text: async () => ""
+      };
+
+      global.fetch.mockResolvedValueOnce(bookResponse).mockResolvedValueOnce(audiobookResponse);
+
+      // Step 1: Search both categories
+      const bookSearchReq = { url: 'http://localhost/api/search?q=fantasy novel&category=books' };
+      const audioSearchReq = { url: 'http://localhost/api/search?q=fantasy novel&category=audiobooks' };
+
+      const [bookSearchRes, audioSearchRes] = await Promise.all([
+        searchGET(bookSearchReq),
+        searchGET(audioSearchReq)
+      ]);
+
+      const [bookSearchData, audioSearchData] = await Promise.all([
+        bookSearchRes.json(),
+        audioSearchRes.json()
+      ]);
+
+      // Verify both searches succeeded
+      expect(bookSearchRes.status).toBe(200);
+      expect(bookSearchData.results).toHaveLength(1);
+      expect(bookSearchData.results[0].id).toBe('book-123');
+
+      expect(audioSearchRes.status).toBe(200);
+      expect(audioSearchData.results).toHaveLength(1);
+      expect(audioSearchData.results[0].id).toBe('audio-456');
+
+      // Step 2: Select first result from each category
+      const selectedBook = bookSearchData.results[0];
+      const selectedAudiobook = audioSearchData.results[0];
+
+      // Step 3: Download both in parallel
+      const bookDownloadReq = {
+        json: async () => ({
+          title: selectedBook.title,
+          downloadUrl: selectedBook.downloadUrl,
+          category: 'books'
+        })
+      };
+
+      const audioDownloadReq = {
+        json: async () => ({
+          title: selectedAudiobook.title,
+          downloadUrl: selectedAudiobook.downloadUrl,
+          category: 'audiobooks'
+        })
+      };
+
+      const [bookDownloadRes, audioDownloadRes] = await Promise.all([
+        addPOST(bookDownloadReq),
+        addPOST(audioDownloadReq)
+      ]);
+
+      const [bookDownloadData, audioDownloadData] = await Promise.all([
+        bookDownloadRes.json(),
+        audioDownloadRes.json()
+      ]);
+
+      // Verify both downloads succeeded
+      expect(bookDownloadRes.status).toBe(200);
+      expect(bookDownloadData.ok).toBe(true);
+      expect(audioDownloadRes.status).toBe(200);
+      expect(audioDownloadData.ok).toBe(true);
+
+      // Verify qBittorrent interactions
+      expect(mockQbLogin).toHaveBeenCalledTimes(2);
+      expect(mockQbAddUrl).toHaveBeenCalledTimes(2);
+
+      // Verify correct categories were used
+      expect(mockQbAddUrl).toHaveBeenCalledWith(
+        'http://localhost:8080',
+        'test-session-cookie',
+        'https://www.myanonamouse.net/tor/download.php/book-download-link-abc',
+        'books'
+      );
+
+      expect(mockQbAddUrl).toHaveBeenCalledWith(
+        'http://localhost:8080',
+        'test-session-cookie',
+        'https://www.myanonamouse.net/tor/download.php/audiobook-download-link-def',
+        'audiobooks'
+      );
+    });
+
+    it('should handle token expiration during dual-fetch search workflow', async () => {
+      // Setup: Books succeed, audiobooks fail with token expiration
+      const bookResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: [
+            {
+              id: 'book-999',
+              dl: 'book-link',
+              title: 'Test Book',
+              size: '1.5 MB',
+              filetype: 'epub',
+              added: '2025-09-25',
+              vip: 0,
+              my_snatched: 0,
+              author_info: '{"author":"Test Author"}',
+              seeders: 10,
+              leechers: 2,
+              times_completed: 15
+            }
+          ]
+        }),
+        text: async () => ""
+      };
+
+      global.fetch
+        .mockResolvedValueOnce(bookResponse)
+        .mockResolvedValueOnce({
+          ok: false,
+          status: 403,
+          text: async () => 'Error, you are not signed in'
+        });
+
+      // Step 1: Search both categories
+      const bookSearchReq = { url: 'http://localhost/api/search?q=test&category=books' };
+      const audioSearchReq = { url: 'http://localhost/api/search?q=test&category=audiobooks' };
+
+      const [bookSearchRes, audioSearchRes] = await Promise.all([
+        searchGET(bookSearchReq),
+        searchGET(audioSearchReq)
+      ]);
+
+      const [bookSearchData, audioSearchData] = await Promise.all([
+        bookSearchRes.json(),
+        audioSearchRes.json()
+      ]);
+
+      // Verify partial success
+      expect(bookSearchRes.status).toBe(200);
+      expect(bookSearchData.results).toHaveLength(1);
+
+      expect(audioSearchRes.status).toBe(401);
+      expect(audioSearchData.tokenExpired).toBe(true);
+      expect(audioSearchData.error).toContain('MAM token has expired');
+
+      // User should not be able to complete dual download with missing audiobook results
+      expect(audioSearchData.results).toEqual([]);
+    });
+
+    it('should handle partial download failure and allow retry of failed item', async () => {
+      // Setup successful dual search
+      const bookResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: [
+            {
+              id: 'book-retry',
+              dl: 'book-link-retry',
+              title: 'Retry Book',
+              size: '2.0 MB',
+              filetype: 'epub',
+              added: '2025-09-25',
+              vip: 0,
+              my_snatched: 0,
+              author_info: '{"author":"Retry Author"}',
+              seeders: 8,
+              leechers: 1,
+              times_completed: 12
+            }
+          ]
+        }),
+        text: async () => ""
+      };
+
+      const audiobookResponse = {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          data: [
+            {
+              id: 'audio-retry',
+              dl: 'audio-link-retry',
+              title: 'Retry Audiobook',
+              size: '400 MB',
+              filetype: 'm4b',
+              added: '2025-09-24',
+              vip: 0,
+              my_snatched: 0,
+              author_info: '{"author":"Retry Author"}',
+              seeders: 5,
+              leechers: 1,
+              times_completed: 8
+            }
+          ]
+        }),
+        text: async () => ""
+      };
+
+      global.fetch.mockResolvedValueOnce(bookResponse).mockResolvedValueOnce(audiobookResponse);
+
+      // Step 1: Search both categories
+      const bookSearchReq = { url: 'http://localhost/api/search?q=retry test&category=books' };
+      const audioSearchReq = { url: 'http://localhost/api/search?q=retry test&category=audiobooks' };
+
+      const [bookSearchRes, audioSearchRes] = await Promise.all([
+        searchGET(bookSearchReq),
+        searchGET(audioSearchReq)
+      ]);
+
+      const [bookSearchData, audioSearchData] = await Promise.all([
+        bookSearchRes.json(),
+        audioSearchRes.json()
+      ]);
+
+      const selectedBook = bookSearchData.results[0];
+      const selectedAudiobook = audioSearchData.results[0];
+
+      // Step 2: First download attempt - audiobook succeeds, book fails
+      mockQbLogin.mockReset();
+      mockQbAddUrl.mockReset();
+
+      mockQbLogin
+        .mockRejectedValueOnce(new Error('qBittorrent connection failed')) // Book fails
+        .mockResolvedValueOnce('test-session-cookie'); // Audiobook succeeds
+
+      mockQbAddUrl.mockResolvedValueOnce(true);
+
+      const bookDownloadReq1 = {
+        json: async () => ({
+          title: selectedBook.title,
+          downloadUrl: selectedBook.downloadUrl,
+          category: 'books'
+        })
+      };
+
+      const audioDownloadReq1 = {
+        json: async () => ({
+          title: selectedAudiobook.title,
+          downloadUrl: selectedAudiobook.downloadUrl,
+          category: 'audiobooks'
+        })
+      };
+
+      const [bookDownloadRes1, audioDownloadRes1] = await Promise.all([
+        addPOST(bookDownloadReq1),
+        addPOST(audioDownloadReq1)
+      ]);
+
+      const [bookDownloadData1, audioDownloadData1] = await Promise.all([
+        bookDownloadRes1.json(),
+        audioDownloadRes1.json()
+      ]);
+
+      // Verify partial success
+      expect(bookDownloadRes1.status).toBe(500);
+      expect(bookDownloadData1.ok).toBe(false);
+      expect(audioDownloadRes1.status).toBe(200);
+      expect(audioDownloadData1.ok).toBe(true);
+
+      // Step 3: Retry failed book download (selection should be preserved)
+      mockQbLogin.mockReset();
+      mockQbAddUrl.mockReset();
+      mockQbLogin.mockResolvedValueOnce('test-session-cookie');
+      mockQbAddUrl.mockResolvedValueOnce(true);
+
+      const bookDownloadReq2 = {
+        json: async () => ({
+          title: selectedBook.title,
+          downloadUrl: selectedBook.downloadUrl,
+          category: 'books'
+        })
+      };
+
+      const bookDownloadRes2 = await addPOST(bookDownloadReq2);
+      const bookDownloadData2 = await bookDownloadRes2.json();
+
+      // Verify retry succeeded
+      expect(bookDownloadRes2.status).toBe(200);
+      expect(bookDownloadData2.ok).toBe(true);
+      expect(mockQbAddUrl).toHaveBeenCalledWith(
+        'http://localhost:8080',
+        'test-session-cookie',
+        'https://www.myanonamouse.net/tor/download.php/book-link-retry',
+        'books'
+      );
+    });
+  });
 });

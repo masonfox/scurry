@@ -14,7 +14,17 @@ Scurry is perfect for those moments when you’re away from your computer and wa
 
 **Just search → tap → done.**
 
-![Scurry](./docs/assets/screenshot.png)
+![Scurry](./docs/assets/main-screenshot.png)
+
+<details> <summary>Dual Fetch UI</summary>
+
+Dual fetch allows you to fetch _both_ ebook and audibooks at the same time in a purpose built, stream-lined UI. Simply select the "Both" option in the search.
+
+![Dual Fetch Web](./docs/assets/dual-web.png)
+
+![Token Manager](./docs/assets/token-manager.png)
+
+</details>
 
 <details> <summary>Token Manager UI</summary>
 
@@ -24,14 +34,14 @@ Scurry is perfect for those moments when you’re away from your computer and wa
 
 ### Key Features
 
-- **Search MAM**: Clean, responsive interface to search MyAnonamouse's extensive library
-- **One-click Downloads**: Instantly send torrents to your qBittorrent instance with a single click
-- **Direct Integration**: Automatically authenticates with both MAM and qBittorrent APIs
-- **URL Query Support**: Pre-fill searches using URL parameters (e.g., `?q=search+term`)
-- **Smart Filtering**: Filter results by category, seeders, file types, and more
-- **Download Management**: Automatic categorization and organization in qBittorrent
-- **Authentication**: Simple password protection for your instance
-- **Docker Ready**: Easy deployment with Docker Compose
+- 🔎 **Search MAM**: Clean, responsive interface to search MyAnonamouse's extensive library
+- 🌟 **Dual-Fetch Mode**: Search and download both ebook and audiobook simultaneously with streamlined selection workflow
+- 👉️ **One-click Downloads**: Instantly send torrents to your qBittorrent instance with a single click
+- 🤝 **Direct Integration**: Automatically authenticates with both MAM and qBittorrent APIs
+- 🔗 **URL Query Support**: Pre-fill searches using URL parameters (e.g., `?q=search+term`)
+- ⬇️ **Download Management**: Automatic categorization and organization in qBittorrent
+- 🔐 **Authentication**: Simple password protection for your instance
+- 🐋 **Docker Ready**: Easy deployment with Docker Compose
 
 ### How It Works
 
