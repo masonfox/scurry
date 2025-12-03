@@ -80,7 +80,21 @@ I recommend that you leverage the [docker image](https://github.com/masonfox/scu
 
 **Via Compose**
 ```bash
-docker compose --build -d
+version: "3.8"
+
+services:
+  scurry:
+    build: ghcr.io/masonfox/scurry:latest
+    ports: 3000:3000
+    env_file: .env
+    environment:
+      APP_PASSWORD: # remove for no auth
+      APP_QB_URL: # qbittorrent URL
+      APP_QB_USERNAME: # qbittorrent user
+      APP_QB_PASSWORD: # qbittorrent password
+    volumes:
+      - ./secrets:/app/secrets
+    restart: unless-stopped
 ```
 
 **Via Docker Run Script**
