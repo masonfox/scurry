@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { config } from '@/src/lib/config';
 import { SESSION_COOKIE } from '@/src/lib/constants.js';
+import { isSecureConnection } from '@/src/lib/auth.js';
 
 const SESSION_SECRET = config.appPassword;
 
@@ -17,8 +18,8 @@ export async function POST(req) {
   const res = NextResponse.json({ success: true });
   res.cookies.set(SESSION_COOKIE, '1', {
     httpOnly: true,
-    sameSite: 'strict',
-    secure: true,
+    sameSite: 'lax',
+    secure: isSecureConnection(req),
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 7 days
   });

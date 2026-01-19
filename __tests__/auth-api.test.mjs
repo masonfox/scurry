@@ -7,7 +7,11 @@ import { SESSION_COOKIE } from '../src/lib/constants.js';
 describe('auth API', () => {
   describe('login', () => {
     test('POST returns error if no password', async () => {
-      const req = { json: async () => ({}) };
+      const req = { 
+        json: async () => ({}),
+        headers: { get: () => null },
+        url: 'http://localhost:3000/api/login'
+      };
       const res = await loginPOST(req);
       const data = await res.json();
       expect(res.status).toBe(400);
@@ -15,7 +19,11 @@ describe('auth API', () => {
     });
 
     test('POST returns error if password is wrong', async () => {
-      const req = { json: async () => ({ password: 'wrong' }) };
+      const req = { 
+        json: async () => ({ password: 'wrong' }),
+        headers: { get: () => null },
+        url: 'http://localhost:3000/api/login'
+      };
       const res = await loginPOST(req);
       const data = await res.json();
       expect(res.status).toBe(401);
@@ -23,7 +31,11 @@ describe('auth API', () => {
     });
 
     test('POST returns success if password is correct', async () => {
-      const req = { json: async () => ({ password: config.appPassword }) };
+      const req = { 
+        json: async () => ({ password: config.appPassword }),
+        headers: { get: () => null },
+        url: 'http://localhost:3000/api/login'
+      };
       const res = await loginPOST(req);
       const data = await res.json();
       expect(res.status).toBe(200);
@@ -33,7 +45,11 @@ describe('auth API', () => {
 
   describe('logout', () => {
     test('POST clears the session cookie and returns success', async () => {
-      const res = await logoutPOST();
+      const req = {
+        headers: { get: () => null },
+        url: 'http://localhost:3000/api/logout'
+      };
+      const res = await logoutPOST(req);
       expect(res.status).toBe(200);
       const data = await res.json();
       expect(data.success).toBe(true);
