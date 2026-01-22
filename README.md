@@ -54,6 +54,14 @@ Dual fetch allows you to fetch _both_ ebook and audibooks at the same time in a 
 3. **Download**: Click the download button to automatically add torrents to qBittorrent
 4. **Organize**: Torrents are automatically categorized and managed in your qBittorrent instance
 
+### qBittorrent Categorization
+Scurry will organize torrents into the following categories based on their MAM type:
+
+- **Books**: `books` category
+- **Audiobooks**: `audiobooks` category
+
+To take advantage of this, simply create those categories - `books` and `audiobooks` - in qBittorrent, with unique save paths.
+
 ### URL Query String Support
 
 You can pre-fill search terms by adding a `q` parameter to the URL:
