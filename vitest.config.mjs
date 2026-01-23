@@ -13,7 +13,30 @@ export default defineConfig({
     exclude: ['**/__tests__/helpers/**', '**/node_modules/**', '**/dist/**', '**/build/**'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'html', 'lcov'],
+      include: ['app/**/*.{js,jsx}', 'src/**/*.{js,jsx}'],
+      exclude: [
+        '**/__tests__/**',
+        '**/*.test.{js,jsx,mjs}',
+        '**/*.spec.{js,jsx,mjs}',
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/.next/**',
+        '**/coverage/**',
+        'app/layout.js',
+        'app/components/**',
+        'app/page.jsx',
+        'app/login/page.jsx',
+      ],
+      all: true,
+      clean: true,
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 60,
+        statements: 60
+      }
     },
   },
   resolve: {
