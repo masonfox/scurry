@@ -1,7 +1,7 @@
 import SearchResultItem from './SearchResultItem';
 import PropTypes from 'prop-types';
 
-export default function SearchResultsList({ results, onAddItem, loading }) {
+export default function SearchResultsList({ results, onAddItem, loading, userStats }) {
   if (!loading && results.length === 0) {
     return <p className="text-gray-500 mt-5">☝️ Try a search to see results...</p>;
   }
@@ -12,7 +12,8 @@ export default function SearchResultsList({ results, onAddItem, loading }) {
         <SearchResultItem 
           key={result.id} 
           result={result} 
-          onAddItem={onAddItem} 
+          onAddItem={onAddItem}
+          userStats={userStats}
         />
       ))}
     </ul>
@@ -22,5 +23,10 @@ export default function SearchResultsList({ results, onAddItem, loading }) {
 SearchResultsList.propTypes = {
   results: PropTypes.arrayOf(PropTypes.object).isRequired,
   onAddItem: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired
+  loading: PropTypes.bool.isRequired,
+  userStats: PropTypes.shape({
+    uploaded: PropTypes.string,
+    downloaded: PropTypes.string,
+    ratio: PropTypes.string
+  })
 };

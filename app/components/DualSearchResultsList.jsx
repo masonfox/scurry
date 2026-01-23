@@ -1,6 +1,7 @@
 import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
+import { parseSizeToBytes, calculateNewRatio, formatBytesToSize } from '@/src/lib/utilities';
 
 export default function DualSearchResultsList({
   audiobookResults,
@@ -11,7 +12,8 @@ export default function DualSearchResultsList({
   onSelectBook,
   loading,
   onDownload,
-  downloadLoading
+  downloadLoading,
+  userStats
 }) {
   if (loading) {
     return (
@@ -40,6 +42,27 @@ export default function DualSearchResultsList({
   const currentStep = selectedBook ? 2 : 1;
   const bothSelected = selectedAudiobook && selectedBook;
   const disabled = !bothSelected || downloadLoading;
+
+  // Calculate combined size and projected ratio when both are selected
+  let combinedInfo = null;
+  if (bothSelected && userStats) {
+    const audiobookBytes = parseSizeToBytes(selectedAudiobook.size);
+    const bookBytes = parseSizeToBytes(selectedBook.size);
+    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
+    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
+    
+    if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
+      const totalBytes = audiobookBytes + bookBytes;
+      const currentRatio = uploadedBytes / downloadedBytes;
+      const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
+      const diff = (parseFloat(projectedRatio) - currentRatio).toFixed(2);
+      combinedInfo = {
+        totalSize: formatBytesToSize(totalBytes),
+        projectedRatio,
+        diff
+      };
+    }
+  }
 
   // Download button component - matching search button style with icon
   const downloadButton = (
@@ -80,6 +103,17 @@ export default function DualSearchResultsList({
         actionButton={downloadButton}
       />
       
+      {/* Combined info display when both selected */}
+      {combinedInfo && (
+        <div className="mb-4 px-4 py-2 bg-pink-50 border border-pink-200 rounded-lg text-center text-sm">
+          <span className="text-gray-700">Combined: </span>
+          <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
+          <span className="text-gray-500 mx-2">•</span>
+          <span className="text-gray-700">New ratio: </span>
+          <span className="font-semibold text-gray-900">{combinedInfo.projectedRatio} ({combinedInfo.diff})</span>
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-6">
       {/* Left Column: Books */}
       <div>
@@ -98,6 +132,7 @@ export default function DualSearchResultsList({
                 selectable={true}
                 selected={selectedBook?.id === result.id}
                 onSelect={onSelectBook}
+                userStats={userStats}
               />
             ))}
           </ul>
@@ -121,6 +156,7 @@ export default function DualSearchResultsList({
                 selectable={true}
                 selected={selectedAudiobook?.id === result.id}
                 onSelect={onSelectAudiobook}
+                userStats={userStats}
               />
             ))}
           </ul>
@@ -154,5 +190,10 @@ DualSearchResultsList.propTypes = {
   onSelectBook: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   onDownload: PropTypes.func.isRequired,
-  downloadLoading: PropTypes.bool.isRequired
+  downloadLoading: PropTypes.bool.isRequired,
+  userStats: PropTypes.shape({
+    uploaded: PropTypes.string,
+    downloaded: PropTypes.string,
+    ratio: PropTypes.string
+  })
 };

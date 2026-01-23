@@ -1,12 +1,28 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
+import { parseSizeToBytes, calculateNewRatio } from '@/src/lib/utilities';
 
-export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect }) {
+export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats }) {
   const handleClick = () => {
     if (selectable && onSelect) {
       onSelect(result);
     }
   };
+
+  // Calculate projected ratio if user stats are available
+  let projectedRatioDisplay = null;
+  if (userStats && result.size) {
+    const sizeBytes = parseSizeToBytes(result.size);
+    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
+    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
+    
+    if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
+      const currentRatio = uploadedBytes / downloadedBytes;
+      const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
+      const diff = (parseFloat(newRatio) - currentRatio).toFixed(2);
+      projectedRatioDisplay = `${newRatio} (${diff})`;
+    }
+  }
 
   const borderClasses = selectable
     ? selected
@@ -52,6 +68,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
           {/* Torrent metadata */}
           <div className="text-sm text-gray-500 mt-1">
             {result.size} • {result.filetypes} • {result.seeders} seeders • {result.downloads} downloads
+            {projectedRatioDisplay && ` • New ratio: ${projectedRatioDisplay}`}
           </div>
           {/* Determine if torrent has already been snatched */}
           {result.snatched && (
@@ -116,5 +133,10 @@ SearchResultItem.propTypes = {
   onAddItem: PropTypes.func,
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
-  onSelect: PropTypes.func
+  onSelect: PropTypes.func,
+  userStats: PropTypes.shape({
+    uploaded: PropTypes.string,
+    downloaded: PropTypes.string,
+    ratio: PropTypes.string
+  })
 };
