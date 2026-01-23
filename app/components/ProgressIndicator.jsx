@@ -5,6 +5,7 @@ export default function ProgressIndicator({
   totalSteps = 2,
   progress,
   mobile = false,
+  compact = false,
   actionButton = null
 }) {
   const stepText = progress === 100 ? 'Done' : (currentStep === 1 ? 'a Book' : 'an Audiobook');
@@ -32,6 +33,27 @@ export default function ProgressIndicator({
           </div>
         </div>
       </>
+    );
+  }
+
+  // Compact mode: For integrated header layout (no container, just progress elements)
+  if (compact) {
+    return (
+      <div className="flex items-center gap-4 flex-1">
+        <span className="text-sm text-gray-700 whitespace-nowrap font-medium">
+          <span>Step {currentStep} of {totalSteps}:</span>
+          <span className="ml-1">Select {stepText}</span>
+        </span>
+        <div className="flex-1 max-w-md">
+          <div className="w-full bg-gray-200 rounded-full h-2.5">
+            <div
+              className="bg-pink-400 h-2.5 rounded-full transition-all duration-500 ease-in-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+        <span className="text-sm font-semibold text-gray-900 min-w-[45px] text-right">{progress}%</span>
+      </div>
     );
   }
 
@@ -68,5 +90,6 @@ ProgressIndicator.propTypes = {
   totalSteps: PropTypes.number,
   progress: PropTypes.number.isRequired,
   mobile: PropTypes.bool,
+  compact: PropTypes.bool,
   actionButton: PropTypes.node
 };
