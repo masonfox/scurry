@@ -1,9 +1,9 @@
-// Middleware to check for session cookie and redirect to /login if not present
+// Proxy to check for session cookie and redirect to /login if not present
 import { NextResponse } from 'next/server';
 import { SESSION_COOKIE, ALLOWED_PATHS } from './src/lib/constants.js';
 
 
-export function middleware(request) {
+export default function proxy(request) {
   const { pathname, search } = request.nextUrl;
   // Allow API routes and static files
   if (ALLOWED_PATHS.some((p) => pathname.startsWith(p))) {

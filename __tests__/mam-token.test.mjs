@@ -83,6 +83,13 @@ describe('mam-token API', () => {
       vi.spyOn(fs, 'writeFileSync').mockImplementation();
       
       const res = await POST(mockRequest);
+      
+      // If we get a 500, show the error details for debugging
+      if (res.status === 500) {
+        const errorData = await res.json();
+        throw new Error(`Expected 200 but got 500. Error: ${JSON.stringify(errorData)}`);
+      }
+      
       expect(res.status).toBe(200);
       
       const data = await res.json();

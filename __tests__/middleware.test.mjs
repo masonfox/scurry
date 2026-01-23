@@ -1,8 +1,8 @@
-import { middleware } from '../middleware.js';
+import proxy from '../proxy.ts';
 import { SESSION_COOKIE, ALLOWED_PATHS } from '../src/lib/constants.js';
 import { NextResponse } from 'next/server';
 
-describe('middleware', () => {
+describe('proxy (middleware)', () => {
   function mockRequest(pathname, cookieValue, search = '') {
     // Use a real URL object for nextUrl
     const url = new URL('http://localhost' + pathname + search);
@@ -27,38 +27,38 @@ describe('middleware', () => {
       // For static files, use the path as is; for routes, append a subpath
       const path = base.startsWith('/') && base.length > 1 && !base.includes('.') ? base + '/foo' : base;
       const req = mockRequest(path);
-      const res = middleware(req);
+      const res = proxy(req);
       expect(res).toEqual(NextResponse.next());
     });
   });
 
   test('allows /login', () => {
     const req = mockRequest('/login');
-    const res = middleware(req);
+    const res = proxy(req);
     expect(res).toEqual(NextResponse.next());
   });
 
   test('redirects to /login if no session cookie', () => {
     const req = mockRequest('/protected');
-    const res = middleware(req);
+    const res = proxy(req);
     expect(res.headers.get('location')).toBe('http://localhost/login?redirect=%2Fprotected');
   });
 
   test('redirects to /login with query string preserved', () => {
     const req = mockRequest('/', '', '?q=test+search');
-    const res = middleware(req);
+    const res = proxy(req);
     expect(res.headers.get('location')).toBe('http://localhost/login?redirect=%2F%3Fq%3Dtest%2Bsearch');
   });
 
   test('redirects to /login without redirect param for root without query', () => {
     const req = mockRequest('/');
-    const res = middleware(req);
+    const res = proxy(req);
     expect(res.headers.get('location')).toBe('http://localhost/login');
   });
 
   test('allows if session cookie is present', () => {
     const req = mockRequest('/protected', '1');
-    const res = middleware(req);
+    const res = proxy(req);
     expect(res).toEqual(NextResponse.next());
   });
 });
