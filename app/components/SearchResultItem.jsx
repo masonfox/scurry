@@ -123,7 +123,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         {/* Torrent action buttons */}
         {!selectable && (
           <div className="flex flex-col gap-2 items-end flex-shrink-0 mt-1 md:mt-0">
-            <div className="flex gap-2 items-center justify-between w-full md:w-auto md:justify-end">
+            <div className="flex gap-2 md:gap-3 items-center justify-between w-full md:w-auto md:justify-end">
               {/* FL Wedge toggle button - left on mobile */}
               {hasWedges && !result.snatched && !result.freeleech && (
                 <WedgeToggleButton
