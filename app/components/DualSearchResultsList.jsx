@@ -67,11 +67,11 @@ export default function DualSearchResultsList({
       if (!isBookFreeleech) bytesForRatio += bookBytes;
       if (!isAudiobookFreeleech) bytesForRatio += audiobookBytes;
       
-      // If both are freeleech, show "Same" as ratio doesn't change
+      // If both are freeleech, show "No Change" as ratio doesn't change
       if (bytesForRatio === 0) {
         combinedInfo = {
           totalSize: formatBytesToSize(totalBytes),
-          projectedRatio: 'Same',
+          projectedRatio: 'No Change',
           diff: null
         };
       } else {

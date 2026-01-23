@@ -22,9 +22,9 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
   // Calculate projected ratio if user stats are available
   let projectedRatioDisplay = null;
   if (userStats && result.size) {
-    // If using FL wedge or torrent is already freeleech, show "Same" as ratio doesn't change
+    // If using FL wedge or torrent is already freeleech, show "No Change" as ratio doesn't change
     if (useWedge || result.freeleech) {
-      projectedRatioDisplay = 'Same';
+      projectedRatioDisplay = 'No Change';
     } else {
       const sizeBytes = parseSizeToBytes(result.size);
       const uploadedBytes = parseSizeToBytes(userStats.uploaded);
