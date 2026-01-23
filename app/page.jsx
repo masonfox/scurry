@@ -36,6 +36,11 @@ function SearchPage() {
   const [selectedAudiobook, setSelectedAudiobook] = useState(null);
   const [selectedBook, setSelectedBook] = useState(null);
   const [dualDownloadLoading, setDualDownloadLoading] = useState(false);
+  
+  // FL Wedge state
+  const [singleModeWedges, setSingleModeWedges] = useState({}); // { torrentId: boolean }
+  const [useAudiobookWedge, setUseAudiobookWedge] = useState(false);
+  const [useBookWedge, setUseBookWedge] = useState(false);
 
   // Load saved category from localStorage on mount
   useEffect(() => {
@@ -75,6 +80,9 @@ function SearchPage() {
     setSelectedAudiobook(null);
     setSelectedBook(null);
     setMessage(null);
+    setSingleModeWedges({});
+    setUseAudiobookWedge(false);
+    setUseBookWedge(false);
     
     try {
       // Handle "both" mode with parallel searches
@@ -265,22 +273,36 @@ function SearchPage() {
       // Map search category to qBittorrent category
       const qbCategory = searchCategory === "audiobooks" ? "audiobooks" : "books";
       
+      // Check if wedge should be used for this item
+      const useWedge = singleModeWedges[item.id] || false;
+      
       const res = await fetch(`/api/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title: item.title,
           downloadUrl: item.downloadUrl,
-          category: qbCategory
+          category: qbCategory,
+          useWedge
         })
       });
       const data = await res.json();
       if (!res.ok || !data.ok) throw new Error(data.error || "Add failed");
-      setMessage({ type: "success", text: `Queued: ${item.title}` });
+      
+      setMessage({ 
+        type: "success", 
+        text: `Queued: ${item.title}${useWedge ? ' (FL Wedge applied)' : ''}` 
+      });
+      
+      // Refresh user stats if wedge was used
+      if (useWedge && data.wedgeUsed) {
+        fetchUserStats();
+      }
       
       // Clear search and scroll to top
       setQ("");
       setResults([]);
+      setSingleModeWedges({});
       window.scrollTo({ top: 0, behavior: "smooth" });
       
       // Remove message after 3 seconds
@@ -290,7 +312,7 @@ function SearchPage() {
     } catch (err) {
       setMessage({ type: "error", text: err?.message || "Add failed" });
     }
-  }, [searchCategory]);
+  }, [searchCategory, singleModeWedges, fetchUserStats]);
 
   const clearResults = useCallback(() => {
     setResults([]);
@@ -299,6 +321,9 @@ function SearchPage() {
     setSelectedAudiobook(null);
     setSelectedBook(null);
     setMessage(null);
+    setSingleModeWedges({});
+    setUseAudiobookWedge(false);
+    setUseBookWedge(false);
   }, []);
 
   // Dual-mode selection handlers
@@ -330,7 +355,8 @@ function SearchPage() {
           body: JSON.stringify({
             title: selectedAudiobook.title,
             downloadUrl: selectedAudiobook.downloadUrl,
-            category: 'audiobooks'
+            category: 'audiobooks',
+            useWedge: useAudiobookWedge
           })
         }),
         fetch('/api/add', {
@@ -339,7 +365,8 @@ function SearchPage() {
           body: JSON.stringify({
             title: selectedBook.title,
             downloadUrl: selectedBook.downloadUrl,
-            category: 'books'
+            category: 'books',
+            useWedge: useBookWedge
           })
         })
       ]);
@@ -353,11 +380,21 @@ function SearchPage() {
       const audiobookSuccess = audiobookRes.ok && audiobookData.ok;
       const bookSuccess = bookRes.ok && bookData.ok;
       
+      // Refresh stats if any wedge was used
+      if ((useAudiobookWedge && audiobookSuccess) || (useBookWedge && bookSuccess)) {
+        fetchUserStats();
+      }
+      
       if (audiobookSuccess && bookSuccess) {
         // Both succeeded
+        const wedgeInfo = [];
+        if (useAudiobookWedge) wedgeInfo.push('audiobook FL');
+        if (useBookWedge) wedgeInfo.push('book FL');
+        const wedgeText = wedgeInfo.length > 0 ? ` (${wedgeInfo.join(', ')} applied)` : '';
+        
         setMessage({ 
           type: 'success', 
-          text: `✓ Queued 2 items: ${selectedBook.title} + ${selectedAudiobook.title}` 
+          text: `✓ Queued 2 items: ${selectedBook.title} + ${selectedAudiobook.title}${wedgeText}` 
         });
         
         // Clear and reset
@@ -366,6 +403,8 @@ function SearchPage() {
         setBookResults([]);
         setSelectedAudiobook(null);
         setSelectedBook(null);
+        setUseAudiobookWedge(false);
+        setUseBookWedge(false);
         window.scrollTo({ top: 0, behavior: 'smooth' });
         
         setTimeout(() => setMessage(null), SUCCESS_MESSAGE_DURATION_MS);
@@ -401,7 +440,23 @@ function SearchPage() {
     } finally {
       setDualDownloadLoading(false);
     }
-  }, [selectedAudiobook, selectedBook]);
+  }, [selectedAudiobook, selectedBook, useAudiobookWedge, useBookWedge, fetchUserStats]);
+
+  // Wedge toggle handlers
+  const handleToggleSingleWedge = useCallback((torrentId) => {
+    setSingleModeWedges(prev => ({
+      ...prev,
+      [torrentId]: !prev[torrentId]
+    }));
+  }, []);
+
+  const handleToggleAudiobookWedge = useCallback(() => {
+    setUseAudiobookWedge(prev => !prev);
+  }, []);
+
+  const handleToggleBookWedge = useCallback(() => {
+    setUseBookWedge(prev => !prev);
+  }, []);
 
   const handleTokenUpdate = (tokenExists) => {
     setMamTokenExists(tokenExists);
@@ -491,6 +546,10 @@ function SearchPage() {
                   onDownload={handleDualDownload}
                   downloadLoading={dualDownloadLoading}
                   userStats={userStats}
+                  useAudiobookWedge={useAudiobookWedge}
+                  useBookWedge={useBookWedge}
+                  onToggleAudiobookWedge={handleToggleAudiobookWedge}
+                  onToggleBookWedge={handleToggleBookWedge}
                 />
               </div>
               
@@ -514,6 +573,8 @@ function SearchPage() {
               onAddItem={addItem}
               loading={loading}
               userStats={userStats}
+              singleModeWedges={singleModeWedges}
+              onToggleWedge={handleToggleSingleWedge}
             />
           )}
         </>

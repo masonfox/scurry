@@ -53,6 +53,14 @@ export default function UserStatsBar({ stats, loading, error }) {
           </span>
           <span className="text-gray-900 font-semibold">{stats.ratio}</span>
         </div>
+        <span className="text-gray-400">•</span>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-700 font-medium">
+            <span className="sm:hidden">FL:</span>
+            <span className="hidden sm:inline">FL Wedges:</span>
+          </span>
+          <span className="text-gray-900 font-semibold">{stats.flWedges || 0}</span>
+        </div>
       </div>
     </div>
   );
@@ -63,7 +71,8 @@ UserStatsBar.propTypes = {
     uploaded: PropTypes.string.isRequired,
     downloaded: PropTypes.string.isRequired,
     ratio: PropTypes.string.isRequired,
-    username: PropTypes.string
+    username: PropTypes.string,
+    flWedges: PropTypes.number
   }),
   loading: PropTypes.bool,
   error: PropTypes.string

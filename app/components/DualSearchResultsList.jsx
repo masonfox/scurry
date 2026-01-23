@@ -13,7 +13,11 @@ export default function DualSearchResultsList({
   loading,
   onDownload,
   downloadLoading,
-  userStats
+  userStats,
+  useAudiobookWedge,
+  useBookWedge,
+  onToggleAudiobookWedge,
+  onToggleBookWedge
 }) {
   if (loading) {
     return (
@@ -113,6 +117,47 @@ export default function DualSearchResultsList({
         </div>
       )}
       
+      {/* Wedge toggles when both are selected */}
+      {bothSelected && userStats?.flWedges > 0 && (
+        <div className="mb-4 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <div className="flex items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-3">
+              <span className="text-gray-700 font-medium">Use FL Wedge:</span>
+              <button
+                onClick={onToggleBookWedge}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded transition-colors duration-200 ${
+                  useBookWedge 
+                    ? 'bg-pink-400 text-white hover:bg-pink-500' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                title={useBookWedge ? "FL Wedge will be used for book" : "Click to use FL Wedge for book"}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="6"></circle>
+                  <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+                </svg>
+                <span>Book</span>
+              </button>
+              <button
+                onClick={onToggleAudiobookWedge}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded transition-colors duration-200 ${
+                  useAudiobookWedge 
+                    ? 'bg-pink-400 text-white hover:bg-pink-500' 
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                title={useAudiobookWedge ? "FL Wedge will be used for audiobook" : "Click to use FL Wedge for audiobook"}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="6"></circle>
+                  <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+                </svg>
+                <span>Audiobook</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="grid grid-cols-2 gap-6">
       {/* Left Column: Books */}
       <div>
@@ -193,6 +238,11 @@ DualSearchResultsList.propTypes = {
   userStats: PropTypes.shape({
     uploaded: PropTypes.string,
     downloaded: PropTypes.string,
-    ratio: PropTypes.string
-  })
+    ratio: PropTypes.string,
+    flWedges: PropTypes.number
+  }),
+  useAudiobookWedge: PropTypes.bool,
+  useBookWedge: PropTypes.bool,
+  onToggleAudiobookWedge: PropTypes.func,
+  onToggleBookWedge: PropTypes.func
 };

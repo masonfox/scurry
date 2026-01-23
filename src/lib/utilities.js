@@ -166,3 +166,24 @@ export function calculateRatioDiff(uploadedBytes, downloadedBytes, additionalByt
   const diff = parseFloat(newRatio) - currentRatio;
   return diff.toFixed(4);
 }
+
+/**
+ * Extracts torrent ID from MAM download URL
+ * @param {string} downloadUrl - MAM download URL (e.g., "https://www.myanonamouse.net/tor/download.php/12345")
+ * @returns {string|null} - Torrent ID or null if not found
+ */
+export function extractTorrentId(downloadUrl) {
+  if (!downloadUrl) return null;
+  
+  // Match patterns like: /tor/download.php/12345 or /tor/download.php?id=12345
+  const match = downloadUrl.match(/\/tor\/download\.php[\/\?](?:id=)?(\d+)/);
+  return match ? match[1] : null;
+}
+
+/**
+ * Generates Unix timestamp in milliseconds
+ * @returns {number} - Current Unix timestamp in milliseconds
+ */
+export function generateTimestamp() {
+  return Date.now();
+}

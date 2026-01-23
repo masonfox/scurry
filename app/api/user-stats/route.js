@@ -79,7 +79,8 @@ export async function GET(req) {
       downloaded: data.downloaded || "0 B",
       ratio: data.ratio || "0.00",
       username: data.username || null,
-      uid: data.uid || null
+      uid: data.uid || null,
+      flWedges: data.wedges || 0
     };
 
     // Cache the result
