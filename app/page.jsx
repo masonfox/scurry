@@ -8,6 +8,7 @@ import SearchResultsList from './components/SearchResultsList';
 import DualDownloadButton from './components/DualDownloadButton';
 import DualSearchResultsList from './components/DualSearchResultsList';
 import SequentialSearchResults from './components/SequentialSearchResults';
+import UserStatsBar from './components/UserStatsBar';
 
 const DEFAULT_CATEGORY = process.env.NEXT_PUBLIC_DEFAULT_CATEGORY ?? "books";
 const SUCCESS_MESSAGE_DURATION_MS = 5000;
@@ -23,6 +24,11 @@ function SearchPage() {
   const [mamTokenExists, setMamTokenExists] = useState(false); // default false until we check
   const [tokenLoading, setTokenLoading] = useState(true); // loading state for token check
   const searchParams = useSearchParams();
+  
+  // User stats state
+  const [userStats, setUserStats] = useState(null);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsError, setStatsError] = useState(null);
   
   // Dual-mode state
   const [audiobookResults, setAudiobookResults] = useState([]);
@@ -226,6 +232,33 @@ function SearchPage() {
       .finally(() => setTokenLoading(false));
   };
 
+  // Fetch user stats when token exists
+  useEffect(() => {
+    if (mamTokenExists) {
+      fetchUserStats();
+    }
+  }, [mamTokenExists]);
+
+  const fetchUserStats = async () => {
+    setStatsLoading(true);
+    setStatsError(null);
+    try {
+      const res = await fetch('/api/user-stats');
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch user stats');
+      }
+      
+      setUserStats(data.stats);
+    } catch (err) {
+      console.error('Error fetching user stats:', err);
+      setStatsError(err.message);
+    } finally {
+      setStatsLoading(false);
+    }
+  };
+
   const addItem = useCallback(async (item) => {
     setMessage(null);
     try {
@@ -413,6 +446,12 @@ function SearchPage() {
         </div>
       ) : (
         <>
+          <UserStatsBar 
+            stats={userStats} 
+            loading={statsLoading} 
+            error={statsError} 
+          />
+          
           <SearchForm
             q={q}
             setQ={setQ}
@@ -451,6 +490,7 @@ function SearchPage() {
                   loading={loading}
                   onDownload={handleDualDownload}
                   downloadLoading={dualDownloadLoading}
+                  userStats={userStats}
                 />
               </div>
               
@@ -464,6 +504,7 @@ function SearchPage() {
                   onSelectAudiobook={handleSelectAudiobook}
                   onSelectBook={handleSelectBook}
                   loading={loading}
+                  userStats={userStats}
                 />
               </div>
             </>
@@ -472,6 +513,7 @@ function SearchPage() {
               results={results}
               onAddItem={addItem}
               loading={loading}
+              userStats={userStats}
             />
           )}
         </>

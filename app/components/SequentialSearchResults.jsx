@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
+import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
 // Delay before auto-scrolling to next section (ms)
 const AUTO_SCROLL_DELAY_MS = 100;
@@ -13,7 +14,8 @@ export default function SequentialSearchResults({
   selectedBook,
   onSelectAudiobook,
   onSelectBook,
-  loading
+  loading,
+  userStats
 }) {
   const bookSectionRef = useRef(null);
 
@@ -55,6 +57,26 @@ export default function SequentialSearchResults({
   const progress = selectedBook && selectedAudiobook ? 100 : selectedBook ? 50 : 0;
   const currentStep = selectedBook ? 2 : 1;
 
+  // Calculate combined size and projected ratio when both are selected
+  let combinedInfo = null;
+  if (selectedBook && selectedAudiobook && userStats) {
+    const audiobookBytes = parseSizeToBytes(selectedAudiobook.size);
+    const bookBytes = parseSizeToBytes(selectedBook.size);
+    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
+    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
+    
+    if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
+      const totalBytes = audiobookBytes + bookBytes;
+      const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
+      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, totalBytes);
+      combinedInfo = {
+        totalSize: formatBytesToSize(totalBytes),
+        projectedRatio,
+        diff
+      };
+    }
+  }
+
   return (
     <div className="mt-6 pb-32">
       {/* Progress Indicator - Fixed at bottom on mobile */}
@@ -63,6 +85,17 @@ export default function SequentialSearchResults({
         progress={progress}
         mobile={true}
       />
+
+      {/* Combined info display when both selected */}
+      {combinedInfo && (
+        <div className="mb-4 px-4 py-2 bg-pink-50 border border-pink-200 rounded-lg text-center text-sm">
+          <span className="text-gray-700">Combined: </span>
+          <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
+          <span className="text-gray-500 mx-2">•</span>
+          <span className="text-gray-700">New ratio: </span>
+          <span className="font-semibold text-gray-900">{combinedInfo.projectedRatio} ({combinedInfo.diff})</span>
+        </div>
+      )}
 
       {/* Step 1: Book Selection */}
       <div className={selectedBook ? 'mb-6' : ''}>
@@ -87,6 +120,7 @@ export default function SequentialSearchResults({
                 selectable={true}
                 selected={true}
                 onSelect={onSelectBook}
+                userStats={userStats}
               />
             </ul>
           </div>
@@ -108,6 +142,7 @@ export default function SequentialSearchResults({
                     selectable={true}
                     selected={false}
                     onSelect={onSelectBook}
+                    userStats={userStats}
                   />
                 ))}
               </ul>
@@ -140,6 +175,7 @@ export default function SequentialSearchResults({
                   selectable={true}
                   selected={true}
                   onSelect={onSelectAudiobook}
+                  userStats={userStats}
                 />
               </ul>
             </div>
@@ -161,6 +197,7 @@ export default function SequentialSearchResults({
                       selectable={true}
                       selected={false}
                       onSelect={onSelectAudiobook}
+                      userStats={userStats}
                     />
                   ))}
                 </ul>
@@ -194,5 +231,10 @@ SequentialSearchResults.propTypes = {
   selectedBook: resultShape,
   onSelectAudiobook: PropTypes.func.isRequired,
   onSelectBook: PropTypes.func.isRequired,
-  loading: PropTypes.bool.isRequired
+  loading: PropTypes.bool.isRequired,
+  userStats: PropTypes.shape({
+    uploaded: PropTypes.string,
+    downloaded: PropTypes.string,
+    ratio: PropTypes.string
+  })
 };
