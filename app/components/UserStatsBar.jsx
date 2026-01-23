@@ -29,36 +29,47 @@ export default function UserStatsBar({ stats, loading, error }) {
 
   return (
     <div className="mt-4 mb-4 px-4 py-3 bg-pink-50 border border-pink-200 rounded-lg">
-      <div className="flex items-center justify-center gap-3 sm:gap-6 text-sm">
+      {/* Mobile: 2x2 grid layout with vertical divider */}
+      <div className="grid grid-cols-[1fr_auto_1fr] gap-x-4 gap-y-2 text-sm sm:hidden justify-items-center items-center">
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">
-            <span className="sm:hidden">U:</span>
-            <span className="hidden sm:inline">Upload:</span>
-          </span>
+          <span className="text-gray-700 font-medium">U:</span>
+          <span className="text-gray-900 font-semibold">{stats.uploaded}</span>
+        </div>
+        <div className="row-span-2 border-l border-pink-200 h-full"></div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-700 font-medium">D:</span>
+          <span className="text-gray-900 font-semibold">{stats.downloaded}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-gray-700 font-medium">R:</span>
+          <span className="text-gray-900 font-semibold">{stats.ratio}</span>
+        </div>
+        {/* Vertical divider spans both rows */}
+        <div className="flex items-center gap-2">
+          <span className="text-gray-700 font-medium">FL:</span>
+          <span className="text-gray-900 font-semibold">{stats.flWedges || 0}</span>
+        </div>
+      </div>
+
+      {/* Desktop: horizontal layout with dots */}
+      <div className="hidden sm:flex items-center justify-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-700 font-medium">Upload:</span>
           <span className="text-gray-900 font-semibold">{stats.uploaded}</span>
         </div>
         <span className="text-gray-400">•</span>
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">
-            <span className="sm:hidden">D:</span>
-            <span className="hidden sm:inline">Download:</span>
-          </span>
+          <span className="text-gray-700 font-medium">Download:</span>
           <span className="text-gray-900 font-semibold">{stats.downloaded}</span>
         </div>
         <span className="text-gray-400">•</span>
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">
-            <span className="sm:hidden">R:</span>
-            <span className="hidden sm:inline">Ratio:</span>
-          </span>
+          <span className="text-gray-700 font-medium">Ratio:</span>
           <span className="text-gray-900 font-semibold">{stats.ratio}</span>
         </div>
         <span className="text-gray-400">•</span>
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">
-            <span className="sm:hidden">FL:</span>
-            <span className="hidden sm:inline">FL Wedges:</span>
-          </span>
+          <span className="text-gray-700 font-medium">FL Wedges:</span>
           <span className="text-gray-900 font-semibold">{stats.flWedges || 0}</span>
         </div>
       </div>
