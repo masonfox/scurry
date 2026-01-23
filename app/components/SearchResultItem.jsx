@@ -56,12 +56,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         <div className="flex-1 min-w-0">
           {/* Basic torrent information */}
           <div className="mb-1">
-            <a 
-              href={result.torrentUrl}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="font-semibold text-gray-900 hover:text-pink-400 transition-colors duration-200 inline-flex items-center flex-wrap"
-            >
+            <div className="font-semibold text-gray-900 inline-flex items-center flex-wrap">
               {result.vip && (
                 <span className="inline-flex mr-1 relative top-0.25">
                   <Image
@@ -91,12 +86,20 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
                 <span className="mx-1">by</span>
                 <span>{result.author}</span>
               </span>
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0 inline text-gray-400 ml-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                <polyline points="15 3 21 3 21 9"></polyline>
-                <line x1="10" y1="14" x2="21" y2="3"></line>
-              </svg>
-            </a>
+              <a 
+                href={result.torrentUrl}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex ml-1.5 hover:text-pink-400 transition-colors duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0 text-gray-400 hover:text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
           </div>
           {/* Torrent metadata */}
           <div className="text-sm text-gray-500 mt-1">
