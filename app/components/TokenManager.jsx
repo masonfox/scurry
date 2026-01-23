@@ -212,11 +212,11 @@ export default function TokenManager({ onTokenUpdate }) {
           <strong>How to get your MAM session token:</strong>
         </p>
         <ol className="text-sm text-blue-700 mt-1 list-decimal list-inside space-y-1">
-          <li>Go to your <a href="https://www.myanonamouse.net/preferences/index.php?view=security" class="underline" target="_blank" rel="noopener noreferrer">Security Preferences</a>.</li>
+          <li>Go to your <a href="https://www.myanonamouse.net/preferences/index.php?view=security" className="underline" target="_blank" rel="noopener noreferrer">Security Preferences</a>.</li>
           <li>Create a session with the IP where you&apos;ll run Scurry.</li>
           <li>Copy your session token value and paste it above.</li>
         </ol>
-        <i class="mt-2 block text-xs text-blue-800">Note: do not prepend <code class="bg-gray-200 text-red-600 p-1 rounded">MAM_ID=</code> above - just the raw token value.</i>
+        <i className="mt-2 block text-xs text-blue-800">Note: do not prepend <code className="bg-gray-200 text-red-600 p-1 rounded">MAM_ID=</code> above - just the raw token value.</i>
       </div>
     </div>
   );
