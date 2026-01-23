@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
-import { parseSizeToBytes, calculateNewRatio } from '@/src/lib/utilities';
+import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff } from '@/src/lib/utilities';
 
 export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats }) {
   const handleClick = () => {
@@ -17,9 +17,8 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
     const downloadedBytes = parseSizeToBytes(userStats.downloaded);
     
     if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
-      const currentRatio = uploadedBytes / downloadedBytes;
       const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
-      const diff = (parseFloat(newRatio) - currentRatio).toFixed(4);
+      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, sizeBytes);
       projectedRatioDisplay = `${newRatio} (${diff})`;
     }
   }

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
-import { parseSizeToBytes, calculateNewRatio, formatBytesToSize } from '@/src/lib/utilities';
+import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
 // Delay before auto-scrolling to next section (ms)
 const AUTO_SCROLL_DELAY_MS = 100;
@@ -67,9 +67,8 @@ export default function SequentialSearchResults({
     
     if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
       const totalBytes = audiobookBytes + bookBytes;
-      const currentRatio = uploadedBytes / downloadedBytes;
       const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
-      const diff = (parseFloat(projectedRatio) - currentRatio).toFixed(2);
+      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, totalBytes);
       combinedInfo = {
         totalSize: formatBytesToSize(totalBytes),
         projectedRatio,

@@ -125,9 +125,9 @@ export function formatBytesToSize(bytes) {
 }
 
 /**
- * Calculate new ratio after downloading additional content
- * @param {number} uploadedBytes - Current uploaded amount in bytes
- * @param {number} downloadedBytes - Current downloaded amount in bytes
+ * Calculates new ratio after downloading additional bytes
+ * @param {number} uploadedBytes - Current uploaded bytes
+ * @param {number} downloadedBytes - Current downloaded bytes
  * @param {number} additionalBytes - Additional bytes to download
  * @returns {string|null} - New ratio as string, or null if invalid
  */
@@ -144,4 +144,25 @@ export function calculateNewRatio(uploadedBytes, downloadedBytes, additionalByte
   
   const ratio = uploadedBytes / newDownloaded;
   return ratio.toFixed(4);
+}
+
+/**
+ * Calculates the difference between new ratio and current ratio
+ * @param {number} uploadedBytes - Current uploaded bytes
+ * @param {number} downloadedBytes - Current downloaded bytes
+ * @param {number} additionalBytes - Additional bytes to download
+ * @returns {string|null} - Difference as string with 4 decimal places, or null if invalid
+ */
+export function calculateRatioDiff(uploadedBytes, downloadedBytes, additionalBytes) {
+  if (uploadedBytes == null || downloadedBytes == null || additionalBytes == null) return null;
+  if (isNaN(uploadedBytes) || isNaN(downloadedBytes) || isNaN(additionalBytes)) return null;
+  if (downloadedBytes === 0) return null;
+  
+  const currentRatio = uploadedBytes / downloadedBytes;
+  const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, additionalBytes);
+  
+  if (newRatio === null) return null;
+  
+  const diff = parseFloat(newRatio) - currentRatio;
+  return diff.toFixed(4);
 }

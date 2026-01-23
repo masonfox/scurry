@@ -1,7 +1,7 @@
 import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
 import PropTypes from 'prop-types';
-import { parseSizeToBytes, calculateNewRatio, formatBytesToSize } from '@/src/lib/utilities';
+import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
 export default function DualSearchResultsList({
   audiobookResults,
@@ -53,9 +53,8 @@ export default function DualSearchResultsList({
     
     if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
       const totalBytes = audiobookBytes + bookBytes;
-      const currentRatio = uploadedBytes / downloadedBytes;
       const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
-      const diff = (parseFloat(projectedRatio) - currentRatio).toFixed(2);
+      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, totalBytes);
       combinedInfo = {
         totalSize: formatBytesToSize(totalBytes),
         projectedRatio,
