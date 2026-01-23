@@ -29,19 +29,28 @@ export default function UserStatsBar({ stats, loading, error }) {
 
   return (
     <div className="mt-4 mb-4 px-4 py-3 bg-pink-50 border border-pink-200 rounded-lg">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-6 text-sm">
+      <div className="flex items-center justify-center gap-3 sm:gap-6 text-sm">
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">Upload:</span>
+          <span className="text-gray-700 font-medium">
+            <span className="sm:hidden">U:</span>
+            <span className="hidden sm:inline">Upload:</span>
+          </span>
           <span className="text-gray-900 font-semibold">{stats.uploaded}</span>
         </div>
-        <span className="hidden sm:inline text-gray-400">•</span>
+        <span className="text-gray-400">•</span>
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">Download:</span>
+          <span className="text-gray-700 font-medium">
+            <span className="sm:hidden">D:</span>
+            <span className="hidden sm:inline">Download:</span>
+          </span>
           <span className="text-gray-900 font-semibold">{stats.downloaded}</span>
         </div>
-        <span className="hidden sm:inline text-gray-400">•</span>
+        <span className="text-gray-400">•</span>
         <div className="flex items-center gap-2">
-          <span className="text-gray-700 font-medium">Ratio:</span>
+          <span className="text-gray-700 font-medium">
+            <span className="sm:hidden">R:</span>
+            <span className="hidden sm:inline">Ratio:</span>
+          </span>
           <span className="text-gray-900 font-semibold">{stats.ratio}</span>
         </div>
       </div>
