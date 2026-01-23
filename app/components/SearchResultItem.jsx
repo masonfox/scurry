@@ -22,14 +22,19 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
   // Calculate projected ratio if user stats are available
   let projectedRatioDisplay = null;
   if (userStats && result.size) {
-    const sizeBytes = parseSizeToBytes(result.size);
-    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
-    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
-    
-    if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
-      const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
-      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, sizeBytes);
-      projectedRatioDisplay = `${newRatio} (${diff})`;
+    // If using FL wedge or torrent is already freeleech, show "Same" as ratio doesn't change
+    if (useWedge || result.freeleech) {
+      projectedRatioDisplay = 'Same';
+    } else {
+      const sizeBytes = parseSizeToBytes(result.size);
+      const uploadedBytes = parseSizeToBytes(userStats.uploaded);
+      const downloadedBytes = parseSizeToBytes(userStats.downloaded);
+      
+      if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
+        const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
+        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, sizeBytes);
+        projectedRatioDisplay = `${newRatio} (${diff})`;
+      }
     }
   }
 

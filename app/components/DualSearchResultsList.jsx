@@ -58,13 +58,31 @@ export default function DualSearchResultsList({
     
     if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
       const totalBytes = audiobookBytes + bookBytes;
-      const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
-      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, totalBytes);
-      combinedInfo = {
-        totalSize: formatBytesToSize(totalBytes),
-        projectedRatio,
-        diff
-      };
+      
+      // Calculate bytes that will affect ratio (exclude items with FL wedge or already freeleech)
+      let bytesForRatio = 0;
+      const isBookFreeleech = useBookWedge || selectedBook.freeleech;
+      const isAudiobookFreeleech = useAudiobookWedge || selectedAudiobook.freeleech;
+      
+      if (!isBookFreeleech) bytesForRatio += bookBytes;
+      if (!isAudiobookFreeleech) bytesForRatio += audiobookBytes;
+      
+      // If both are freeleech, show "Same" as ratio doesn't change
+      if (bytesForRatio === 0) {
+        combinedInfo = {
+          totalSize: formatBytesToSize(totalBytes),
+          projectedRatio: 'Same',
+          diff: null
+        };
+      } else {
+        const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, bytesForRatio);
+        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, bytesForRatio);
+        combinedInfo = {
+          totalSize: formatBytesToSize(totalBytes),
+          projectedRatio,
+          diff
+        };
+      }
     }
   }
 
@@ -114,7 +132,9 @@ export default function DualSearchResultsList({
           <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
           <span className="text-gray-500 mx-2">•</span>
           <span className="text-gray-700">New ratio: </span>
-          <span className="font-semibold text-gray-900">{combinedInfo.projectedRatio} ({combinedInfo.diff})</span>
+          <span className="font-semibold text-gray-900">
+            {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
+          </span>
         </div>
       )}
       
