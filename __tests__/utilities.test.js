@@ -185,6 +185,13 @@ describe('utilities', () => {
       expect(calculateNewRatio(0, 0, 1048576)).toBe('0.0000');
     });
 
+    it('returns infinity symbol for impossible edge case', () => {
+      // Edge case: uploaded bytes exist but new downloaded is 0
+      // This would require negative additionalBytes (impossible in practice)
+      // But we test it to ensure the branch is covered
+      expect(calculateNewRatio(1048576, 1048576, -1048576)).toBe('∞');
+    });
+
     it('handles division edge cases', () => {
       // uploaded: 1MB, downloaded: 0, additional: 1MB
       // new downloaded = 0 + 1MB = 1MB
