@@ -68,7 +68,6 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
           {/* Torrent metadata */}
           <div className="text-sm text-gray-500 mt-1">
             {result.size} • {result.filetypes} • {result.seeders} seeders • {result.downloads} downloads
-            {projectedRatioDisplay && ` • New ratio: ${projectedRatioDisplay}`}
           </div>
           {/* Determine if torrent has already been snatched */}
           {result.snatched && (
@@ -87,28 +86,35 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         )}
         {/* Torrent action buttons */}
         {!selectable && (
-          <div className="flex gap-5 items-center justify-between flex-shrink-0 mt-1 md:mt-0">
-            <a 
-              className="text-pink-400 hover:text-pink-500 font-medium transition-colors duration-200 text-sm cursor-pointer" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              href={result.torrentUrl}
-            >
-              View
-            </a>
-            <button
-              className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
-              disabled={result.snatched}
-              onClick={() => onAddItem(result)}
-              aria-label={`Download ${result.title}`}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Download</span>
-            </button>
+          <div className="flex flex-col gap-2 items-end flex-shrink-0 mt-1 md:mt-0">
+            <div className="flex gap-5 items-center">
+              <a 
+                className="text-pink-400 hover:text-pink-500 font-medium transition-colors duration-200 text-sm cursor-pointer" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                href={result.torrentUrl}
+              >
+                View
+              </a>
+              <button
+                className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
+                disabled={result.snatched}
+                onClick={() => onAddItem(result)}
+                aria-label={`Download ${result.title}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download</span>
+              </button>
+            </div>
+            {projectedRatioDisplay && !result.snatched && (
+              <div className="text-xs text-gray-400 cursor-default" title="New Ratio">
+                NR: {projectedRatioDisplay}
+              </div>
+            )}
           </div>
         )}
       </div>
