@@ -11,11 +11,15 @@ export default function MobileBottomSheet({
   useAudiobookWedge,
   useBookWedge,
   onToggleAudiobookWedge,
-  onToggleBookWedge
+  onToggleBookWedge,
+  selectedBook,
+  selectedAudiobook
 }) {
   const disabled = !bothSelected || loading;
   const hasWedges = userStats?.flWedges > 0;
   const stepText = currentStep === 1 ? 'a Book' : 'an Audiobook';
+  const showBookWedge = selectedBook && !selectedBook.freeleech;
+  const showAudiobookWedge = selectedAudiobook && !selectedAudiobook.freeleech;
 
   return (
     <>
@@ -45,22 +49,26 @@ export default function MobileBottomSheet({
           )}
 
           {/* Wedge selector panel (only show when both selected and has wedges) */}
-          {bothSelected && hasWedges && (
+          {bothSelected && hasWedges && (showBookWedge || showAudiobookWedge) && (
             <div className="bg-white p-3 rounded-lg border border-gray-200">
               <div className="flex items-center justify-center gap-3">
                 <span className="text-sm text-gray-700 font-medium">Use FL Wedge:</span>
-                <WedgeToggleButton
-                  active={useBookWedge}
-                  onClick={onToggleBookWedge}
-                  label="Book"
-                  size="large"
-                />
-                <WedgeToggleButton
-                  active={useAudiobookWedge}
-                  onClick={onToggleAudiobookWedge}
-                  label="Audiobook"
-                  size="large"
-                />
+                {showBookWedge && (
+                  <WedgeToggleButton
+                    active={useBookWedge}
+                    onClick={onToggleBookWedge}
+                    label="Book"
+                    size="large"
+                  />
+                )}
+                {showAudiobookWedge && (
+                  <WedgeToggleButton
+                    active={useAudiobookWedge}
+                    onClick={onToggleAudiobookWedge}
+                    label="Audiobook"
+                    size="large"
+                  />
+                )}
               </div>
             </div>
           )}
@@ -115,5 +123,7 @@ MobileBottomSheet.propTypes = {
   useAudiobookWedge: PropTypes.bool,
   useBookWedge: PropTypes.bool,
   onToggleAudiobookWedge: PropTypes.func,
-  onToggleBookWedge: PropTypes.func
+  onToggleBookWedge: PropTypes.func,
+  selectedBook: PropTypes.object,
+  selectedAudiobook: PropTypes.object
 };

@@ -119,23 +119,27 @@ export default function DualSearchResultsList({
       )}
       
       {/* Wedge toggles when both are selected */}
-      {bothSelected && userStats?.flWedges > 0 && (
+      {bothSelected && userStats?.flWedges > 0 && (selectedBook?.freeleech === false || selectedAudiobook?.freeleech === false) && (
         <div className="mb-4 px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg">
           <div className="flex items-center justify-center gap-6 text-sm">
             <div className="flex items-center gap-3">
               <span className="text-gray-700 font-medium">Use FL Wedge:</span>
-              <WedgeToggleButton
-                active={useBookWedge}
-                onClick={onToggleBookWedge}
-                label="Book"
-                size="large"
-              />
-              <WedgeToggleButton
-                active={useAudiobookWedge}
-                onClick={onToggleAudiobookWedge}
-                label="Audiobook"
-                size="large"
-              />
+              {!selectedBook?.freeleech && (
+                <WedgeToggleButton
+                  active={useBookWedge}
+                  onClick={onToggleBookWedge}
+                  label="Book"
+                  size="large"
+                />
+              )}
+              {!selectedAudiobook?.freeleech && (
+                <WedgeToggleButton
+                  active={useAudiobookWedge}
+                  onClick={onToggleAudiobookWedge}
+                  label="Audiobook"
+                  size="large"
+                />
+              )}
             </div>
           </div>
         </div>

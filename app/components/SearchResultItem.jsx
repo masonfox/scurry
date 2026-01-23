@@ -128,7 +128,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
               )}
               <div className="flex items-center gap-2">
                 {/* FL Wedge toggle button */}
-                {hasWedges && !result.snatched && (
+                {hasWedges && !result.snatched && !result.freeleech && (
                   <WedgeToggleButton
                     active={useWedge}
                     onClick={handleToggleWedge}

@@ -110,6 +110,8 @@ export default function SequentialSearchResults({
         useBookWedge={useBookWedge}
         onToggleAudiobookWedge={onToggleAudiobookWedge}
         onToggleBookWedge={onToggleBookWedge}
+        selectedBook={selectedBook}
+        selectedAudiobook={selectedAudiobook}
       />
 
       {/* Combined info display when both selected */}
