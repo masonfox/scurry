@@ -1,27 +1,18 @@
 import { NextResponse } from "next/server";
 import { readMamToken } from "@/src/lib/config";
 import { MAM_BASE } from "@/src/lib/constants";
-import { extractTorrentId, generateTimestamp } from "@/src/lib/utilities";
+import { generateTimestamp } from "@/src/lib/utilities";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function POST(req) {
   try {
-    const { downloadUrl } = await req.json();
+    const { torrentId } = await req.json();
     
-    if (!downloadUrl) {
-      return NextResponse.json(
-        { error: "Download URL is required" },
-        { status: 400 }
-      );
-    }
-
-    // Extract torrent ID from download URL
-    const torrentId = extractTorrentId(downloadUrl);
     if (!torrentId) {
       return NextResponse.json(
-        { error: "Could not extract torrent ID from download URL" },
+        { error: "Torrent ID is required" },
         { status: 400 }
       );
     }

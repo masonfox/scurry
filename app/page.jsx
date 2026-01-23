@@ -281,6 +281,7 @@ function SearchPage() {
         body: JSON.stringify({
           title: item.title,
           downloadUrl: item.downloadUrl,
+          torrentId: item.id,
           category: qbCategory,
           useWedge
         })
@@ -354,6 +355,7 @@ function SearchPage() {
           body: JSON.stringify({
             title: selectedAudiobook.title,
             downloadUrl: selectedAudiobook.downloadUrl,
+            torrentId: selectedAudiobook.id,
             category: 'audiobooks',
             useWedge: useAudiobookWedge
           })
@@ -364,6 +366,7 @@ function SearchPage() {
           body: JSON.stringify({
             title: selectedBook.title,
             downloadUrl: selectedBook.downloadUrl,
+            torrentId: selectedBook.id,
             category: 'books',
             useWedge: useBookWedge
           })
