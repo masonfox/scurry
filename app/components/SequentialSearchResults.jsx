@@ -24,12 +24,25 @@ export default function SequentialSearchResults({
   onToggleBookWedge
 }) {
   const bookSectionRef = useRef(null);
+  const audiobookSectionRef = useRef(null);
+
+  // Auto-scroll to books section when search results first load
+  useEffect(() => {
+    if (!loading && (bookResults.length > 0 || audiobookResults.length > 0) && bookSectionRef.current) {
+      setTimeout(() => {
+        bookSectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, AUTO_SCROLL_DELAY_MS);
+    }
+  }, [loading, bookResults.length, audiobookResults.length]);
 
   // Auto-scroll to audiobook results when book is selected
   useEffect(() => {
-    if (selectedBook && bookSectionRef.current) {
+    if (selectedBook && audiobookSectionRef.current) {
       setTimeout(() => {
-        bookSectionRef.current?.scrollIntoView({ 
+        audiobookSectionRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'start' 
         });
@@ -111,7 +124,7 @@ export default function SequentialSearchResults({
       )}
 
       {/* Step 1: Book Selection */}
-      <div className={selectedBook ? 'mb-6' : ''}>
+      <div ref={bookSectionRef} className={selectedBook ? 'mb-6' : ''}>
         {selectedBook ? (
           // Collapsed view showing selected book
           <div className="mb-6">
@@ -166,7 +179,7 @@ export default function SequentialSearchResults({
 
       {/* Step 2: Audiobook Selection (only shown after book selected) */}
       {selectedBook && (
-        <div ref={bookSectionRef}>
+        <div ref={audiobookSectionRef}>
           {selectedAudiobook ? (
             // Collapsed view showing selected audiobook
             <div className="mb-6">
