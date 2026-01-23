@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff } from '@/src/lib/utilities';
+import WedgeToggleButton from './WedgeToggleButton';
 
 export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats, useWedge = false, onToggleWedge }) {
   const handleClick = () => {
@@ -111,21 +112,11 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
               <div className="flex items-center gap-2">
                 {/* FL Wedge toggle button */}
                 {hasWedges && !result.snatched && (
-                  <button
+                  <WedgeToggleButton
+                    active={useWedge}
                     onClick={handleToggleWedge}
-                    className={`p-1.5 rounded transition-colors duration-200 ${
-                      useWedge 
-                        ? 'bg-pink-400 text-white hover:bg-pink-500' 
-                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }`}
-                    title={useWedge ? "FL Wedge will be used" : "Click to use FL Wedge"}
-                    aria-label={useWedge ? "Remove FL Wedge" : "Use FL Wedge"}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="8" r="6"></circle>
-                      <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
-                    </svg>
-                  </button>
+                    size="small"
+                  />
                 )}
                 <button
                   className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
