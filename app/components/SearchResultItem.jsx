@@ -62,15 +62,10 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
               rel="noopener noreferrer"
               className="font-semibold text-gray-900 hover:text-pink-400 transition-colors duration-200 inline-flex items-center flex-wrap"
             >
-              <span>{result.title}</span>
-              <span className="text-gray-600 font-normal">
-                <span className="mx-1">by</span>
-                <span>{result.author}</span>
-              </span>
               {result.vip && (
-                <span className="inline-flex ml-1 relative top-0.25">
+                <span className="inline-flex mr-1 relative top-0.25">
                   <Image
-                    src="https://cdn.myanonamouse.net/pic/vip.png"
+                    src="/images/vip.png"
                     alt="VIP"
                     width={14}
                     height={14}
@@ -79,6 +74,23 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
                   />
                 </span>
               )}
+              {result.freeleech && (
+                <span className="inline-flex mr-1 relative top-0.25">
+                  <Image
+                    src="/images/freeleech.gif"
+                    alt="Freeleech"
+                    width={14}
+                    height={14}
+                    style={{ height: 14 }}
+                    unoptimized
+                  />
+                </span>
+              )}
+              <span>{result.title}</span>
+              <span className="text-gray-600 font-normal">
+                <span className="mx-1">by</span>
+                <span>{result.author}</span>
+              </span>
               <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0 inline text-gray-400 ml-1.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                 <polyline points="15 3 21 3 21 9"></polyline>
@@ -162,6 +174,7 @@ SearchResultItem.propTypes = {
     torrentUrl: PropTypes.string.isRequired,
     downloadUrl: PropTypes.string.isRequired,
     vip: PropTypes.bool,
+    freeleech: PropTypes.bool,
     snatched: PropTypes.bool
   }).isRequired,
   onAddItem: PropTypes.func,

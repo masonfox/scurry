@@ -12,6 +12,7 @@ export function createMamTorrent(overrides = {}) {
     filetype: 'epub',
     added: '2025-09-25',
     vip: 0,
+    free: 0,
     my_snatched: 0,
     author_info: '{"author":"Test Author"}',
     seeders: 15,
