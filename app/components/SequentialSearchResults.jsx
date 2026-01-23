@@ -97,7 +97,7 @@ export default function SequentialSearchResults({
   }
 
   return (
-    <div className="mt-6 pb-32">
+    <div className="mt-6 pb-40">
       {/* Mobile bottom sheet with progress indicator and download button */}
       <MobileBottomSheet
         currentStep={currentStep}
