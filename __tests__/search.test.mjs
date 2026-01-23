@@ -1,10 +1,10 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, vi } from 'vitest';
 import { GET } from '../app/api/search/route.js';
 import { buildMamDownloadUrl, buildMamTorrentUrl } from '../src/lib/utilities.js';
 
 // Mock fetch and dependencies
-jest.mock('../src/lib/config', () => ({
-  readMamToken: jest.fn(() => 'fake-token'),
+vi.mock('../src/lib/config', () => ({
+  readMamToken: vi.fn(() => 'fake-token'),
   config: { 
     qbUrl: '', 
     qbUser: '', 
@@ -14,7 +14,7 @@ jest.mock('../src/lib/config', () => ({
   }
 }));
 
-global.fetch = jest.fn(async () => ({
+global.fetch = vi.fn(async () => ({
   ok: true,
   status: 200,
   json: async () => ({ results: [{ id: '123', dl: 'abc' }], data: [{ id: '123', dl: 'abc', title: 'Test', size: '1MB', filetype: 'epub', added: '2025-08-14', vip: 0, my_snatched: 0, author_info: '{"author":"Author"}', seeders: 10, leechers: 2, times_completed: 5 }]}),

@@ -1,12 +1,13 @@
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, it, expect, vi } from 'vitest';
 import { POST } from '../app/api/add/route.js';
+import * as qbittorrent from '../src/lib/qbittorrent';
 
-jest.mock('../src/lib/config', () => ({
+vi.mock('../src/lib/config', () => ({
   config: { qbUrl: 'http://qb', qbUser: 'user', qbPass: 'pass', qbCategory: 'cat' }
 }));
-jest.mock('../src/lib/qbittorrent', () => ({
-  qbLogin: jest.fn(async () => 'cookie'),
-  qbAddUrl: jest.fn(async () => true)
+vi.mock('../src/lib/qbittorrent', () => ({
+  qbLogin: vi.fn(async () => 'cookie'),
+  qbAddUrl: vi.fn(async () => true)
 }));
 
 describe('add route', () => {
@@ -26,8 +27,7 @@ describe('add route', () => {
   });
 
   it('returns 500 if qbittorrent throws', async () => {
-    const { qbAddUrl } = require('../src/lib/qbittorrent');
-    qbAddUrl.mockImplementationOnce(() => { throw new Error('fail'); });
+    qbittorrent.qbAddUrl.mockImplementationOnce(() => { throw new Error('fail'); });
     
     const req = { json: async () => ({ title: 'test', downloadUrl: 'magnet:?xt=...', category: 'cat' }) };
     const res = await POST(req);

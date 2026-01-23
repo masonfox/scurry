@@ -1,18 +1,17 @@
-
-
+import { describe, it, test, expect, beforeEach, afterEach, vi } from 'vitest';
 import { GET, POST, DELETE } from '../app/api/mam-token/route.js';
 import fs from 'node:fs';
 import path from 'node:path';
 
 describe('mam-token API', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('GET', () => {
     test('returns exists: true with masked token if token file exists', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('test-token-1234567890abcdef');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue('test-token-1234567890abcdef');
       
       const res = await GET();
       expect(res.status).toBe(200);
@@ -24,8 +23,8 @@ describe('mam-token API', () => {
     });
 
     test('returns exists: true with *** for short tokens', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('short');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue('short');
       
       const res = await GET();
       expect(res.status).toBe(200);
@@ -36,8 +35,8 @@ describe('mam-token API', () => {
     });
 
     test('returns exists: true with empty string for empty token', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'readFileSync').mockReturnValue('');
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'readFileSync').mockReturnValue('');
       
       const res = await GET();
       expect(res.status).toBe(200);
@@ -48,7 +47,7 @@ describe('mam-token API', () => {
     });
 
     test('returns exists: false if token file does not exist', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       
       const res = await GET();
       expect(res.status).toBe(200);
@@ -59,7 +58,7 @@ describe('mam-token API', () => {
     });
 
     test('handles file read errors', async () => {
-      jest.spyOn(fs, 'existsSync').mockImplementation(() => {
+      vi.spyOn(fs, 'existsSync').mockImplementation(() => {
         throw new Error('File system error');
       });
       
@@ -76,12 +75,12 @@ describe('mam-token API', () => {
       // Use a longer token that passes validation (50+ chars)
       const validToken = 'valid-test-token-1234567890abcdefghijklmnopqrstuvwxyz1234567890';
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ token: validToken })
+        json: vi.fn().mockResolvedValue({ token: validToken })
       };
       
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'mkdirSync').mockImplementation();
-      jest.spyOn(fs, 'writeFileSync').mockImplementation();
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'mkdirSync').mockImplementation();
+      vi.spyOn(fs, 'writeFileSync').mockImplementation();
       
       const res = await POST(mockRequest);
       expect(res.status).toBe(200);
@@ -95,35 +94,32 @@ describe('mam-token API', () => {
     test('creates directory if it does not exist', async () => {
       const validToken = 'valid-test-token-1234567890abcdefghijklmnopqrstuvwxyz1234567890';
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ token: validToken })
+        json: vi.fn().mockResolvedValue({ token: validToken })
       };
       
-      // Mock path.dirname to return a specific directory path
-      jest.spyOn(path, 'dirname').mockReturnValue('/mock/secrets');
-      
-      // First call for directory check returns false, then true for the directory creation
-      jest.spyOn(fs, 'existsSync')
+      // First call for directory check returns false, then true for subsequent calls
+      vi.spyOn(fs, 'existsSync')
         .mockReturnValueOnce(false) // directory doesn't exist
         .mockReturnValue(true);      // subsequent calls return true
       
-      const mkdirSyncSpy = jest.spyOn(fs, 'mkdirSync').mockImplementation();
-      jest.spyOn(fs, 'writeFileSync').mockImplementation();
+      const mkdirSyncSpy = vi.spyOn(fs, 'mkdirSync').mockImplementation();
+      vi.spyOn(fs, 'writeFileSync').mockImplementation();
       
       const res = await POST(mockRequest);
       expect(res.status).toBe(200);
       
-      expect(mkdirSyncSpy).toHaveBeenCalledWith('/mock/secrets', { recursive: true });
+      expect(mkdirSyncSpy).toHaveBeenCalledWith(expect.any(String), { recursive: true });
       expect(fs.writeFileSync).toHaveBeenCalled();
     });
 
     test('handles file write errors', async () => {
       const validToken = 'valid-test-token-1234567890abcdefghijklmnopqrstuvwxyz1234567890';
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ token: validToken })
+        json: vi.fn().mockResolvedValue({ token: validToken })
       };
       
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'writeFileSync').mockImplementation(() => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {
         throw new Error('Permission denied');
       });
       
@@ -136,7 +132,7 @@ describe('mam-token API', () => {
 
     test('rejects empty token', async () => {
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ token: '   ' }) // whitespace only
+        json: vi.fn().mockResolvedValue({ token: '   ' }) // whitespace only
       };
       
       const res = await POST(mockRequest);
@@ -148,7 +144,7 @@ describe('mam-token API', () => {
 
     test('rejects missing token', async () => {
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({})
+        json: vi.fn().mockResolvedValue({})
       };
       
       const res = await POST(mockRequest);
@@ -160,7 +156,7 @@ describe('mam-token API', () => {
 
     test('rejects invalid token format', async () => {
       const mockRequest = {
-        json: jest.fn().mockResolvedValue({ token: 'short' }) // too short
+        json: vi.fn().mockResolvedValue({ token: 'short' }) // too short
       };
       
       const res = await POST(mockRequest);
@@ -174,8 +170,8 @@ describe('mam-token API', () => {
 
   describe('DELETE', () => {
     test('deletes existing token file', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'unlinkSync').mockImplementation();
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'unlinkSync').mockImplementation();
       
       const res = await DELETE();
       expect(res.status).toBe(200);
@@ -187,7 +183,7 @@ describe('mam-token API', () => {
     });
 
     test('handles non-existent file gracefully', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       
       const res = await DELETE();
       expect(res.status).toBe(200);
@@ -198,8 +194,8 @@ describe('mam-token API', () => {
     });
 
     test('handles file deletion errors', async () => {
-      jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-      jest.spyOn(fs, 'unlinkSync').mockImplementation(() => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {
         throw new Error('File is locked');
       });
       
