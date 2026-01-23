@@ -78,11 +78,18 @@ describe('mam-token API', () => {
         json: vi.fn().mockResolvedValue({ token: validToken })
       };
       
-      vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+      // Mock existsSync to return false for directory check so mkdirSync gets called
+      vi.spyOn(fs, 'existsSync').mockImplementation((path) => {
+        // Return false for the directory so it gets created
+        if (path === 'secrets') return false;
+        // Return true for anything else (like file checks)
+        return true;
+      });
       vi.spyOn(fs, 'mkdirSync').mockImplementation();
       vi.spyOn(fs, 'writeFileSync').mockImplementation();
       
       const res = await POST(mockRequest);
+      
       expect(res.status).toBe(200);
       
       const data = await res.json();
