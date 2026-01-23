@@ -1,38 +1,68 @@
 import { NextResponse } from "next/server";
 import { validateMamToken } from "@/src/lib/utilities";
 import { MAM_TOKEN_FILE } from "@/src/lib/constants";
-import { readMamToken } from "@/src/lib/config";
+import { readMamToken, isMouseholeMode, config } from "@/src/lib/config";
 import fs from "node:fs";
 import path from "node:path";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+// Helper function to mask token for display
+function maskToken(token) {
+  return token.length > 10 
+    ? `${token.slice(0, 6)}...${token.slice(-4)}`
+    : token.length > 0 ? "***" : "";
+}
+
 // Get current token
 export async function GET() {
   try {
+    const mouseholeEnabled = isMouseholeMode();
+    
+    if (mouseholeEnabled) {
+      try {
+        const stateFile = config.mouseholeStateFile;
+        const state = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+        const decodedToken = decodeURIComponent(state.currentCookie);
+        
+        return NextResponse.json({
+          exists: true,
+          token: maskToken(decodedToken),
+          fullLength: decodedToken.length,
+          location: stateFile,
+          mouseholeInfo: {
+            enabled: true,
+            stateFile,
+            lastUpdate: state.lastUpdate?.at || state.lastMam?.request?.at,
+            mamUpdated: state.lastUpdate?.mamUpdated,
+          },
+        });
+      } catch (err) {
+        // Fall through to regular token file check
+        console.warn("Mousehole read failed, checking static token:", err.message);
+      }
+    }
+    
     const exists = fs.existsSync(MAM_TOKEN_FILE);
     
     if (!exists) {
       return NextResponse.json({ 
         exists: false, 
         token: null, 
-        location: MAM_TOKEN_FILE 
+        location: MAM_TOKEN_FILE,
+        mouseholeInfo: mouseholeEnabled ? { enabled: true, error: "state.json not found" } : { enabled: false },
       });
     }
 
     const token = readMamToken();
-    
-    // Don't send the full token for security - just first/last few chars
-    const maskedToken = token.length > 10 
-      ? `${token.slice(0, 6)}...${token.slice(-4)}`
-      : token.length > 0 ? "***" : "";
 
     return NextResponse.json({ 
       exists: true, 
-      token: maskedToken,
+      token: maskToken(token),
       fullLength: token.length,
-      location: MAM_TOKEN_FILE 
+      location: MAM_TOKEN_FILE,
+      mouseholeInfo: { enabled: false },
     });
   } catch (error) {
     console.error(`Failed to read MAM token: ${error.message}`);
@@ -40,7 +70,8 @@ export async function GET() {
       { 
         exists: false, 
         error: error.message, 
-        location: MAM_TOKEN_FILE 
+        location: MAM_TOKEN_FILE,
+        mouseholeInfo: { enabled: isMouseholeMode() },
       }, 
       { status: 500 }
     );
@@ -49,6 +80,13 @@ export async function GET() {
 
 // Update/create token
 export async function POST(req) {
+  if (isMouseholeMode()) {
+    return NextResponse.json(
+      { error: "Token management is disabled when MOUSEHOLE_ENABLED=true. Tokens are managed by mousehole." },
+      { status: 400 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { token } = body;
@@ -108,6 +146,13 @@ export async function POST(req) {
 
 // Delete token
 export async function DELETE() {
+  if (isMouseholeMode()) {
+    return NextResponse.json(
+      { error: "Token management is disabled when MOUSEHOLE_ENABLED=true. Tokens are managed by mousehole." },
+      { status: 400 }
+    );
+  }
+
   try {
     if (fs.existsSync(MAM_TOKEN_FILE)) {
       fs.unlinkSync(MAM_TOKEN_FILE);

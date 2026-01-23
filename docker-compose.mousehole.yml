@@ -1,0 +1,48 @@
+# Docker Compose example with Mousehole integration
+# This configuration runs both Scurry and Mousehole, with shared token management
+
+services:
+  mousehole:
+    image: tmmrtn/mousehole:latest
+    container_name: mousehole
+    environment:
+      TZ: Etc/UTC  # Set to your timezone for localization
+      MOUSEHOLE_PORT: 5010
+      MOUSEHOLE_CHECK_INTERVAL_SECONDS: 300  # 5 minutes
+    volumes:
+      # Persist mousehole state across container restarts
+      - mam_secrets:/srv/mousehole
+    ports:
+      - "5010:5010"  # Mousehole web UI
+    restart: unless-stopped
+
+  scurry:
+    image: ghcr.io/masonfox/scurry:latest
+    container_name: scurry
+    env_file: .env
+    environment:
+      # Enable mousehole integration
+      MOUSEHOLE_ENABLED: "true"
+      MOUSEHOLE_STATE_FILE: /app/secrets/state.json
+      
+      # Standard Scurry configuration
+      TZ: Etc/UTC  # Set to your timezone for localization
+      APP_PASSWORD: ${APP_PASSWORD:-cheese}
+      APP_QB_URL: ${APP_QB_URL}
+      APP_QB_USERNAME: ${APP_QB_USERNAME:-admin}
+      APP_QB_PASSWORD: ${APP_QB_PASSWORD:-adminadmin}
+      APP_MAM_USER_AGENT: ${APP_MAM_USER_AGENT:-Scurry/2.0 (+contact)}
+      NEXT_PUBLIC_DEFAULT_CATEGORY: ${NEXT_PUBLIC_DEFAULT_CATEGORY:-books}
+    volumes:
+      # Mount the same volume where mousehole stores state.json (read-only)
+      - mam_secrets:/app/secrets:ro
+    ports:
+      - "3000:3000"  # Scurry web UI
+    depends_on:
+      - mousehole
+    restart: unless-stopped
+
+volumes:
+  # Shared volume for MAM token management
+  # Mousehole writes to state.json, Scurry reads from it
+  mam_secrets:

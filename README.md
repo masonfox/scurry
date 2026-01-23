@@ -63,6 +63,17 @@ Scurry will organize torrents into the following categories based on their MAM t
 
 To take advantage of this, simply create those categories - `books` and `audiobooks` - in qBittorrent, with unique save paths.
 
+### Mousehole Integration (Optional)
+
+Scurry supports integration with [mousehole](https://github.com/t-mart/mousehole) for automatic MAM token management. When enabled, mousehole dynamically manages your MAM session tokens, eliminating the need for manual updates when your IP address changes.
+
+**Benefits:**
+- Automatic token rotation when IP changes
+- No manual token updates required
+- Perfect for dynamic IPs or VPN/seedbox setups
+
+See the [Mousehole Integration Guide](docs/MOUSEHOLE.md) for detailed setup instructions.
+
 ### URL Query String Support
 
 You can pre-fill search terms by adding a `q` parameter to the URL:
@@ -89,12 +100,11 @@ I recommend that you leverage the [docker image](https://github.com/masonfox/scu
 
 **Via Compose**
 ```bash
-version: "3.8"
-
 services:
   scurry:
     image: ghcr.io/masonfox/scurry:latest
-    ports: 3000:3000
+    ports:
+      - "3000:3000"
     environment:
       APP_PASSWORD: # remove for no auth
       APP_QB_URL: # qbittorrent URL
