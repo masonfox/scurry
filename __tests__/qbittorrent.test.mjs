@@ -1,7 +1,7 @@
-import { describe, it, expect, jest } from '@jest/globals';
+import { describe, it, expect, vi } from 'vitest';
 import * as qb from '../src/lib/qbittorrent.js';
 
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('qbittorrent.js', () => {
   describe('qbLogin', () => {

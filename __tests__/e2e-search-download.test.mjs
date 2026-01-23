@@ -1,11 +1,12 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET as searchGET } from '../app/api/search/route.js';
 import { POST as addPOST } from '../app/api/add/route.js';
 import { buildMamDownloadUrl, buildMamTorrentUrl } from '../src/lib/utilities.js';
+import * as qbittorrent from '../src/lib/qbittorrent';
 
 // Mock all external dependencies
-jest.mock('../src/lib/config', () => ({
-  readMamToken: jest.fn(() => 'test-mam-token-12345'),
+vi.mock('../src/lib/config', () => ({
+  readMamToken: vi.fn(() => 'test-mam-token-12345'),
   config: { 
     qbUrl: 'http://localhost:8080', 
     qbUser: 'testuser', 
@@ -15,27 +16,20 @@ jest.mock('../src/lib/config', () => ({
   }
 }));
 
-jest.mock('../src/lib/qbittorrent', () => ({
-  qbLogin: jest.fn(),
-  qbAddUrl: jest.fn()
+vi.mock('../src/lib/qbittorrent', () => ({
+  qbLogin: vi.fn(),
+  qbAddUrl: vi.fn()
 }));
 
 // Mock fetch globally for MAM API calls
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('E2E Search and Download Integration Tests', () => {
   let mockMamResponse;
-  let mockQbLogin;
-  let mockQbAddUrl;
 
   beforeEach(() => {
     // Reset all mocks
-    jest.clearAllMocks();
-    
-    // Get references to mocked functions
-    const { qbLogin, qbAddUrl } = require('../src/lib/qbittorrent');
-    mockQbLogin = qbLogin;
-    mockQbAddUrl = qbAddUrl;
+    vi.clearAllMocks();
 
     // Default MAM API response
     mockMamResponse = {
@@ -77,12 +71,12 @@ describe('E2E Search and Download Integration Tests', () => {
     };
 
     // Default qBittorrent mocks
-    mockQbLogin.mockResolvedValue('test-session-cookie');
-    mockQbAddUrl.mockResolvedValue(true);
+    qbittorrent.qbLogin.mockResolvedValue('test-session-cookie');
+    qbittorrent.qbAddUrl.mockResolvedValue(true);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Complete Search to Download Workflow', () => {
@@ -133,12 +127,12 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(downloadData.ok).toBe(true);
 
       // Verify qBittorrent interactions
-      expect(mockQbLogin).toHaveBeenCalledWith(
+      expect(qbittorrent.qbLogin).toHaveBeenCalledWith(
         'http://localhost:8080',
         'testuser',
         'testpass'
       );
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/test-download-link-abc123',
@@ -192,7 +186,7 @@ describe('E2E Search and Download Integration Tests', () => {
 
       expect(downloadRes.status).toBe(200);
       expect(downloadData.ok).toBe(true);
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/audiobook-download-link',
@@ -219,8 +213,8 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(searchData.error).toContain('Search failed: 500');
 
       // Since search failed, no download should be attempted
-      expect(mockQbLogin).not.toHaveBeenCalled();
-      expect(mockQbAddUrl).not.toHaveBeenCalled();
+      expect(qbittorrent.qbLogin).not.toHaveBeenCalled();
+      expect(qbittorrent.qbAddUrl).not.toHaveBeenCalled();
     });
 
     it('should handle MAM token expiration during search', async () => {
@@ -243,7 +237,7 @@ describe('E2E Search and Download Integration Tests', () => {
     it('should handle qBittorrent login failure during download', async () => {
       // Setup successful search
       global.fetch.mockResolvedValueOnce(mockMamResponse);
-      mockQbLogin.mockRejectedValueOnce(new Error('qBittorrent login failed: 401 Unauthorized'));
+      qbittorrent.qbLogin.mockRejectedValueOnce(new Error('qBittorrent login failed: 401 Unauthorized'));
 
       // Step 1: Successful search
       const searchReq = { url: 'http://localhost/api/search?q=test' };
@@ -268,13 +262,13 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(downloadRes.status).toBe(500);
       expect(downloadData.ok).toBe(false);
       expect(downloadData.error).toContain('qBittorrent login failed');
-      expect(mockQbAddUrl).not.toHaveBeenCalled();
+      expect(qbittorrent.qbAddUrl).not.toHaveBeenCalled();
     });
 
     it('should handle qBittorrent add failure during download', async () => {
       // Setup successful search
       global.fetch.mockResolvedValueOnce(mockMamResponse);
-      mockQbAddUrl.mockRejectedValueOnce(new Error('Failed to add torrent'));
+      qbittorrent.qbAddUrl.mockRejectedValueOnce(new Error('Failed to add torrent'));
 
       // Step 1: Successful search
       const searchReq = { url: 'http://localhost/api/search?q=test' };
@@ -300,8 +294,8 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(downloadData.error).toContain('Failed to add torrent');
       
       // Verify login was attempted but add failed
-      expect(mockQbLogin).toHaveBeenCalled();
-      expect(mockQbAddUrl).toHaveBeenCalled();
+      expect(qbittorrent.qbLogin).toHaveBeenCalled();
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalled();
     });
   });
 
@@ -347,7 +341,7 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(downloadRes.status).toBe(400);
       expect(downloadData.ok).toBe(false);
       expect(downloadData.error).toContain('No magnet or torrentUrl provided');
-      expect(mockQbLogin).not.toHaveBeenCalled();
+      expect(qbittorrent.qbLogin).not.toHaveBeenCalled();
     });
 
     it('should handle malformed JSON from MAM API', async () => {
@@ -388,7 +382,7 @@ describe('E2E Search and Download Integration Tests', () => {
 
       expect(downloadRes.status).toBe(200);
       expect(downloadData.ok).toBe(true);
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
@@ -458,7 +452,7 @@ describe('E2E Search and Download Integration Tests', () => {
       
       // Mock qBittorrent login with specific cookie
       const testCookie = 'SID=test-session-12345; Path=/; HttpOnly';
-      mockQbLogin.mockResolvedValueOnce(testCookie);
+      qbittorrent.qbLogin.mockResolvedValueOnce(testCookie);
 
       const searchReq = { url: 'http://localhost/api/search?q=test' };
       const searchRes = await searchGET(searchReq);
@@ -474,7 +468,7 @@ describe('E2E Search and Download Integration Tests', () => {
 
       await addPOST(downloadReq);
 
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         testCookie,
         expect.any(String),
@@ -519,8 +513,8 @@ describe('E2E Search and Download Integration Tests', () => {
 
       expect(data1.ok).toBe(true);
       expect(data2.ok).toBe(true);
-      expect(mockQbLogin).toHaveBeenCalledTimes(2); // Each request gets its own session
-      expect(mockQbAddUrl).toHaveBeenCalledTimes(2);
+      expect(qbittorrent.qbLogin).toHaveBeenCalledTimes(2); // Each request gets its own session
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -638,18 +632,18 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(audioDownloadData.ok).toBe(true);
 
       // Verify qBittorrent interactions
-      expect(mockQbLogin).toHaveBeenCalledTimes(2);
-      expect(mockQbAddUrl).toHaveBeenCalledTimes(2);
+      expect(qbittorrent.qbLogin).toHaveBeenCalledTimes(2);
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledTimes(2);
 
       // Verify correct categories were used
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/book-download-link-abc',
         'books'
       );
 
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/audiobook-download-link-def',
@@ -787,14 +781,14 @@ describe('E2E Search and Download Integration Tests', () => {
       const selectedAudiobook = audioSearchData.results[0];
 
       // Step 2: First download attempt - audiobook succeeds, book fails
-      mockQbLogin.mockReset();
-      mockQbAddUrl.mockReset();
+      qbittorrent.qbLogin.mockReset();
+      qbittorrent.qbAddUrl.mockReset();
 
-      mockQbLogin
+      qbittorrent.qbLogin
         .mockRejectedValueOnce(new Error('qBittorrent connection failed')) // Book fails
         .mockResolvedValueOnce('test-session-cookie'); // Audiobook succeeds
 
-      mockQbAddUrl.mockResolvedValueOnce(true);
+      qbittorrent.qbAddUrl.mockResolvedValueOnce(true);
 
       const bookDownloadReq1 = {
         json: async () => ({
@@ -829,10 +823,10 @@ describe('E2E Search and Download Integration Tests', () => {
       expect(audioDownloadData1.ok).toBe(true);
 
       // Step 3: Retry failed book download (selection should be preserved)
-      mockQbLogin.mockReset();
-      mockQbAddUrl.mockReset();
-      mockQbLogin.mockResolvedValueOnce('test-session-cookie');
-      mockQbAddUrl.mockResolvedValueOnce(true);
+      qbittorrent.qbLogin.mockReset();
+      qbittorrent.qbAddUrl.mockReset();
+      qbittorrent.qbLogin.mockResolvedValueOnce('test-session-cookie');
+      qbittorrent.qbAddUrl.mockResolvedValueOnce(true);
 
       const bookDownloadReq2 = {
         json: async () => ({
@@ -848,7 +842,7 @@ describe('E2E Search and Download Integration Tests', () => {
       // Verify retry succeeded
       expect(bookDownloadRes2.status).toBe(200);
       expect(bookDownloadData2.ok).toBe(true);
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/book-link-retry',

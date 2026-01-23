@@ -1,10 +1,11 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET as searchGET } from '../app/api/search/route.js';
 import { POST as addPOST } from '../app/api/add/route.js';
+import * as qbittorrent from '../src/lib/qbittorrent';
 
 // Mock dependencies
-jest.mock('../src/lib/config', () => ({
-  readMamToken: jest.fn(() => 'test-token'),
+vi.mock('../src/lib/config', () => ({
+  readMamToken: vi.fn(() => 'test-token'),
   config: { 
     qbUrl: 'http://localhost:8080', 
     qbUser: 'testuser', 
@@ -13,32 +14,24 @@ jest.mock('../src/lib/config', () => ({
   }
 }));
 
-jest.mock('../src/lib/qbittorrent', () => ({
-  qbLogin: jest.fn(),
-  qbAddUrl: jest.fn()
+vi.mock('../src/lib/qbittorrent', () => ({
+  qbLogin: vi.fn(),
+  qbAddUrl: vi.fn()
 }));
 
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('E2E Integration Tests - Advanced Scenarios', () => {
-  let mockQbLogin;
-  let mockQbAddUrl;
-
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     
-    // Get references to mocked functions
-    const { qbLogin, qbAddUrl } = require('../src/lib/qbittorrent');
-    mockQbLogin = qbLogin;
-    mockQbAddUrl = qbAddUrl;
-
     // Default qBittorrent mocks
-    mockQbLogin.mockResolvedValue('test-session-cookie');
-    mockQbAddUrl.mockResolvedValue(true);
+    qbittorrent.qbLogin.mockResolvedValue('test-session-cookie');
+    qbittorrent.qbAddUrl.mockResolvedValue(true);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Real-world Search Scenarios', () => {
@@ -107,8 +100,8 @@ describe('E2E Integration Tests - Advanced Scenarios', () => {
 
       expect(downloadRes.status).toBe(200);
       expect(downloadData.ok).toBe(true);
-      expect(mockQbLogin).toHaveBeenCalled();
-      expect(mockQbAddUrl).toHaveBeenCalled();
+      expect(qbittorrent.qbLogin).toHaveBeenCalled();
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalled();
     });
 
     it('should handle searching for rare books with low availability', async () => {
@@ -225,7 +218,7 @@ describe('E2E Integration Tests - Advanced Scenarios', () => {
 
       const downloadRes = await addPOST(downloadReq);
       expect(downloadRes.status).toBe(200);
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
@@ -271,7 +264,7 @@ describe('E2E Integration Tests - Advanced Scenarios', () => {
       global.fetch.mockResolvedValueOnce(torrentResponse);
       
       // Setup qBittorrent to be unavailable
-      mockQbLogin.mockRejectedValueOnce(new Error('Connection refused - qBittorrent not available'));
+      qbittorrent.qbLogin.mockRejectedValueOnce(new Error('Connection refused - qBittorrent not available'));
 
       // Search should succeed
       const searchReq = { url: 'http://localhost/api/search?q=test' };
@@ -454,10 +447,10 @@ describe('E2E Integration Tests - Advanced Scenarios', () => {
         expect(downloadData.ok).toBe(true);
         
         // Verify category was passed correctly
-        const lastCall = mockQbAddUrl.mock.calls[mockQbAddUrl.mock.calls.length - 1];
+        const lastCall = qbittorrent.qbAddUrl.mock.calls[qbittorrent.qbAddUrl.mock.calls.length - 1];
         expect(lastCall[3]).toBe(category); // Category is 4th parameter
         
-        jest.clearAllMocks();
+        vi.clearAllMocks();
       }
     });
   });

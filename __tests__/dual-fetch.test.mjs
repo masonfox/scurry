@@ -1,10 +1,11 @@
-import { describe, it, expect, jest, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET as searchGET } from '../app/api/search/route.js';
 import { POST as addPOST } from '../app/api/add/route.js';
+import * as qbittorrent from '../src/lib/qbittorrent';
 
 // Mock dependencies
-jest.mock('../src/lib/config', () => ({
-  readMamToken: jest.fn(() => 'test-mam-token-12345'),
+vi.mock('../src/lib/config', () => ({
+  readMamToken: vi.fn(() => 'test-mam-token-12345'),
   config: { 
     qbUrl: 'http://localhost:8080', 
     qbUser: 'testuser', 
@@ -14,25 +15,19 @@ jest.mock('../src/lib/config', () => ({
   }
 }));
 
-jest.mock('../src/lib/qbittorrent', () => ({
-  qbLogin: jest.fn(),
-  qbAddUrl: jest.fn()
+vi.mock('../src/lib/qbittorrent', () => ({
+  qbLogin: vi.fn(),
+  qbAddUrl: vi.fn()
 }));
 
-global.fetch = jest.fn();
+global.fetch = vi.fn();
 
 describe('Dual-Fetch Feature Tests', () => {
-  let mockQbLogin;
-  let mockQbAddUrl;
   let mockBookResponse;
   let mockAudiobookResponse;
 
   beforeEach(() => {
-    jest.clearAllMocks();
-    
-    const { qbLogin, qbAddUrl } = require('../src/lib/qbittorrent');
-    mockQbLogin = qbLogin;
-    mockQbAddUrl = qbAddUrl;
+    vi.clearAllMocks();
 
     // Default book search response
     mockBookResponse = {
@@ -113,12 +108,12 @@ describe('Dual-Fetch Feature Tests', () => {
     };
 
     // Default qBittorrent mocks
-    mockQbLogin.mockResolvedValue('test-session-cookie');
-    mockQbAddUrl.mockResolvedValue(true);
+    qbittorrent.qbLogin.mockResolvedValue('test-session-cookie');
+    qbittorrent.qbAddUrl.mockResolvedValue(true);
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   describe('Parallel Search Functionality', () => {
@@ -356,11 +351,11 @@ describe('Dual-Fetch Feature Tests', () => {
       expect(audioDownloadData.ok).toBe(true);
 
       // Verify qBittorrent calls with correct categories
-      expect(mockQbLogin).toHaveBeenCalledTimes(2);
-      expect(mockQbAddUrl).toHaveBeenCalledTimes(2);
+      expect(qbittorrent.qbLogin).toHaveBeenCalledTimes(2);
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledTimes(2);
 
       // Verify book was added with 'books' category
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/book-download-link-1',
@@ -368,7 +363,7 @@ describe('Dual-Fetch Feature Tests', () => {
       );
 
       // Verify audiobook was added with 'audiobooks' category
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/audiobook-download-link-1',
@@ -394,7 +389,7 @@ describe('Dual-Fetch Feature Tests', () => {
       const selectedAudiobook = audioSearchData.results[0];
 
       // Setup: book download succeeds, audiobook fails
-      mockQbAddUrl
+      qbittorrent.qbAddUrl
         .mockResolvedValueOnce(true) // Book succeeds
         .mockRejectedValueOnce(new Error('Failed to add torrent')); // Audiobook fails
 
@@ -452,7 +447,7 @@ describe('Dual-Fetch Feature Tests', () => {
       const selectedAudiobook = audioSearchData.results[0];
 
       // Setup: audiobook succeeds, book fails due to qBittorrent login
-      mockQbLogin
+      qbittorrent.qbLogin
         .mockRejectedValueOnce(new Error('qBittorrent login failed: 401 Unauthorized')) // Book fails
         .mockResolvedValueOnce('test-session-cookie'); // Audiobook succeeds
 
@@ -510,7 +505,7 @@ describe('Dual-Fetch Feature Tests', () => {
       const selectedAudiobook = audioSearchData.results[0];
 
       // Setup: both downloads fail
-      mockQbLogin.mockRejectedValue(new Error('qBittorrent unavailable'));
+      qbittorrent.qbLogin.mockRejectedValue(new Error('qBittorrent unavailable'));
 
       const bookDownloadReq = {
         json: async () => ({
@@ -583,8 +578,8 @@ describe('Dual-Fetch Feature Tests', () => {
       expect(audioDownloadData.error).toContain('No magnet or torrentUrl provided');
 
       // Verify no qBittorrent calls were made
-      expect(mockQbLogin).not.toHaveBeenCalled();
-      expect(mockQbAddUrl).not.toHaveBeenCalled();
+      expect(qbittorrent.qbLogin).not.toHaveBeenCalled();
+      expect(qbittorrent.qbAddUrl).not.toHaveBeenCalled();
     });
 
     it('should correctly use custom categories for dual downloads', async () => {
@@ -638,14 +633,14 @@ describe('Dual-Fetch Feature Tests', () => {
       expect(audioDownloadData.ok).toBe(true);
 
       // Verify custom categories were used
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
         'fiction-books'
       );
 
-      expect(mockQbAddUrl).toHaveBeenCalledWith(
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
