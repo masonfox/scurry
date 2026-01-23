@@ -129,6 +129,21 @@ describe('use-wedge route', () => {
     expect(json.error).toMatch(/Insufficient bonus points/);
   });
 
+  it('returns 400 if MAM API returns success: false without error message', async () => {
+    // Mock MAM API returning success: false with no error field
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: false })
+    });
+
+    const req = { json: async () => ({ torrentId: '12345' }) };
+    const res = await POST(req);
+    const json = await res.json();
+    
+    expect(res.status).toBe(400);
+    expect(json.error).toBe('Failed to use FL wedge: Unknown error occurred');
+  });
+
   it('returns 400 if MAM API returns an error field', async () => {
     // Mock MAM API returning error
     global.fetch.mockResolvedValueOnce({

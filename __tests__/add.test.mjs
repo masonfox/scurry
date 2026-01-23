@@ -54,6 +54,17 @@ describe('add route', () => {
     expect(json.error).toMatch(/fail/);
   });
 
+  it('returns 500 with fallback message if error has no message', async () => {
+    qbittorrent.qbAddUrl.mockImplementationOnce(() => { throw 'string error'; });
+    
+    const req = { json: async () => ({ title: 'test', downloadUrl: 'magnet:?xt=...', category: 'cat' }) };
+    const res = await POST(req);
+    const json = await res.json();
+    
+    expect(json.ok).toBe(false);
+    expect(json.error).toBe('Add failed');
+  });
+
   it('does not bust cache if download fails', async () => {
     qbittorrent.qbAddUrl.mockImplementationOnce(() => { throw new Error('fail'); });
     
@@ -61,5 +72,168 @@ describe('add route', () => {
     await POST(req);
     
     expect(userStatsRoute.bustStatsCache).not.toHaveBeenCalled();
+  });
+
+  describe('wedge integration', () => {
+    beforeEach(() => {
+      vi.clearAllMocks();
+      global.fetch = vi.fn();
+    });
+
+    it('purchases FL wedge before adding torrent when useWedge is true', async () => {
+      // Mock successful wedge purchase
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true })
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        }),
+        nextUrl: { origin: 'http://localhost:3000' }
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(true);
+      expect(json.wedgeUsed).toBe(true);
+      expect(global.fetch).toHaveBeenCalledWith(
+        'http://localhost:3000/api/use-wedge',
+        expect.objectContaining({
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ torrentId: '12345' })
+        })
+      );
+      // Verify qBittorrent was called after wedge purchase
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalled();
+    });
+
+    it('returns error when wedge purchase fails', async () => {
+      // Mock failed wedge purchase
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ success: false, error: 'Not enough wedges' })
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        }),
+        nextUrl: { origin: 'http://localhost:3000' }
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(false);
+      expect(json.wedgeFailed).toBe(true);
+      expect(json.error).toContain('Not enough wedges');
+      // Should NOT attempt to add torrent to qBittorrent
+      expect(qbittorrent.qbAddUrl).not.toHaveBeenCalled();
+    });
+
+    it('does not bust cache when wedge purchase fails', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        json: async () => ({ success: false, error: 'Error' })
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        }),
+        nextUrl: { origin: 'http://localhost:3000' }
+      };
+
+      await POST(req);
+      expect(userStatsRoute.bustStatsCache).not.toHaveBeenCalled();
+    });
+
+    it('returns error when wedge response has ok=true but success=false', async () => {
+      // Mock wedge purchase with success: false
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: false, error: 'Insufficient bonus points' })
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        }),
+        nextUrl: { origin: 'http://localhost:3000' }
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(false);
+      expect(json.wedgeFailed).toBe(true);
+      expect(json.error).toBe('Insufficient bonus points');
+      expect(qbittorrent.qbAddUrl).not.toHaveBeenCalled();
+    });
+
+    it('busts cache after successful wedge purchase and download', async () => {
+      // Mock successful wedge purchase
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({ success: true })
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        }),
+        nextUrl: { origin: 'http://localhost:3000' }
+      };
+
+      await POST(req);
+
+      expect(userStatsRoute.bustStatsCache).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles wedge purchase when response has no error message', async () => {
+      global.fetch.mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        json: async () => ({ success: false })
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        }),
+        nextUrl: { origin: 'http://localhost:3000' }
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(false);
+      expect(json.wedgeFailed).toBe(true);
+      expect(json.error).toBe('Failed to purchase FL wedge');
+    });
   });
 });

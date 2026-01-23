@@ -8,7 +8,8 @@ import {
   parseSizeToBytes,
   formatBytesToSize,
   calculateNewRatio,
-  calculateRatioDiff
+  calculateRatioDiff,
+  generateTimestamp
 } from '../src/lib/utilities.js';
 
 describe('utilities', () => {
@@ -57,13 +58,18 @@ describe('utilities', () => {
     // Valid tokens
     expect(validateMamToken('CWX7gfubkHotwItFiZu0QmBNkvXcq_76fR6AZxPmSacmLAmkPEI')).toBe(true);
     expect(validateMamToken('a'.repeat(51))).toBe(true); // 51 chars
+    expect(validateMamToken('A'.repeat(51))).toBe(true); // uppercase
+    expect(validateMamToken('0'.repeat(51))).toBe(true); // numbers
+    expect(validateMamToken('a_b-c'.repeat(11))).toBe(true); // with underscores and hyphens (55 chars)
     
     // Invalid tokens
     expect(validateMamToken('short')).toBe(false); // too short
     expect(validateMamToken('')).toBe(false); // empty
     expect(validateMamToken(null)).toBe(false); // null
     expect(validateMamToken(undefined)).toBe(false); // undefined
-    expect(validateMamToken('contains spaces and symbols!')).toBe(false); // invalid chars
+    expect(validateMamToken('contains spaces and symbols!'.repeat(3))).toBe(false); // invalid chars but long enough
+    expect(validateMamToken('a'.repeat(51) + '!')).toBe(false); // 52 chars but has invalid char
+    expect(validateMamToken(123)).toBe(false); // number instead of string
   });
 
   it('maskToken masks tokens correctly', () => {
@@ -71,9 +77,27 @@ describe('utilities', () => {
     
     expect(maskToken('1234567890abcdef')).toBe('123456...cdef');
     expect(maskToken('short')).toBe('***');
+    expect(maskToken('1234567890')).toBe('***'); // exactly 10 chars
+    expect(maskToken('12345678')).toBe('***'); // 8 chars
+    expect(maskToken('123456')).toBe('***'); // 6 chars
     expect(maskToken('')).toBe('');
     expect(maskToken(null)).toBe('');
     expect(maskToken(undefined)).toBe('');
+    expect(maskToken('   ')).toBe('***'); // whitespace only, trimmed to empty but still short
+    expect(maskToken(123)).toBe(''); // number instead of string
+    expect(maskToken({})).toBe(''); // object instead of string
+    expect(maskToken([])).toBe(''); // array instead of string
+  });
+
+  it('generateTimestamp returns current timestamp in milliseconds', () => {
+    const before = Date.now();
+    const timestamp = generateTimestamp();
+    const after = Date.now();
+    
+    expect(timestamp).toBeGreaterThanOrEqual(before);
+    expect(timestamp).toBeLessThanOrEqual(after);
+    expect(typeof timestamp).toBe('number');
+    expect(Number.isInteger(timestamp)).toBe(true);
   });
 
   describe('parseSizeToBytes', () => {
