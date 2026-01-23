@@ -99,12 +99,11 @@ I recommend that you leverage the [docker image](https://github.com/masonfox/scu
 
 **Via Compose**
 ```bash
-version: "3.8"
-
 services:
   scurry:
     image: ghcr.io/masonfox/scurry:latest
-    ports: 3000:3000
+    ports:
+      - "3000:3000"
     environment:
       APP_PASSWORD: # remove for no auth
       APP_QB_URL: # qbittorrent URL
