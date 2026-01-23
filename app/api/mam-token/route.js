@@ -62,7 +62,11 @@ export async function GET() {
       token: maskToken(token),
       fullLength: token.length,
       location: MAM_TOKEN_FILE,
-      mouseholeInfo: { enabled: false },
+      mouseholeInfo: mouseholeEnabled ? { 
+        enabled: true, 
+        usingFallback: true,
+        error: "state.json not found, using fallback token file" 
+      } : { enabled: false },
     });
   } catch (error) {
     console.error(`Failed to read MAM token: ${error.message}`);

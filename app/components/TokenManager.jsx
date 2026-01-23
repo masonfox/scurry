@@ -116,28 +116,53 @@ export default function TokenManager({ onTokenUpdate }) {
       {isMouseholeMode ? (
         // Mousehole Read-Only View
         <div className="space-y-4">
-          <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 mt-1">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="text-sm font-semibold text-purple-900 mb-1">
-                  Token Managed by Mousehole
-                </h3>
-                <p className="text-sm text-purple-700">
-                  Your MAM token is dynamically managed by the mousehole service. Token editing is disabled.
-                </p>
+          {tokenData.mouseholeInfo?.usingFallback ? (
+            // Fallback Warning Banner
+            <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <svg className="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-yellow-900 mb-1">
+                    Mousehole State File Not Found
+                  </h3>
+                  <p className="text-sm text-yellow-700">
+                    Mousehole mode is enabled, but the state.json file couldn&apos;t be found. Using fallback token from static file.
+                  </p>
+                  <p className="text-xs text-yellow-600 mt-2">
+                    Verify that mousehole is running and the volume mount is correct.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            // Normal Mousehole Banner
+            <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
+              <div className="flex items-start gap-3">
+                <div className="flex-shrink-0 mt-1">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-purple-900 mb-1">
+                    Token Managed by Mousehole
+                  </h3>
+                  <p className="text-sm text-purple-700">
+                    Your MAM token is dynamically managed by the mousehole service. Token editing is disabled.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="p-3 bg-gray-50 rounded-md">
             <p className="text-sm text-gray-600 mb-2">
-              Status: <span className="font-medium text-green-600">
-                {tokenData.exists ? 'Token active' : 'Waiting for mousehole...'}
+              Status: <span className={`font-medium ${tokenData.exists ? 'text-green-600' : 'text-red-600'}`}>
+                {tokenData.exists ? (tokenData.mouseholeInfo?.usingFallback ? 'Using fallback token' : 'Token active') : 'Waiting for mousehole...'}
               </span>
             </p>
             {tokenData.exists && (
@@ -158,8 +183,13 @@ export default function TokenManager({ onTokenUpdate }) {
               </>
             )}
             <p className="text-xs text-gray-500 mt-2">
-              Source: <code className="bg-gray-200 px-1 rounded">{tokenData.mouseholeInfo?.stateFile || tokenData.location}</code>
+              Source: <code className="bg-gray-200 px-1 rounded">{tokenData.location}</code>
             </p>
+            {tokenData.mouseholeInfo?.error && (
+              <p className="text-xs text-red-600 mt-1">
+                {tokenData.mouseholeInfo.error}
+              </p>
+            )}
           </div>
 
           <div className="py-4 px-6 bg-blue-50 rounded-md">
