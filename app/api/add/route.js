@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { config } from "@/src/lib/config";
 import { qbAddUrl, qbLogin } from "@/src/lib/qbittorrent";
+import { bustStatsCache } from "../user-stats/route.js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ export async function POST(req) {
   const body = await req.json();
   const title = body.title;
   const urlOrMagnet = body.downloadUrl;
+  const torrentId = body.torrentId;
   const category = body.category || config.qbCategory; // Use category from request or fallback to config
   const useWedge = body.useWedge || false;
   
@@ -26,7 +28,7 @@ export async function POST(req) {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ downloadUrl: urlOrMagnet })
+        body: JSON.stringify({ torrentId })
       });
 
       const wedgeData = await wedgeRes.json();
@@ -48,6 +50,10 @@ export async function POST(req) {
     // TODO: clean up params
     await qbAddUrl(config.qbUrl, cookie, urlOrMagnet, category);
     console.log(`Added to qBittorrent: ${title} (${category})${useWedge ? ' with FL wedge' : ''}`);
+    
+    // Bust user stats cache since download affects stats
+    bustStatsCache();
+    
     return NextResponse.json({ ok: true, wedgeUsed: useWedge });
   } catch (err) {
     console.error(`Failed to add to qBittorrent: ${title} (${category}) - ${err?.message || err}`);
