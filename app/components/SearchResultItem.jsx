@@ -86,16 +86,21 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         )}
         {/* Torrent action buttons */}
         {!selectable && (
-          <div className="flex flex-col gap-2 items-end flex-shrink-0 mt-1 md:mt-0">
-            <div className="flex gap-5 items-center">
-              <a 
-                className="text-pink-400 hover:text-pink-500 font-medium transition-colors duration-200 text-sm cursor-pointer" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                href={result.torrentUrl}
-              >
-                View
-              </a>
+          <div className="flex gap-5 items-center justify-between flex-shrink-0 mt-1 md:mt-0">
+            <a 
+              className="text-pink-400 hover:text-pink-500 font-medium transition-colors duration-200 text-sm cursor-pointer" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              href={result.torrentUrl}
+            >
+              View
+            </a>
+            {projectedRatioDisplay && !result.snatched && (
+              <div className="text-xs text-gray-400 cursor-default md:hidden" title="New Ratio">
+                NR: {projectedRatioDisplay}
+              </div>
+            )}
+            <div className="flex flex-col gap-2 items-end">
               <button
                 className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
                 disabled={result.snatched}
@@ -109,12 +114,12 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
                 </svg>
                 <span>Download</span>
               </button>
+              {projectedRatioDisplay && !result.snatched && (
+                <div className="text-xs text-gray-400 cursor-default hidden md:block" title="New Ratio">
+                  NR: {projectedRatioDisplay}
+                </div>
+              )}
             </div>
-            {projectedRatioDisplay && !result.snatched && (
-              <div className="text-xs text-gray-400 cursor-default" title="New Ratio">
-                NR: {projectedRatioDisplay}
-              </div>
-            )}
           </div>
         )}
       </div>
