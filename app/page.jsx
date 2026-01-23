@@ -5,7 +5,6 @@ import MessageBanner from './MessageBanner';
 import Header from './components/Header';
 import SearchForm from './components/SearchForm';
 import SearchResultsList from './components/SearchResultsList';
-import DualDownloadButton from './components/DualDownloadButton';
 import DualSearchResultsList from './components/DualSearchResultsList';
 import SequentialSearchResults from './components/SequentialSearchResults';
 import UserStatsBar from './components/UserStatsBar';
@@ -523,16 +522,6 @@ function SearchPage() {
 
           {searchCategory === 'both' ? (
             <>
-              {/* Mobile: Download button separate */}
-              <div className="block md:hidden">
-                <DualDownloadButton
-                  audiobookSelected={!!selectedAudiobook}
-                  bookSelected={!!selectedBook}
-                  onDownload={handleDualDownload}
-                  loading={dualDownloadLoading}
-                />
-              </div>
-              
               {/* Desktop: side-by-side */}
               <div className="hidden md:block">
                 <DualSearchResultsList
@@ -553,7 +542,7 @@ function SearchPage() {
                 />
               </div>
               
-              {/* Mobile: sequential */}
+              {/* Mobile: sequential with unified bottom sheet */}
               <div className="block md:hidden">
                 <SequentialSearchResults
                   audiobookResults={audiobookResults}
@@ -564,6 +553,12 @@ function SearchPage() {
                   onSelectBook={handleSelectBook}
                   loading={loading}
                   userStats={userStats}
+                  onDownload={handleDualDownload}
+                  downloadLoading={dualDownloadLoading}
+                  useAudiobookWedge={useAudiobookWedge}
+                  useBookWedge={useBookWedge}
+                  onToggleAudiobookWedge={handleToggleAudiobookWedge}
+                  onToggleBookWedge={handleToggleBookWedge}
                 />
               </div>
             </>

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import SearchResultItem from './SearchResultItem';
-import ProgressIndicator from './ProgressIndicator';
+import MobileBottomSheet from './MobileBottomSheet';
 import PropTypes from 'prop-types';
 import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
@@ -15,7 +15,13 @@ export default function SequentialSearchResults({
   onSelectAudiobook,
   onSelectBook,
   loading,
-  userStats
+  userStats,
+  onDownload,
+  downloadLoading,
+  useAudiobookWedge,
+  useBookWedge,
+  onToggleAudiobookWedge,
+  onToggleBookWedge
 }) {
   const bookSectionRef = useRef(null);
 
@@ -79,11 +85,18 @@ export default function SequentialSearchResults({
 
   return (
     <div className="mt-6 pb-32">
-      {/* Progress Indicator - Fixed at bottom on mobile */}
-      <ProgressIndicator 
+      {/* Mobile bottom sheet with progress indicator and download button */}
+      <MobileBottomSheet
         currentStep={currentStep}
         progress={progress}
-        mobile={true}
+        bothSelected={!!(selectedBook && selectedAudiobook)}
+        onDownload={onDownload}
+        loading={downloadLoading}
+        userStats={userStats}
+        useAudiobookWedge={useAudiobookWedge}
+        useBookWedge={useBookWedge}
+        onToggleAudiobookWedge={onToggleAudiobookWedge}
+        onToggleBookWedge={onToggleBookWedge}
       />
 
       {/* Combined info display when both selected */}
@@ -235,6 +248,13 @@ SequentialSearchResults.propTypes = {
   userStats: PropTypes.shape({
     uploaded: PropTypes.string,
     downloaded: PropTypes.string,
-    ratio: PropTypes.string
-  })
+    ratio: PropTypes.string,
+    flWedges: PropTypes.number
+  }),
+  onDownload: PropTypes.func.isRequired,
+  downloadLoading: PropTypes.bool.isRequired,
+  useAudiobookWedge: PropTypes.bool,
+  useBookWedge: PropTypes.bool,
+  onToggleAudiobookWedge: PropTypes.func,
+  onToggleBookWedge: PropTypes.func
 };
