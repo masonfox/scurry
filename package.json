@@ -1,5 +1,6 @@
 {
   "name": "scurry",
+  "type": "module",
   "author": {
     "name": "Mason Fox",
     "email": "masonfox22@gmail.com"
