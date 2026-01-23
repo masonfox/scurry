@@ -123,36 +123,37 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         {/* Torrent action buttons */}
         {!selectable && (
           <div className="flex flex-col gap-2 items-end flex-shrink-0 mt-1 md:mt-0">
-            <div className="flex gap-2 items-center justify-end w-full md:w-auto">
+            <div className="flex gap-2 items-center justify-between w-full md:w-auto md:justify-end">
+              {/* FL Wedge toggle button - left on mobile */}
+              {hasWedges && !result.snatched && !result.freeleech && (
+                <WedgeToggleButton
+                  active={useWedge}
+                  onClick={handleToggleWedge}
+                  size="small"
+                />
+              )}
+              {/* Projected ratio - center on mobile, below on desktop */}
               {projectedRatioDisplay && !result.snatched && (
-                <div className="text-xs text-gray-400 cursor-default md:hidden" title="New ratio after download">
+                <div className="text-xs text-gray-400 cursor-default md:hidden flex-1 text-center" title="New ratio after download">
                   {projectedRatioDisplay}
                 </div>
               )}
-              <div className="flex items-center gap-2">
-                {/* FL Wedge toggle button */}
-                {hasWedges && !result.snatched && !result.freeleech && (
-                  <WedgeToggleButton
-                    active={useWedge}
-                    onClick={handleToggleWedge}
-                    size="small"
-                  />
-                )}
-                <button
-                  className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
-                  disabled={result.snatched}
-                  onClick={() => onAddItem(result)}
-                  aria-label={`Download ${result.title}`}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                    <polyline points="7 10 12 15 17 10"></polyline>
-                    <line x1="12" y1="15" x2="12" y2="3"></line>
-                  </svg>
-                  <span>Download</span>
-                </button>
-              </div>
+              {/* Download button - right on mobile */}
+              <button
+                className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
+                disabled={result.snatched}
+                onClick={() => onAddItem(result)}
+                aria-label={`Download ${result.title}`}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download</span>
+              </button>
             </div>
+            {/* Projected ratio - below on desktop */}
             {projectedRatioDisplay && !result.snatched && (
               <div className="text-xs text-gray-400 cursor-default hidden md:block" title="New ratio after download">
                 {projectedRatioDisplay}
