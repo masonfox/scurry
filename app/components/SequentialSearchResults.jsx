@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import SearchResultItem from './SearchResultItem';
-import ProgressIndicator from './ProgressIndicator';
+import MobileBottomSheet from './MobileBottomSheet';
 import PropTypes from 'prop-types';
 import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
@@ -15,15 +15,34 @@ export default function SequentialSearchResults({
   onSelectAudiobook,
   onSelectBook,
   loading,
-  userStats
+  userStats,
+  onDownload,
+  downloadLoading,
+  useAudiobookWedge,
+  useBookWedge,
+  onToggleAudiobookWedge,
+  onToggleBookWedge
 }) {
   const bookSectionRef = useRef(null);
+  const audiobookSectionRef = useRef(null);
+
+  // Auto-scroll to books section when search results first load
+  useEffect(() => {
+    if (!loading && (bookResults.length > 0 || audiobookResults.length > 0) && bookSectionRef.current) {
+      setTimeout(() => {
+        bookSectionRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start' 
+        });
+      }, AUTO_SCROLL_DELAY_MS);
+    }
+  }, [loading, bookResults.length, audiobookResults.length]);
 
   // Auto-scroll to audiobook results when book is selected
   useEffect(() => {
-    if (selectedBook && bookSectionRef.current) {
+    if (selectedBook && audiobookSectionRef.current) {
       setTimeout(() => {
-        bookSectionRef.current?.scrollIntoView({ 
+        audiobookSectionRef.current?.scrollIntoView({ 
           behavior: 'smooth', 
           block: 'start' 
         });
@@ -67,23 +86,50 @@ export default function SequentialSearchResults({
     
     if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
       const totalBytes = audiobookBytes + bookBytes;
-      const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
-      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, totalBytes);
-      combinedInfo = {
-        totalSize: formatBytesToSize(totalBytes),
-        projectedRatio,
-        diff
-      };
+      
+      // Calculate bytes that will affect ratio (exclude items with FL wedge or already freeleech)
+      let bytesForRatio = 0;
+      const isBookFreeleech = useBookWedge || selectedBook.freeleech;
+      const isAudiobookFreeleech = useAudiobookWedge || selectedAudiobook.freeleech;
+      
+      if (!isBookFreeleech) bytesForRatio += bookBytes;
+      if (!isAudiobookFreeleech) bytesForRatio += audiobookBytes;
+      
+      // If both are freeleech, show "No Change" as ratio doesn't change
+      if (bytesForRatio === 0) {
+        combinedInfo = {
+          totalSize: formatBytesToSize(totalBytes),
+          projectedRatio: 'No Change',
+          diff: null
+        };
+      } else {
+        const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, bytesForRatio);
+        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, bytesForRatio);
+        combinedInfo = {
+          totalSize: formatBytesToSize(totalBytes),
+          projectedRatio,
+          diff
+        };
+      }
     }
   }
 
   return (
-    <div className="mt-6 pb-32">
-      {/* Progress Indicator - Fixed at bottom on mobile */}
-      <ProgressIndicator 
+    <div className="mt-6 pb-40">
+      {/* Mobile bottom sheet with progress indicator and download button */}
+      <MobileBottomSheet
         currentStep={currentStep}
         progress={progress}
-        mobile={true}
+        bothSelected={!!(selectedBook && selectedAudiobook)}
+        onDownload={onDownload}
+        loading={downloadLoading}
+        userStats={userStats}
+        useAudiobookWedge={useAudiobookWedge}
+        useBookWedge={useBookWedge}
+        onToggleAudiobookWedge={onToggleAudiobookWedge}
+        onToggleBookWedge={onToggleBookWedge}
+        selectedBook={selectedBook}
+        selectedAudiobook={selectedAudiobook}
       />
 
       {/* Combined info display when both selected */}
@@ -93,12 +139,14 @@ export default function SequentialSearchResults({
           <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
           <span className="text-gray-500 mx-2">•</span>
           <span className="text-gray-700">New ratio: </span>
-          <span className="font-semibold text-gray-900">{combinedInfo.projectedRatio} ({combinedInfo.diff})</span>
+          <span className="font-semibold text-gray-900">
+            {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
+          </span>
         </div>
       )}
 
       {/* Step 1: Book Selection */}
-      <div className={selectedBook ? 'mb-6' : ''}>
+      <div ref={bookSectionRef} className={selectedBook ? 'mb-6' : ''}>
         {selectedBook ? (
           // Collapsed view showing selected book
           <div className="mb-6">
@@ -153,7 +201,7 @@ export default function SequentialSearchResults({
 
       {/* Step 2: Audiobook Selection (only shown after book selected) */}
       {selectedBook && (
-        <div ref={bookSectionRef}>
+        <div ref={audiobookSectionRef}>
           {selectedAudiobook ? (
             // Collapsed view showing selected audiobook
             <div className="mb-6">
@@ -235,6 +283,13 @@ SequentialSearchResults.propTypes = {
   userStats: PropTypes.shape({
     uploaded: PropTypes.string,
     downloaded: PropTypes.string,
-    ratio: PropTypes.string
-  })
+    ratio: PropTypes.string,
+    flWedges: PropTypes.number
+  }),
+  onDownload: PropTypes.func.isRequired,
+  downloadLoading: PropTypes.bool.isRequired,
+  useAudiobookWedge: PropTypes.bool,
+  useBookWedge: PropTypes.bool,
+  onToggleAudiobookWedge: PropTypes.func,
+  onToggleBookWedge: PropTypes.func
 };

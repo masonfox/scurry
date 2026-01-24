@@ -1,25 +1,40 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff } from '@/src/lib/utilities';
+import WedgeToggleButton from './WedgeToggleButton';
 
-export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats }) {
+export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats, useWedge = false, onToggleWedge }) {
   const handleClick = () => {
     if (selectable && onSelect) {
       onSelect(result);
     }
   };
 
+  const handleToggleWedge = (e) => {
+    e.stopPropagation(); // Prevent triggering parent click handlers
+    if (onToggleWedge) {
+      onToggleWedge(result.id);
+    }
+  };
+
+  const hasWedges = userStats?.flWedges > 0;
+
   // Calculate projected ratio if user stats are available
   let projectedRatioDisplay = null;
   if (userStats && result.size) {
-    const sizeBytes = parseSizeToBytes(result.size);
-    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
-    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
-    
-    if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
-      const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
-      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, sizeBytes);
-      projectedRatioDisplay = `${newRatio} (${diff})`;
+    // If using FL wedge or torrent is already freeleech, show "No Change" as ratio doesn't change
+    if (useWedge || result.freeleech) {
+      projectedRatioDisplay = 'No Change';
+    } else {
+      const sizeBytes = parseSizeToBytes(result.size);
+      const uploadedBytes = parseSizeToBytes(userStats.uploaded);
+      const downloadedBytes = parseSizeToBytes(userStats.downloaded);
+      
+      if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
+        const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
+        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, sizeBytes);
+        projectedRatioDisplay = `${newRatio} (${diff})`;
+      }
     }
   }
 
@@ -46,23 +61,50 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         <div className="flex-1 min-w-0">
           {/* Basic torrent information */}
           <div className="mb-1">
-            <span className="font-semibold text-gray-900">{result.title}</span>
-            <span className="text-gray-600">
-              <span className="mx-1">by</span>
-              <span>{result.author}</span>
-            </span>
-            {result.vip && (
-              <span className="inline-flex ml-1 relative top-0.25">
-                <Image
-                  src="https://cdn.myanonamouse.net/pic/vip.png"
-                  alt="VIP"
-                  width={14}
-                  height={14}
-                  style={{ height: 14 }}
-                  unoptimized
-                />
+            <div className="font-semibold text-gray-900 inline-flex items-center flex-wrap">
+              {result.vip && (
+                <span className="inline-flex mr-1 relative top-0.25">
+                  <Image
+                    src="/images/vip.png"
+                    alt="VIP"
+                    width={14}
+                    height={14}
+                    style={{ height: 14 }}
+                    unoptimized
+                  />
+                </span>
+              )}
+              {result.freeleech && (
+                <span className="inline-flex mr-1 relative top-0.25">
+                  <Image
+                    src="/images/freeleech.gif"
+                    alt="Freeleech"
+                    width={14}
+                    height={14}
+                    style={{ height: 14 }}
+                    unoptimized
+                  />
+                </span>
+              )}
+              <span>{result.title}</span>
+              <span className="text-gray-600 font-normal">
+                <span className="mx-1">by</span>
+                <span>{result.author}</span>
               </span>
-            )}
+              <a 
+                href={result.torrentUrl}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex ml-1.5 hover:text-pink-400 transition-colors duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5 flex-shrink-0 text-gray-400 hover:text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                  <polyline points="15 3 21 3 21 9"></polyline>
+                  <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+              </a>
+            </div>
           </div>
           {/* Torrent metadata */}
           <div className="text-sm text-gray-500 mt-1">
@@ -86,20 +128,22 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
         {/* Torrent action buttons */}
         {!selectable && (
           <div className="flex flex-col gap-2 items-end flex-shrink-0 mt-1 md:mt-0">
-            <div className="flex gap-5 items-center justify-between w-full md:w-auto">
-              <a 
-                className="text-pink-400 hover:text-pink-500 font-medium transition-colors duration-200 text-sm cursor-pointer" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                href={result.torrentUrl}
-              >
-                View
-              </a>
+            <div className="flex gap-2 md:gap-3 items-center justify-between w-full md:w-auto md:justify-end">
+              {/* FL Wedge toggle button - left on mobile */}
+              {hasWedges && !result.snatched && !result.freeleech && !result.vip && (
+                <WedgeToggleButton
+                  active={useWedge}
+                  onClick={handleToggleWedge}
+                  size="small"
+                />
+              )}
+              {/* Projected ratio - center on mobile, below on desktop */}
               {projectedRatioDisplay && !result.snatched && (
-                <div className="text-xs text-gray-400 cursor-default md:hidden" title="New ratio after download">
+                <div className="text-xs text-gray-400 cursor-default md:hidden flex-1 text-center" title="New ratio after download">
                   {projectedRatioDisplay}
                 </div>
               )}
+              {/* Download button - right on mobile */}
               <button
                 className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
                 disabled={result.snatched}
@@ -114,6 +158,7 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
                 <span>Download</span>
               </button>
             </div>
+            {/* Projected ratio - below on desktop */}
             {projectedRatioDisplay && !result.snatched && (
               <div className="text-xs text-gray-400 cursor-default hidden md:block" title="New ratio after download">
                 {projectedRatioDisplay}
@@ -138,6 +183,7 @@ SearchResultItem.propTypes = {
     torrentUrl: PropTypes.string.isRequired,
     downloadUrl: PropTypes.string.isRequired,
     vip: PropTypes.bool,
+    freeleech: PropTypes.bool,
     snatched: PropTypes.bool
   }).isRequired,
   onAddItem: PropTypes.func,
@@ -147,6 +193,9 @@ SearchResultItem.propTypes = {
   userStats: PropTypes.shape({
     uploaded: PropTypes.string,
     downloaded: PropTypes.string,
-    ratio: PropTypes.string
-  })
+    ratio: PropTypes.string,
+    flWedges: PropTypes.number
+  }),
+  useWedge: PropTypes.bool,
+  onToggleWedge: PropTypes.func
 };

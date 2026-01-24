@@ -29,8 +29,17 @@ export default function SearchForm({
     }
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Blur input to dismiss mobile keyboard
+    if (searchInputRef.current) {
+      searchInputRef.current.blur();
+    }
+    onSubmit(e);
+  };
+
   return (
-    <form onSubmit={onSubmit} className="mt-5 flex flex-col sm:flex-row gap-2 relative">
+    <form onSubmit={handleSubmit} className="mt-5 flex flex-col sm:flex-row gap-2 relative">
       <div className="relative w-full flex flex-col sm:flex-row">
         <div className="relative flex-1">
           <input

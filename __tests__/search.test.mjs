@@ -35,6 +35,47 @@ describe('search route', () => {
     const json = await res.json();
     expect(json.results.length).toBeGreaterThan(0);
   });
+
+  it('handles search results with missing/null fields', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({ 
+        data: [{ 
+          // All optional fields missing or null
+          id: null,
+          title: null,
+          size: null,
+          filetype: null,
+          added: null,
+          vip: 0,
+          free: 0,
+          my_snatched: 0,
+          author_info: null,
+          seeders: null,
+          leechers: null,
+          times_completed: null,
+          dl: null
+        }]
+      }),
+      text: async () => "",
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test' };
+    const res = await GET(req);
+    const json = await res.json();
+    
+    expect(json.results.length).toBe(1);
+    const result = json.results[0];
+    expect(result.id).toBeNull();
+    expect(result.title).toBe('');
+    expect(result.size).toBe('');
+    expect(result.filetypes).toBe('');
+    expect(result.addedDate).toBe('');
+    expect(result.seeders).toBe('0');
+    expect(result.leechers).toBe('0');
+    expect(result.downloads).toBe('0');
+  });
 });
 
 describe('token expiration handling', () => {

@@ -166,3 +166,11 @@ export function calculateRatioDiff(uploadedBytes, downloadedBytes, additionalByt
   const diff = parseFloat(newRatio) - currentRatio;
   return diff.toFixed(4);
 }
+
+/**
+ * Generates Unix timestamp in milliseconds
+ * @returns {number} - Current Unix timestamp in milliseconds
+ */
+export function generateTimestamp() {
+  return Date.now();
+}

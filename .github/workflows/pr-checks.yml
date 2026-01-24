@@ -22,14 +22,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run test suite
-        run: npm test
+      - name: Run test suite with coverage
+        run: npm run test:coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
+          files: ./coverage/lcov.info
+          fail_ci_if_error: false
 
   docker-build:
     name: Docker Build Test

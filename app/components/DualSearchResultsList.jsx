@@ -1,5 +1,6 @@
 import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
+import WedgeToggleButton from './WedgeToggleButton';
 import PropTypes from 'prop-types';
 import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
@@ -13,7 +14,11 @@ export default function DualSearchResultsList({
   loading,
   onDownload,
   downloadLoading,
-  userStats
+  userStats,
+  useAudiobookWedge,
+  useBookWedge,
+  onToggleAudiobookWedge,
+  onToggleBookWedge
 }) {
   if (loading) {
     return (
@@ -53,13 +58,31 @@ export default function DualSearchResultsList({
     
     if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
       const totalBytes = audiobookBytes + bookBytes;
-      const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, totalBytes);
-      const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, totalBytes);
-      combinedInfo = {
-        totalSize: formatBytesToSize(totalBytes),
-        projectedRatio,
-        diff
-      };
+      
+      // Calculate bytes that will affect ratio (exclude items with FL wedge or already freeleech)
+      let bytesForRatio = 0;
+      const isBookFreeleech = useBookWedge || selectedBook.freeleech;
+      const isAudiobookFreeleech = useAudiobookWedge || selectedAudiobook.freeleech;
+      
+      if (!isBookFreeleech) bytesForRatio += bookBytes;
+      if (!isAudiobookFreeleech) bytesForRatio += audiobookBytes;
+      
+      // If both are freeleech, show "No Change" as ratio doesn't change
+      if (bytesForRatio === 0) {
+        combinedInfo = {
+          totalSize: formatBytesToSize(totalBytes),
+          projectedRatio: 'No Change',
+          diff: null
+        };
+      } else {
+        const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, bytesForRatio);
+        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, bytesForRatio);
+        combinedInfo = {
+          totalSize: formatBytesToSize(totalBytes),
+          projectedRatio,
+          diff
+        };
+      }
     }
   }
 
@@ -94,25 +117,75 @@ export default function DualSearchResultsList({
 
   return (
     <div className="mt-6">
-      {/* Progress Indicator for Desktop with inline button */}
-      <ProgressIndicator 
-        currentStep={currentStep}
-        progress={progress}
-        mobile={false}
-        actionButton={downloadButton}
-      />
-      
-      {/* Combined info display when both selected */}
-      {combinedInfo && (
-        <div className="mb-4 px-4 py-2 bg-pink-50 border border-pink-200 rounded-lg text-center text-sm">
-          <span className="text-gray-700">Combined: </span>
-          <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
-          <span className="text-gray-500 mx-2">•</span>
-          <span className="text-gray-700">New ratio: </span>
-          <span className="font-semibold text-gray-900">{combinedInfo.projectedRatio} ({combinedInfo.diff})</span>
+      {/* Integrated Header: 2-Row Layout */}
+      <div className="mb-8 p-5 bg-white rounded-xl border border-gray-200">
+        {/* Row 1: Progress + Download Button */}
+        <div className="flex items-center gap-6">
+          <ProgressIndicator 
+            currentStep={currentStep}
+            progress={progress}
+            mobile={false}
+            compact={true}
+          />
+          
+          {/* Download Button - always visible, disabled until both selected */}
+          <div className="flex-shrink-0 ml-auto">
+            {downloadButton}
+          </div>
         </div>
-      )}
+        
+        {/* Row 2: FL Wedge toggles + Separator + Combined Info (only when both selected) */}
+        {bothSelected && (
+          <div className="flex items-center justify-between text-sm mt-4">
+            {/* FL Wedge toggles */}
+            {userStats?.flWedges > 0 && (selectedBook?.freeleech === false || selectedAudiobook?.freeleech === false) ? (
+              <div className="flex items-center gap-3">
+                <span className="text-gray-600 font-medium">Use FL Wedge:</span>
+                {!selectedBook?.freeleech && (
+                  <WedgeToggleButton
+                    active={useBookWedge}
+                    onClick={onToggleBookWedge}
+                    label="Book"
+                    size="large"
+                  />
+                )}
+                {!selectedAudiobook?.freeleech && (
+                  <WedgeToggleButton
+                    active={useAudiobookWedge}
+                    onClick={onToggleAudiobookWedge}
+                    label="Audiobook"
+                    size="large"
+                  />
+                )}
+              </div>
+            ) : (
+              <div></div>
+            )}
+            
+            {/* Center Separator */}
+            <div className="h-5 w-px bg-gray-300"></div>
+            
+            {/* Combined info */}
+            {combinedInfo && (
+              <div className="flex items-center gap-4 text-gray-700">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-base">📦</span>
+                  <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
+                </span>
+                <span className="text-gray-400">•</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="text-base">📊</span>
+                  <span className="font-semibold text-gray-900">
+                    {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
+                  </span>
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
       
+      {/* Two-column grid for results */}
       <div className="grid grid-cols-2 gap-6">
       {/* Left Column: Books */}
       <div>
@@ -193,6 +266,11 @@ DualSearchResultsList.propTypes = {
   userStats: PropTypes.shape({
     uploaded: PropTypes.string,
     downloaded: PropTypes.string,
-    ratio: PropTypes.string
-  })
+    ratio: PropTypes.string,
+    flWedges: PropTypes.number
+  }),
+  useAudiobookWedge: PropTypes.bool,
+  useBookWedge: PropTypes.bool,
+  onToggleAudiobookWedge: PropTypes.func,
+  onToggleBookWedge: PropTypes.func
 };

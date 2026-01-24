@@ -9,6 +9,19 @@ export const dynamic = "force-dynamic";
 const statsCache = new Map();
 const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
+// Export function to bust cache (called after wedge purchases, etc.)
+export function bustStatsCache(token = null) {
+  if (token) {
+    // Bust specific token's cache
+    statsCache.delete(token);
+    console.log("Busted user stats cache for specific token");
+  } else {
+    // Bust all cache
+    statsCache.clear();
+    console.log("Busted all user stats cache");
+  }
+}
+
 export async function GET(req) {
   try {
     const token = readMamToken();
@@ -79,7 +92,8 @@ export async function GET(req) {
       downloaded: data.downloaded || "0 B",
       ratio: data.ratio || "0.00",
       username: data.username || null,
-      uid: data.uid || null
+      uid: data.uid || null,
+      flWedges: data.wedges || 0
     };
 
     // Cache the result

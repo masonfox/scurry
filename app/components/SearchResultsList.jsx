@@ -1,7 +1,7 @@
 import SearchResultItem from './SearchResultItem';
 import PropTypes from 'prop-types';
 
-export default function SearchResultsList({ results, onAddItem, loading, userStats }) {
+export default function SearchResultsList({ results, onAddItem, loading, userStats, singleModeWedges, onToggleWedge }) {
   if (!loading && results.length === 0) {
     return <p className="text-gray-500 mt-5">☝️ Try a search to see results...</p>;
   }
@@ -14,6 +14,8 @@ export default function SearchResultsList({ results, onAddItem, loading, userSta
           result={result} 
           onAddItem={onAddItem}
           userStats={userStats}
+          useWedge={singleModeWedges?.[result.id] || false}
+          onToggleWedge={onToggleWedge}
         />
       ))}
     </ul>
@@ -27,6 +29,9 @@ SearchResultsList.propTypes = {
   userStats: PropTypes.shape({
     uploaded: PropTypes.string,
     downloaded: PropTypes.string,
-    ratio: PropTypes.string
-  })
+    ratio: PropTypes.string,
+    flWedges: PropTypes.number
+  }),
+  singleModeWedges: PropTypes.object,
+  onToggleWedge: PropTypes.func
 };

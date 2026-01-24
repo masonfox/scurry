@@ -87,6 +87,7 @@ export async function GET(req) {
     filetypes: item.filetype ?? "",
     addedDate: item.added ?? "",
     vip: Boolean(item.vip == 1),
+    freeleech: Boolean(item.free == 1),
     snatched: Boolean(item.my_snatched == 1),
     author: parseAuthorInfo(item.author_info),
     seeders: formatNumberWithCommas(item.seeders ?? 0),
