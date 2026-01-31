@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { POST } from '../app/api/use-wedge/route.js';
+import { purchaseFlWedge } from '../src/lib/wedge.js';
 
 // Mock dependencies
 vi.mock('../src/lib/config', () => ({
@@ -17,36 +17,33 @@ vi.mock('../src/lib/utilities', () => ({
 // Mock fetch globally
 global.fetch = vi.fn();
 
-describe('use-wedge route', () => {
+describe('wedge service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('returns 400 if no torrentId provided', async () => {
-    const req = { json: async () => ({}) };
-    const res = await POST(req);
-    const json = await res.json();
+  it('returns error if no torrentId provided', async () => {
+    const result = await purchaseFlWedge();
     
-    expect(res.status).toBe(400);
-    expect(json.error).toMatch(/Torrent ID is required/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Torrent ID is required/);
+    expect(result.statusCode).toBe(400);
   });
 
-  it('returns 400 if torrentId is null', async () => {
-    const req = { json: async () => ({ torrentId: null }) };
-    const res = await POST(req);
-    const json = await res.json();
+  it('returns error if torrentId is null', async () => {
+    const result = await purchaseFlWedge(null);
     
-    expect(res.status).toBe(400);
-    expect(json.error).toMatch(/Torrent ID is required/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Torrent ID is required/);
+    expect(result.statusCode).toBe(400);
   });
 
-  it('returns 400 if torrentId is empty string', async () => {
-    const req = { json: async () => ({ torrentId: '' }) };
-    const res = await POST(req);
-    const json = await res.json();
+  it('returns error if torrentId is empty string', async () => {
+    const result = await purchaseFlWedge('');
     
-    expect(res.status).toBe(400);
-    expect(json.error).toMatch(/Torrent ID is required/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Torrent ID is required/);
+    expect(result.statusCode).toBe(400);
   });
 
   it('successfully purchases FL wedge with valid torrentId', async () => {
@@ -56,13 +53,10 @@ describe('use-wedge route', () => {
       json: async () => ({ success: true })
     });
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(json.success).toBe(true);
-    expect(json.message).toMatch(/FL wedge applied successfully/);
-    expect(json.torrentId).toBe('12345');
+    expect(result.success).toBe(true);
+    expect(result.torrentId).toBe('12345');
     
     // Verify fetch was called with correct parameters
     expect(global.fetch).toHaveBeenCalledWith(
@@ -89,12 +83,11 @@ describe('use-wedge route', () => {
       text: async () => 'Internal Server Error'
     });
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(res.status).toBe(502);
-    expect(json.error).toMatch(/Failed to purchase FL wedge/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Failed to purchase FL wedge/);
+    expect(result.statusCode).toBe(502);
   });
 
   it('returns 401 if MAM token is expired', async () => {
@@ -105,13 +98,12 @@ describe('use-wedge route', () => {
       text: async () => 'You are not signed in'
     });
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(res.status).toBe(401);
-    expect(json.error).toMatch(/MAM token has expired/);
-    expect(json.tokenExpired).toBe(true);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/MAM token has expired/);
+    expect(result.tokenExpired).toBe(true);
+    expect(result.statusCode).toBe(401);
   });
 
   it('returns 400 if MAM API returns success: false', async () => {
@@ -121,12 +113,11 @@ describe('use-wedge route', () => {
       json: async () => ({ success: false, error: 'Insufficient bonus points' })
     });
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(res.status).toBe(400);
-    expect(json.error).toMatch(/Insufficient bonus points/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Insufficient bonus points/);
+    expect(result.statusCode).toBe(400);
   });
 
   it('returns 400 if MAM API returns success: false without error message', async () => {
@@ -136,12 +127,11 @@ describe('use-wedge route', () => {
       json: async () => ({ success: false })
     });
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(res.status).toBe(400);
-    expect(json.error).toBe('Failed to use FL wedge: Unknown error occurred');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Failed to use FL wedge: Unknown error occurred');
+    expect(result.statusCode).toBe(400);
   });
 
   it('returns 400 if MAM API returns an error field', async () => {
@@ -151,12 +141,11 @@ describe('use-wedge route', () => {
       json: async () => ({ error: 'Torrent not found' })
     });
 
-    const req = { json: async () => ({ torrentId: '99999' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('99999');
     
-    expect(res.status).toBe(400);
-    expect(json.error).toMatch(/Torrent not found/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Torrent not found/);
+    expect(result.statusCode).toBe(400);
   });
 
   it('returns 502 if MAM API returns invalid JSON', async () => {
@@ -167,24 +156,22 @@ describe('use-wedge route', () => {
       text: async () => '<html>Invalid response</html>'
     });
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(res.status).toBe(502);
-    expect(json.error).toMatch(/Invalid response from MAM API/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Invalid response from MAM API/);
+    expect(result.statusCode).toBe(502);
   });
 
   it('returns 500 if unexpected error occurs', async () => {
     // Mock fetch throwing an error
     global.fetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const req = { json: async () => ({ torrentId: '12345' }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge('12345');
     
-    expect(res.status).toBe(500);
-    expect(json.error).toMatch(/Network error|Failed to use FL wedge/);
+    expect(result.success).toBe(false);
+    expect(result.error).toMatch(/Network error|Failed to use FL wedge/);
+    expect(result.statusCode).toBe(500);
   });
 
   it('works with numeric torrentId', async () => {
@@ -194,11 +181,23 @@ describe('use-wedge route', () => {
       json: async () => ({ success: true })
     });
 
-    const req = { json: async () => ({ torrentId: 67890 }) };
-    const res = await POST(req);
-    const json = await res.json();
+    const result = await purchaseFlWedge(67890);
     
-    expect(json.success).toBe(true);
-    expect(json.torrentId).toBe('67890');
+    expect(result.success).toBe(true);
+    expect(result.torrentId).toBe('67890');
+  });
+
+  it('converts numeric torrentId to string in response', async () => {
+    // Mock successful response
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => ({ success: true })
+    });
+
+    const result = await purchaseFlWedge(12345);
+    
+    expect(result.success).toBe(true);
+    expect(result.torrentId).toBe('12345');
+    expect(typeof result.torrentId).toBe('string');
   });
 });

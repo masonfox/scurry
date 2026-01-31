@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { config } from "@/src/lib/config";
 import { qbAddUrl, qbLogin } from "@/src/lib/qbittorrent";
 import { bustStatsCache } from "../user-stats/route.js";
+import { purchaseFlWedge } from "@/src/lib/wedge";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,25 +24,17 @@ export async function POST(req) {
     if (useWedge) {
       console.log(`Purchasing FL wedge for: ${title}`);
       
-      const wedgeRes = await fetch(`${req.nextUrl.origin}/api/use-wedge`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ torrentId })
-      });
-
-      const wedgeData = await wedgeRes.json();
-
-      if (!wedgeRes.ok || !wedgeData.success) {
-        const errorMsg = wedgeData.error || "Failed to purchase FL wedge";
+      const wedgeResult = await purchaseFlWedge(torrentId);
+      
+      if (!wedgeResult.success) {
+        const errorMsg = wedgeResult.error || "Failed to purchase FL wedge";
         console.error(`FL wedge purchase failed for ${title}: ${errorMsg}`);
         return NextResponse.json(
-          { ok: false, error: errorMsg, wedgeFailed: true },
-          { status: wedgeRes.status }
+          { ok: false, error: errorMsg, wedgeFailed: true, tokenExpired: wedgeResult.tokenExpired },
+          { status: wedgeResult.statusCode || 500 }
         );
       }
-
+      
       console.log(`FL wedge successfully applied for: ${title}`);
     }
 

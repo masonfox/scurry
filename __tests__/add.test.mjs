@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '../app/api/add/route.js';
 import * as qbittorrent from '../src/lib/qbittorrent';
 import * as userStatsRoute from '../app/api/user-stats/route.js';
+import * as wedge from '../src/lib/wedge';
 
 vi.mock('../src/lib/config', () => ({
   config: { qbUrl: 'http://qb', qbUser: 'user', qbPass: 'pass', qbCategory: 'cat' }
@@ -12,6 +13,9 @@ vi.mock('../src/lib/qbittorrent', () => ({
 }));
 vi.mock('../app/api/user-stats/route.js', () => ({
   bustStatsCache: vi.fn()
+}));
+vi.mock('../src/lib/wedge', () => ({
+  purchaseFlWedge: vi.fn()
 }));
 
 describe('add route', () => {
@@ -77,14 +81,13 @@ describe('add route', () => {
   describe('wedge integration', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      global.fetch = vi.fn();
     });
 
     it('purchases FL wedge before adding torrent when useWedge is true', async () => {
       // Mock successful wedge purchase
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true })
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: true,
+        torrentId: '12345'
       });
 
       const req = {
@@ -93,8 +96,7 @@ describe('add route', () => {
           downloadUrl: 'magnet:?xt=...',
           torrentId: '12345',
           useWedge: true
-        }),
-        nextUrl: { origin: 'http://localhost:3000' }
+        })
       };
 
       const res = await POST(req);
@@ -102,24 +104,17 @@ describe('add route', () => {
 
       expect(json.ok).toBe(true);
       expect(json.wedgeUsed).toBe(true);
-      expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:3000/api/use-wedge',
-        expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ torrentId: '12345' })
-        })
-      );
+      expect(wedge.purchaseFlWedge).toHaveBeenCalledWith('12345');
       // Verify qBittorrent was called after wedge purchase
       expect(qbittorrent.qbAddUrl).toHaveBeenCalled();
     });
 
     it('returns error when wedge purchase fails', async () => {
       // Mock failed wedge purchase
-      global.fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: async () => ({ success: false, error: 'Not enough wedges' })
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: false,
+        error: 'Not enough wedges',
+        statusCode: 400
       });
 
       const req = {
@@ -128,8 +123,7 @@ describe('add route', () => {
           downloadUrl: 'magnet:?xt=...',
           torrentId: '12345',
           useWedge: true
-        }),
-        nextUrl: { origin: 'http://localhost:3000' }
+        })
       };
 
       const res = await POST(req);
@@ -143,10 +137,10 @@ describe('add route', () => {
     });
 
     it('does not bust cache when wedge purchase fails', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 400,
-        json: async () => ({ success: false, error: 'Error' })
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: false,
+        error: 'Error',
+        statusCode: 400
       });
 
       const req = {
@@ -155,19 +149,19 @@ describe('add route', () => {
           downloadUrl: 'magnet:?xt=...',
           torrentId: '12345',
           useWedge: true
-        }),
-        nextUrl: { origin: 'http://localhost:3000' }
+        })
       };
 
       await POST(req);
       expect(userStatsRoute.bustStatsCache).not.toHaveBeenCalled();
     });
 
-    it('returns error when wedge response has ok=true but success=false', async () => {
+    it('returns error when wedge response has success=false', async () => {
       // Mock wedge purchase with success: false
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: false, error: 'Insufficient bonus points' })
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: false,
+        error: 'Insufficient bonus points',
+        statusCode: 400
       });
 
       const req = {
@@ -176,8 +170,7 @@ describe('add route', () => {
           downloadUrl: 'magnet:?xt=...',
           torrentId: '12345',
           useWedge: true
-        }),
-        nextUrl: { origin: 'http://localhost:3000' }
+        })
       };
 
       const res = await POST(req);
@@ -191,9 +184,9 @@ describe('add route', () => {
 
     it('busts cache after successful wedge purchase and download', async () => {
       // Mock successful wedge purchase
-      global.fetch.mockResolvedValueOnce({
-        ok: true,
-        json: async () => ({ success: true })
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: true,
+        torrentId: '12345'
       });
 
       const req = {
@@ -202,8 +195,7 @@ describe('add route', () => {
           downloadUrl: 'magnet:?xt=...',
           torrentId: '12345',
           useWedge: true
-        }),
-        nextUrl: { origin: 'http://localhost:3000' }
+        })
       };
 
       await POST(req);
@@ -212,10 +204,9 @@ describe('add route', () => {
     });
 
     it('handles wedge purchase when response has no error message', async () => {
-      global.fetch.mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-        json: async () => ({ success: false })
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: false,
+        statusCode: 500
       });
 
       const req = {
@@ -224,8 +215,7 @@ describe('add route', () => {
           downloadUrl: 'magnet:?xt=...',
           torrentId: '12345',
           useWedge: true
-        }),
-        nextUrl: { origin: 'http://localhost:3000' }
+        })
       };
 
       const res = await POST(req);
@@ -234,6 +224,30 @@ describe('add route', () => {
       expect(json.ok).toBe(false);
       expect(json.wedgeFailed).toBe(true);
       expect(json.error).toBe('Failed to purchase FL wedge');
+    });
+
+    it('passes tokenExpired flag from wedge service', async () => {
+      wedge.purchaseFlWedge.mockResolvedValueOnce({
+        success: false,
+        error: 'Token expired',
+        tokenExpired: true,
+        statusCode: 401
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          torrentId: '12345',
+          useWedge: true
+        })
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(false);
+      expect(json.tokenExpired).toBe(true);
     });
   });
 });
