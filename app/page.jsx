@@ -328,12 +328,14 @@ function SearchPage() {
 
   // Dual-mode selection handlers
   const handleSelectAudiobook = useCallback((item) => {
+    if (item?.snatched) return;
     setSelectedAudiobook(prev => 
       prev?.id === item?.id ? null : item
     );
   }, []);
 
   const handleSelectBook = useCallback((item) => {
+    if (item?.snatched) return;
     setSelectedBook(prev => 
       prev?.id === item?.id ? null : item
     );
@@ -342,6 +344,7 @@ function SearchPage() {
   // Dual download handler
   const handleDualDownload = useCallback(async () => {
     if (!selectedAudiobook || !selectedBook) return;
+    if (selectedAudiobook.snatched || selectedBook.snatched) return;
     
     setDualDownloadLoading(true);
     setMessage(null);

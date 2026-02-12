@@ -4,8 +4,10 @@ import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff } from '@/src/l
 import WedgeToggleButton from './WedgeToggleButton';
 
 export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats, useWedge = false, onToggleWedge }) {
+  const isSnatched = result.snatched;
+
   const handleClick = () => {
-    if (selectable && onSelect) {
+    if (selectable && onSelect && !isSnatched) {
       onSelect(result);
     }
   };
@@ -39,18 +41,20 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
   }
 
   const borderClasses = selectable
-    ? selected
-      ? 'border-3 border-pink-300 dark:border-pink-600 cursor-pointer'
-      : 'border-2 border-gray-100 dark:border-zinc-700 hover:border-pink-200 dark:hover:border-pink-700 cursor-pointer'
+    ? isSnatched
+      ? 'border-2 border-gray-100 dark:border-zinc-700 opacity-50 cursor-not-allowed'
+      : selected
+        ? 'border-3 border-pink-300 dark:border-pink-600 cursor-pointer'
+        : 'border-2 border-gray-100 dark:border-zinc-700 hover:border-pink-200 dark:hover:border-pink-700 cursor-pointer'
     : 'border-2 border-gray-100 dark:border-zinc-700 hover:border-pink-200 dark:hover:border-pink-700';
 
   return (
     <li 
       className={`px-4 py-3 rounded-md ${borderClasses} mb-4 transition-colors duration-200 relative`}
-      onClick={selectable ? handleClick : undefined}
-      role={selectable ? 'button' : undefined}
-      tabIndex={selectable ? 0 : undefined}
-      onKeyDown={selectable ? (e) => {
+      onClick={selectable && !isSnatched ? handleClick : undefined}
+      role={selectable && !isSnatched ? 'button' : undefined}
+      tabIndex={selectable && !isSnatched ? 0 : undefined}
+      onKeyDown={selectable && !isSnatched ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick();

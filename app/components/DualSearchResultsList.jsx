@@ -88,8 +88,8 @@ export default function DualSearchResultsList({
 
   // Download button component - matching search button style with icon
   const hasWedges = userStats?.flWedges > 0;
-  const showBookWedge = hasWedges && selectedBook?.freeleech === false && !selectedBook?.vip;
-  const showAudiobookWedge = hasWedges && selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip;
+  const showBookWedge = hasWedges && selectedBook?.freeleech === false && !selectedBook?.vip && !selectedBook?.snatched;
+  const showAudiobookWedge = hasWedges && selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip && !selectedAudiobook?.snatched;
   const showWedges = showBookWedge || showAudiobookWedge;
 
   const downloadButton = (
