@@ -23,7 +23,7 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
   return (
     <div className="p-7 rounded-lg bg-gray-50 dark:bg-zinc-800">
       <div>
-        <div className="flex items-start justify-between">
+        <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold flex items-center -ml-1">
             <span className="mr-1">
               <Image
