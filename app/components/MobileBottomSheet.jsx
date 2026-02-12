@@ -18,8 +18,8 @@ export default function MobileBottomSheet({
   const disabled = !bothSelected || loading;
   const hasWedges = userStats?.flWedges > 0;
   const stepText = currentStep === 1 ? 'a Book' : 'an Audiobook';
-  const showBookWedge = selectedBook && !selectedBook.freeleech;
-  const showAudiobookWedge = selectedAudiobook && !selectedAudiobook.freeleech;
+  const showBookWedge = selectedBook && !selectedBook.freeleech && !selectedBook.vip;
+  const showAudiobookWedge = selectedAudiobook && !selectedAudiobook.freeleech && !selectedAudiobook.vip;
 
   return (
     <>

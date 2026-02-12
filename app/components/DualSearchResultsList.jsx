@@ -138,10 +138,10 @@ export default function DualSearchResultsList({
         {bothSelected && (
           <div className="flex items-center justify-between text-sm mt-4">
             {/* FL Wedge toggles */}
-            {userStats?.flWedges > 0 && (selectedBook?.freeleech === false || selectedAudiobook?.freeleech === false) ? (
+            {userStats?.flWedges > 0 && ((selectedBook?.freeleech === false && !selectedBook?.vip) || (selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip)) ? (
               <div className="flex items-center gap-3">
                 <span className="text-gray-600 dark:text-zinc-400 font-medium">Use FL Wedge:</span>
-                {!selectedBook?.freeleech && (
+                {!selectedBook?.freeleech && !selectedBook?.vip && (
                   <WedgeToggleButton
                     active={useBookWedge}
                     onClick={onToggleBookWedge}
@@ -149,7 +149,7 @@ export default function DualSearchResultsList({
                     size="large"
                   />
                 )}
-                {!selectedAudiobook?.freeleech && (
+                {!selectedAudiobook?.freeleech && !selectedAudiobook?.vip && (
                   <WedgeToggleButton
                     active={useAudiobookWedge}
                     onClick={onToggleAudiobookWedge}
