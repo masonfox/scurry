@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 
 export default function SearchResultsList({ results, onAddItem, loading, userStats, singleModeWedges, onToggleWedge }) {
   if (!loading && results.length === 0) {
-    return <p className="text-gray-500 mt-5">☝️ Try a search to see results...</p>;
+    return <p className="text-gray-500 dark:text-zinc-400 mt-5">☝️ Try a search to see results...</p>;
   }
 
   return (

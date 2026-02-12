@@ -18,7 +18,7 @@ export default function WedgeToggleButton({
       className={`flex items-center gap-2 ${sizeClasses} rounded transition-colors duration-200 cursor-pointer ${
         active 
           ? 'bg-amber-400 text-white hover:bg-amber-500' 
-          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+          : 'bg-gray-200 dark:bg-zinc-600 text-gray-600 dark:text-zinc-300 hover:bg-gray-300 dark:hover:bg-zinc-500'
       }`}
       title={active ? `Freeleech Wedge will be used${label ? ` for ${label}` : ''}` : `Use Freeleech Wedge${label ? ` for ${label}` : ''}`}
       aria-label={active ? `Remove Freeleech Wedge${label ? ` from ${label}` : ''}` : `Use Freeleech Wedge${label ? ` for ${label}` : ''}`}

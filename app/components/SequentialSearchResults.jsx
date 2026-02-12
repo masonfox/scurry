@@ -58,7 +58,7 @@ export default function SequentialSearchResults({
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-gray-600">Searching both categories...</p>
+          <p className="text-gray-600 dark:text-zinc-400">Searching both categories...</p>
         </div>
       </div>
     );
@@ -69,7 +69,7 @@ export default function SequentialSearchResults({
   const noBooks = bookResults.length === 0;
 
   if (noResults) {
-    return <p className="text-gray-500 mt-5">No results found for either category. Try a different search...</p>;
+    return <p className="text-gray-500 dark:text-zinc-400 mt-5">No results found for either category. Try a different search...</p>;
   }
 
   // Calculate progress
@@ -134,12 +134,12 @@ export default function SequentialSearchResults({
 
       {/* Combined info display when both selected */}
       {combinedInfo && (
-        <div className="mb-4 px-4 py-2 bg-pink-50 border border-pink-200 rounded-lg text-center text-sm">
-          <span className="text-gray-700">Combined: </span>
-          <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
-          <span className="text-gray-500 mx-2">•</span>
-          <span className="text-gray-700">New ratio: </span>
-          <span className="font-semibold text-gray-900">
+        <div className="mb-4 px-4 py-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800/40 rounded-lg text-center text-sm">
+          <span className="text-gray-700 dark:text-zinc-300">Combined: </span>
+          <span className="font-semibold text-gray-900 dark:text-zinc-100">{combinedInfo.totalSize}</span>
+          <span className="text-gray-500 dark:text-zinc-500 mx-2">•</span>
+          <span className="text-gray-700 dark:text-zinc-300">New ratio: </span>
+          <span className="font-semibold text-gray-900 dark:text-zinc-100">
             {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
           </span>
         </div>
@@ -151,12 +151,12 @@ export default function SequentialSearchResults({
           // Collapsed view showing selected book
           <div className="mb-6">
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-gray-700 dark:text-zinc-300 flex items-center gap-2">
                 📚 Selected Book
               </h3>
               <button 
                 onClick={() => onSelectBook(null)}
-                className="text-sm text-pink-300 hover:text-pink-500 font-medium"
+                className="text-sm text-pink-300 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300 font-medium"
                 aria-label="Change selected book"
               >
                 Change
@@ -175,12 +175,12 @@ export default function SequentialSearchResults({
         ) : (
           // Full book list
           <div>
-            <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+            <h3 className="text-base font-semibold text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
               📚 Books
-              <span className="text-sm font-normal text-gray-500">({bookResults.length})</span>
+              <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">({bookResults.length})</span>
             </h3>
             {noBooks ? (
-              <p className="text-gray-500 text-sm">No books found</p>
+              <p className="text-gray-500 dark:text-zinc-400 text-sm">No books found</p>
             ) : (
               <ul className="list-none p-0" role="list" aria-label="Book results">
                 {bookResults.map((result) => (
@@ -206,12 +206,12 @@ export default function SequentialSearchResults({
             // Collapsed view showing selected audiobook
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-base font-semibold text-gray-700 flex items-center gap-2">
+                <h3 className="text-base font-semibold text-gray-700 dark:text-zinc-300 flex items-center gap-2">
                   🎧 Selected Audiobook
                 </h3>
                 <button 
                   onClick={() => onSelectAudiobook(null)}
-                  className="text-sm text-pink-300 hover:text-pink-500 font-medium"
+                  className="text-sm text-pink-300 hover:text-pink-500 dark:text-pink-400 dark:hover:text-pink-300 font-medium"
                   aria-label="Change selected audiobook"
                 >
                   Change
@@ -230,12 +230,12 @@ export default function SequentialSearchResults({
           ) : (
             // Full audiobook list
             <div>
-              <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+              <h3 className="text-base font-semibold text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
                 🎧 Audiobooks
-                <span className="text-sm font-normal text-gray-500">({audiobookResults.length})</span>
+                <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">({audiobookResults.length})</span>
               </h3>
               {noAudiobooks ? (
-                <p className="text-gray-500 text-sm">No audiobooks found</p>
+                <p className="text-gray-500 dark:text-zinc-400 text-sm">No audiobooks found</p>
               ) : (
                 <ul className="list-none p-0" role="list" aria-label="Audiobook results">
                   {audiobookResults.map((result) => (

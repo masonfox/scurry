@@ -18,11 +18,11 @@ export default function DualDownloadButton({
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-[100] pointer-events-none">
-      <div className="bg-white rounded-lg shadow-lg p-4 space-y-3 pointer-events-auto">
+      <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-4 space-y-3 pointer-events-auto">
         {/* Wedge toggles when both selected */}
         {bothSelected && hasWedges && (
-          <div className="flex items-center justify-center gap-3 pb-2 border-b border-gray-200">
-            <span className="text-sm text-gray-700 font-medium">Use FL Wedge:</span>
+          <div className="flex items-center justify-center gap-3 pb-2 border-b border-gray-200 dark:border-zinc-700">
+            <span className="text-sm text-gray-700 dark:text-zinc-300 font-medium">Use FL Wedge:</span>
             <WedgeToggleButton
               active={useBookWedge}
               onClick={onToggleBookWedge}
@@ -42,7 +42,7 @@ export default function DualDownloadButton({
         <button
           onClick={onDownload}
           disabled={disabled}
-          className="w-full rounded-md bg-pink-400 px-5 py-3 text-base font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+          className="w-full rounded-md bg-pink-400 px-5 py-3 text-base font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 dark:disabled:bg-zinc-600 dark:disabled:text-zinc-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

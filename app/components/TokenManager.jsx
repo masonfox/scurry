@@ -110,46 +110,46 @@ export default function TokenManager({ onTokenUpdate }) {
   const isMouseholeMode = tokenData.mouseholeInfo?.enabled;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-800">MAM Token Manager</h2>
+    <div className="bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg p-6">
+      <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-zinc-100">MAM Token Manager</h2>
       
       {isMouseholeMode ? (
         // Mousehole Read-Only View
         <div className="space-y-4">
-          <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
+          <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800/40 rounded-md">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 mt-1">
-                <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <h3 className="text-sm font-semibold text-purple-900 mb-1">
+                <h3 className="text-sm font-semibold text-purple-900 dark:text-purple-300 mb-1">
                   Token Managed by Mousehole
                 </h3>
-                <p className="text-sm text-purple-700">
+                <p className="text-sm text-purple-700 dark:text-purple-400">
                   Your MAM token is dynamically managed by the mousehole service. Token editing is disabled.
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="p-3 bg-gray-50 rounded-md">
-            <p className="text-sm text-gray-600 mb-2">
-              Status: <span className="font-medium text-green-600">
+          <div className="p-3 bg-gray-50 dark:bg-zinc-700 rounded-md">
+            <p className="text-sm text-gray-600 dark:text-zinc-400 mb-2">
+              Status: <span className="font-medium text-green-600 dark:text-green-400">
                 {tokenData.exists ? 'Token active' : 'Waiting for mousehole...'}
               </span>
             </p>
             {tokenData.exists && (
               <>
-                <p className="text-sm text-gray-600 mb-1">
-                  Token: <span className="font-mono text-gray-800">{tokenData.token}</span>
+                <p className="text-sm text-gray-600 dark:text-zinc-400 mb-1">
+                  Token: <span className="font-mono text-gray-800 dark:text-zinc-200">{tokenData.token}</span>
                 </p>
-                <p className="text-sm text-gray-600 mb-1">
+                <p className="text-sm text-gray-600 dark:text-zinc-400 mb-1">
                   Length: <span className="font-medium">{tokenData.fullLength} characters</span>
                 </p>
                 {tokenData.mouseholeInfo?.lastUpdate && (
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-gray-600 dark:text-zinc-400">
                     Last updated: <span className="font-medium">
                       {new Date(tokenData.mouseholeInfo.lastUpdate).toLocaleString()}
                     </span>
@@ -157,22 +157,22 @@ export default function TokenManager({ onTokenUpdate }) {
                 )}
               </>
             )}
-            <p className="text-xs text-gray-500 mt-2">
-              Source: <code className="bg-gray-200 px-1 rounded">{tokenData.mouseholeInfo?.stateFile || tokenData.location}</code>
+            <p className="text-xs text-gray-500 dark:text-zinc-500 mt-2">
+              Source: <code className="bg-gray-200 dark:bg-zinc-600 px-1 rounded">{tokenData.mouseholeInfo?.stateFile || tokenData.location}</code>
             </p>
           </div>
 
-          <div className="py-4 px-6 bg-blue-50 rounded-md">
-            <p className="text-sm text-blue-800">
+          <div className="py-4 px-6 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
               <strong>About Mousehole Integration:</strong>
             </p>
-            <ul className="text-sm text-blue-700 mt-1 list-disc list-inside space-y-1">
+            <ul className="text-sm text-blue-700 dark:text-blue-400 mt-1 list-disc list-inside space-y-1">
               <li>Tokens are automatically rotated when your IP changes</li>
               <li>No manual token updates required</li>
               <li>Scurry reads the token from mousehole&apos;s state file</li>
             </ul>
-            <p className="text-xs text-blue-600 mt-2">
-              To disable mousehole mode, set <code className="bg-blue-100 px-1 rounded">MOUSEHOLE_ENABLED=false</code> in your .env file.
+            <p className="text-xs text-blue-600 dark:text-blue-500 mt-2">
+              To disable mousehole mode, set <code className="bg-blue-100 dark:bg-blue-900/40 px-1 rounded">MOUSEHOLE_ENABLED=false</code> in your .env file.
             </p>
           </div>
         </div>
@@ -180,20 +180,20 @@ export default function TokenManager({ onTokenUpdate }) {
         // Standard Manual Token Management View
         <>
           {/* Current Token Status */}
-          <div className="p-3 bg-gray-50 rounded-md">
+          <div className="p-3 bg-gray-50 dark:bg-zinc-700 rounded-md">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600">
-                  Status: <span className={`font-medium ${tokenData.exists ? 'text-green-600' : 'text-red-600'}`}>
+                <p className="text-sm text-gray-600 dark:text-zinc-400">
+                  Status: <span className={`font-medium ${tokenData.exists ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                     {tokenData.exists ? 'Token configured' : 'No token found'}
                   </span>
                 </p>
                 {tokenData.exists && (
                   <>
-                    <p className="text-sm text-gray-600">
-                      Token: <span className="font-mono text-gray-800">{tokenData.token}</span>
+                    <p className="text-sm text-gray-600 dark:text-zinc-400">
+                      Token: <span className="font-mono text-gray-800 dark:text-zinc-200">{tokenData.token}</span>
                     </p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-zinc-400">
                       Length: <span className="font-medium">{tokenData.fullLength} characters</span>
                     </p>
                   </>
@@ -204,14 +204,14 @@ export default function TokenManager({ onTokenUpdate }) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => setShowTokenInput(!showTokenInput)}
-                    className="px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded cursor-pointer hover:bg-blue-200 transition-colors"
+                    className="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-400 rounded cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-900/60 transition-colors"
                   >
                     Update
                   </button>
                   <button
                     onClick={deleteToken}
                     disabled={loading}
-                    className="px-3 py-1 text-sm bg-red-100 text-red-700 cursor-pointer rounded hover:bg-red-200 transition-colors disabled:opacity-50"
+                    className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 cursor-pointer rounded hover:bg-red-200 dark:hover:bg-red-900/60 transition-colors disabled:opacity-50"
                   >
                     Delete
                   </button>
@@ -224,7 +224,7 @@ export default function TokenManager({ onTokenUpdate }) {
           {showTokenInput && (
             <div className="space-y-4 mt-4">
               <div>
-                <label htmlFor="mam-token" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="mam-token" className="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">
                   MAM Session Token
                 </label>
                 <textarea
@@ -232,7 +232,7 @@ export default function TokenManager({ onTokenUpdate }) {
                   value={newToken}
                   onChange={(e) => setNewToken(e.target.value)}
                   placeholder="Paste your MAM session token here..."
-                  className="w-full p-3 border border-gray-300 rounded-md resize-none font-mono text-sm focus:outline-none focus:ring-2 focus:ring-pink-200 focus:border-pink-200"
+                  className="w-full p-3 border border-gray-300 dark:border-zinc-600 rounded-md resize-none font-mono text-sm bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 focus:border-pink-200 dark:focus:border-pink-700"
                   rows={4}
                   disabled={loading}
                 />
@@ -255,7 +255,7 @@ export default function TokenManager({ onTokenUpdate }) {
                       setMessage(null);
                     }}
                     disabled={loading}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded cursor-pointer"
+                    className="bg-gray-200 dark:bg-zinc-600 hover:bg-gray-300 dark:hover:bg-zinc-500 text-gray-700 dark:text-zinc-200 font-semibold py-2 px-4 rounded cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -268,24 +268,24 @@ export default function TokenManager({ onTokenUpdate }) {
           {message && (
             <div className={`mt-4 p-3 rounded-md ${
               message.type === 'error' 
-                ? 'bg-red-50 text-red-700 border border-red-200' 
-                : 'bg-green-50 text-green-700 border border-green-200'
+                ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/40' 
+                : 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800/40'
             }`}>
               {message.text}
             </div>
           )}
 
           {/* Help Text */}
-          <div className="mt-4 py-4 px-6 bg-blue-50 rounded-md">
-            <p className="text-sm text-blue-800">
+          <div className="mt-4 py-4 px-6 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
               <strong>How to get your MAM session token:</strong>
             </p>
-            <ol className="text-sm text-blue-700 mt-1 list-decimal list-inside space-y-1">
+            <ol className="text-sm text-blue-700 dark:text-blue-400 mt-1 list-decimal list-inside space-y-1">
               <li>Go to your <a href="https://www.myanonamouse.net/preferences/index.php?view=security" className="underline" target="_blank" rel="noopener noreferrer">Security Preferences</a>.</li>
               <li>Create a session with the IP where you&apos;ll run Scurry.</li>
               <li>Copy your session token value and paste it above.</li>
             </ol>
-            <i className="mt-2 block text-xs text-blue-800">Note: do not prepend <code className="bg-gray-200 text-red-600 p-1 rounded">MAM_ID=</code> above - just the raw token value.</i>
+            <i className="mt-2 block text-xs text-blue-800 dark:text-blue-400">Note: do not prepend <code className="bg-gray-200 dark:bg-zinc-600 text-red-600 dark:text-red-400 p-1 rounded">MAM_ID=</code> above - just the raw token value.</i>
           </div>
         </>
       )}

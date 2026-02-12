@@ -1,4 +1,5 @@
 import React from "react";
+import ThemeProvider from "./components/ThemeProvider";
 
 export const viewport = {
   themeColor: [
@@ -26,8 +27,25 @@ import "./styles/globals.css";
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('scurry_theme');
+                  var isDark = theme === 'dark' || ((!theme || theme === 'auto') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+                  if (isDark) document.documentElement.classList.add('dark');
+                } catch(e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
+      <body className="bg-white dark:bg-zinc-900 transition-colors">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

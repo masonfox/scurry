@@ -49,7 +49,7 @@ export default function SearchForm({
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={`Search ${searchCategory}...`}
-            className="block w-full rounded-md sm:rounded-l-md sm:rounded-r-none bg-white px-4 py-2.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-200 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6 pr-10"
+            className="block w-full rounded-md sm:rounded-l-md sm:rounded-r-none bg-white dark:bg-zinc-800 px-4 py-2.5 text-base text-gray-900 dark:text-zinc-100 outline-1 -outline-offset-1 outline-gray-200 dark:outline-zinc-600 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 sm:text-sm/6 pr-10"
             autoComplete="off"
             spellCheck="false"
           />
@@ -58,7 +58,7 @@ export default function SearchForm({
               type="button"
               aria-label="Clear search"
               onClick={handleClearSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-pink-400 focus:outline-none"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 hover:text-pink-400 dark:hover:text-pink-400 focus:outline-none"
               style={{ padding: 0, background: 'none', border: 'none', cursor: 'pointer' }}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24">
@@ -70,7 +70,7 @@ export default function SearchForm({
         <select
           value={searchCategory}
           onChange={(e) => onCategoryChange(e.target.value)}
-          className="bg-gray-100 border-t border-gray-200 sm:border-t-0 sm:border-l px-3 py-2.5 mt-2 sm:mt-0 text-sm text-gray-700 rounded-md sm:rounded-l-none sm:rounded-r-md outline-1 -outline-offset-1 outline-gray-200 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 cursor-pointer w-full sm:w-auto sm:min-w-36 appearance-none bg-no-repeat bg-right bg-[length:16px_16px]"
+          className="bg-gray-100 dark:bg-zinc-700 border-t border-gray-200 dark:border-zinc-600 sm:border-t-0 sm:border-l px-3 py-2.5 mt-2 sm:mt-0 text-sm text-gray-700 dark:text-zinc-200 rounded-md sm:rounded-l-none sm:rounded-r-md outline-1 -outline-offset-1 outline-gray-200 dark:outline-zinc-600 focus:outline-2 focus:-outline-offset-2 focus:outline-pink-400 cursor-pointer w-full sm:w-auto sm:min-w-36 appearance-none bg-no-repeat bg-right bg-[length:16px_16px]"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
             backgroundPosition: 'right 0.5rem center'
@@ -82,7 +82,7 @@ export default function SearchForm({
         </select>
       </div>
       <button 
-        className="rounded-md bg-pink-100 px-5 py-2.5 text-sm font-semibold text-pink-500 hover:bg-pink-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer min-w-[100px] flex items-center justify-center gap-2" 
+        className="rounded-md bg-pink-100 dark:bg-pink-900/40 px-5 py-2.5 text-sm font-semibold text-pink-500 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-900/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer min-w-[100px] flex items-center justify-center gap-2" 
         disabled={loading || !q.trim()}
       >
         <>

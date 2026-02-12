@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import TokenManager from './TokenManager';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header({ onTokenUpdate, mamTokenExists }) {
   const [showTokenManager, setShowTokenManager] = useState(false);
@@ -20,31 +21,34 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
   };
 
   return (
-    <div className="p-7 rounded-lg bg-gray-50">
+    <div className="p-7 rounded-lg bg-gray-50 dark:bg-zinc-800">
       <div>
-        <h1 className="text-3xl font-bold flex items-center -ml-1">
-          <span className="mr-1">
-            <Image
-              src="/images/logo.png"
-              alt="Scurry Logo"
-              width={36}
-              height={36}
-              style={{ display: 'inline', verticalAlign: 'middle', height: 36 }}
-              priority
-              unoptimized
-            />
-          </span>
-          <span className="text-gray-800">Scurry</span>
-        </h1>
-        <p className="mt-2 text-gray-500">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks books & audiobooks into qBittorrent</p>
+        <div className="flex items-start justify-between">
+          <h1 className="text-3xl font-bold flex items-center -ml-1">
+            <span className="mr-1">
+              <Image
+                src="/images/logo.png"
+                alt="Scurry Logo"
+                width={36}
+                height={36}
+                style={{ display: 'inline', verticalAlign: 'middle', height: 36 }}
+                priority
+                unoptimized
+              />
+            </span>
+            <span className="text-gray-800 dark:text-zinc-100">Scurry</span>
+          </h1>
+          <ThemeToggle />
+        </div>
+        <p className="mt-2 text-gray-500 dark:text-zinc-400">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks books & audiobooks into qBittorrent</p>
         
         <div className="mt-4 flex gap-3">
           <button
             onClick={() => setShowTokenManager(!showTokenManager)}
             className={`py-2 px-4 rounded font-semibold transition-colors cursor-pointer ${
               mamTokenExists 
-                ? 'bg-green-100 hover:bg-green-200 text-green-700' 
-                : 'bg-orange-100 hover:bg-orange-200 text-orange-700'
+                ? 'bg-green-100 hover:bg-green-200 text-green-700 dark:bg-green-900/40 dark:hover:bg-green-900/60 dark:text-green-400' 
+                : 'bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/40 dark:hover:bg-orange-900/60 dark:text-orange-400'
             }`}
             title={mamTokenExists ? 'Manage MAM Token' : 'MAM Token Missing - Click to Add'}
           >
@@ -53,7 +57,7 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
           
           <button
             onClick={handleLogout}
-            className="bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded cursor-pointer"
+            className="bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-zinc-700 dark:hover:bg-zinc-600 dark:text-zinc-200 font-semibold py-2 px-4 rounded cursor-pointer"
           >
             Logout
           </button>

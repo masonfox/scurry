@@ -24,22 +24,22 @@ export default function MobileBottomSheet({
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed bottom-0 left-0 right-0 h-48 bg-gray-50 rounded-xl z-40 border-t border-gray-200"></div>
+      <div className="fixed bottom-0 left-0 right-0 h-48 bg-gray-50 dark:bg-zinc-900 rounded-xl z-40 border-t border-gray-200 dark:border-zinc-700"></div>
 
       {/* Content container - single fixed element */}
       <div className="fixed bottom-4 left-4 right-4 z-[100] pointer-events-none">
         <div className="pointer-events-auto space-y-3">
           {/* Progress indicator (only show when not both selected) */}
           {!bothSelected && (
-            <div className="bg-white p-3 rounded-lg border border-gray-200">
+            <div className="bg-white dark:bg-zinc-800 p-3 rounded-lg border border-gray-200 dark:border-zinc-700">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-700 whitespace-nowrap">
+                <span className="text-sm text-gray-700 dark:text-zinc-300 whitespace-nowrap">
                   <span>Step {currentStep} of 2:</span>
                   <span className="ml-1 font-medium">Select {stepText}</span>
                 </span>
-                <span className="text-sm text-gray-500">{progress}%</span>
+                <span className="text-sm text-gray-500 dark:text-zinc-400">{progress}%</span>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="w-full bg-gray-200 dark:bg-zinc-700 rounded-full h-2">
                 <div
                   className="bg-pink-400 h-2 rounded-full transition-all duration-500 ease-in-out"
                   style={{ width: `${progress}%` }}
@@ -50,9 +50,9 @@ export default function MobileBottomSheet({
 
           {/* Wedge selector panel (only show when both selected and has wedges) */}
           {bothSelected && hasWedges && (showBookWedge || showAudiobookWedge) && (
-            <div className="bg-white p-3 rounded-lg border border-gray-200">
+            <div className="bg-white dark:bg-zinc-800 p-3 rounded-lg border border-gray-200 dark:border-zinc-700">
               <div className="flex items-center justify-center gap-3">
-                <span className="text-sm text-gray-700 font-medium">Use FL Wedge:</span>
+                <span className="text-sm text-gray-700 dark:text-zinc-300 font-medium">Use FL Wedge:</span>
                 {showBookWedge && (
                   <WedgeToggleButton
                     active={useBookWedge}
@@ -74,11 +74,11 @@ export default function MobileBottomSheet({
           )}
 
           {/* Download button panel */}
-          <div className="bg-white rounded-lg shadow-lg p-4">
+          <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-lg p-4">
             <button
               onClick={onDownload}
               disabled={disabled}
-              className="w-full rounded-md bg-pink-400 px-5 py-3 text-base font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
+              className="w-full rounded-md bg-pink-400 px-5 py-3 text-base font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 dark:disabled:bg-zinc-600 dark:disabled:text-zinc-400 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <>

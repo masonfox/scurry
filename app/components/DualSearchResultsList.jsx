@@ -28,7 +28,7 @@ export default function DualSearchResultsList({
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p className="text-gray-600">Searching both categories...</p>
+          <p className="text-gray-600 dark:text-zinc-400">Searching both categories...</p>
         </div>
       </div>
     );
@@ -39,7 +39,7 @@ export default function DualSearchResultsList({
   const noBooks = bookResults.length === 0;
 
   if (noResults) {
-    return <p className="text-gray-500 mt-5">No results found for either category. Try a different search...</p>;
+    return <p className="text-gray-500 dark:text-zinc-400 mt-5">No results found for either category. Try a different search...</p>;
   }
 
   // Calculate progress for desktop
@@ -91,7 +91,7 @@ export default function DualSearchResultsList({
     <button
       onClick={onDownload}
       disabled={disabled}
-      className="rounded-md bg-pink-400 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 disabled:cursor-not-allowed cursor-pointer min-w-[100px] flex items-center justify-center gap-2 h-full"
+      className="rounded-md bg-pink-400 px-5 py-2.5 text-sm font-semibold text-white hover:bg-pink-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-pink-500 disabled:bg-gray-300 disabled:text-gray-600 dark:disabled:bg-zinc-600 dark:disabled:text-zinc-400 disabled:cursor-not-allowed cursor-pointer min-w-[100px] flex items-center justify-center gap-2 h-full"
       aria-label="Download selected book and audiobook"
     >
       {downloadLoading ? (
@@ -118,7 +118,7 @@ export default function DualSearchResultsList({
   return (
     <div className="mt-6">
       {/* Integrated Header: 2-Row Layout */}
-      <div className="mb-8 p-5 bg-white rounded-xl border border-gray-200">
+      <div className="mb-8 p-5 bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700">
         {/* Row 1: Progress + Download Button */}
         <div className="flex items-center gap-6">
           <ProgressIndicator 
@@ -140,7 +140,7 @@ export default function DualSearchResultsList({
             {/* FL Wedge toggles */}
             {userStats?.flWedges > 0 && (selectedBook?.freeleech === false || selectedAudiobook?.freeleech === false) ? (
               <div className="flex items-center gap-3">
-                <span className="text-gray-600 font-medium">Use FL Wedge:</span>
+                <span className="text-gray-600 dark:text-zinc-400 font-medium">Use FL Wedge:</span>
                 {!selectedBook?.freeleech && (
                   <WedgeToggleButton
                     active={useBookWedge}
@@ -163,19 +163,19 @@ export default function DualSearchResultsList({
             )}
             
             {/* Center Separator */}
-            <div className="h-5 w-px bg-gray-300"></div>
+            <div className="h-5 w-px bg-gray-300 dark:bg-zinc-600"></div>
             
             {/* Combined info */}
             {combinedInfo && (
-              <div className="flex items-center gap-4 text-gray-700">
+              <div className="flex items-center gap-4 text-gray-700 dark:text-zinc-300">
                 <span className="flex items-center gap-1.5">
                   <span className="text-base">📦</span>
-                  <span className="font-semibold text-gray-900">{combinedInfo.totalSize}</span>
+                  <span className="font-semibold text-gray-900 dark:text-zinc-100">{combinedInfo.totalSize}</span>
                 </span>
-                <span className="text-gray-400">•</span>
+                <span className="text-gray-400 dark:text-zinc-500">•</span>
                 <span className="flex items-center gap-1.5">
                   <span className="text-base">📊</span>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-gray-900 dark:text-zinc-100">
                     {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
                   </span>
                 </span>
@@ -189,12 +189,12 @@ export default function DualSearchResultsList({
       <div className="grid grid-cols-2 gap-6">
       {/* Left Column: Books */}
       <div>
-        <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
           📚 Books
-          <span className="text-sm font-normal text-gray-500">({bookResults.length})</span>
+          <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">({bookResults.length})</span>
         </h3>
         {noBooks ? (
-          <p className="text-gray-500 text-sm">No books found</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm">No books found</p>
         ) : (
           <ul className="list-none p-0" role="list" aria-label="Book results">
             {bookResults.map((result) => (
@@ -213,12 +213,12 @@ export default function DualSearchResultsList({
 
       {/* Right Column: Audiobooks */}
       <div>
-        <h3 className="text-base font-semibold text-gray-700 mb-4 flex items-center gap-2">
+        <h3 className="text-base font-semibold text-gray-700 dark:text-zinc-300 mb-4 flex items-center gap-2">
           🎧 Audiobooks
-          <span className="text-sm font-normal text-gray-500">({audiobookResults.length})</span>
+          <span className="text-sm font-normal text-gray-500 dark:text-zinc-400">({audiobookResults.length})</span>
         </h3>
         {noAudiobooks ? (
-          <p className="text-gray-500 text-sm">No audiobooks found</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm">No audiobooks found</p>
         ) : (
           <ul className="list-none p-0" role="list" aria-label="Audiobook results">
             {audiobookResults.map((result) => (
