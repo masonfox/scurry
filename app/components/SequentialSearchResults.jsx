@@ -269,6 +269,7 @@ const resultShape = PropTypes.shape({
   torrentUrl: PropTypes.string.isRequired,
   downloadUrl: PropTypes.string.isRequired,
   vip: PropTypes.bool,
+  freeleech: PropTypes.bool,
   snatched: PropTypes.bool
 });
 

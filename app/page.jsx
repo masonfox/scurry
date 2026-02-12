@@ -346,6 +346,10 @@ function SearchPage() {
     if (!selectedAudiobook || !selectedBook) return;
     if (selectedAudiobook.snatched || selectedBook.snatched) return;
     
+    // Derive effective wedge values (only use wedge if item is actually eligible)
+    const effectiveAudiobookWedge = useAudiobookWedge && !selectedAudiobook.freeleech && !selectedAudiobook.vip && !selectedAudiobook.snatched;
+    const effectiveBookWedge = useBookWedge && !selectedBook.freeleech && !selectedBook.vip && !selectedBook.snatched;
+    
     setDualDownloadLoading(true);
     setMessage(null);
     
@@ -360,7 +364,7 @@ function SearchPage() {
             downloadUrl: selectedAudiobook.downloadUrl,
             torrentId: selectedAudiobook.id,
             category: 'audiobooks',
-            useWedge: useAudiobookWedge
+            useWedge: effectiveAudiobookWedge
           })
         }),
         fetch('/api/add', {
@@ -371,7 +375,7 @@ function SearchPage() {
             downloadUrl: selectedBook.downloadUrl,
             torrentId: selectedBook.id,
             category: 'books',
-            useWedge: useBookWedge
+            useWedge: effectiveBookWedge
           })
         })
       ]);
@@ -386,15 +390,15 @@ function SearchPage() {
       const bookSuccess = bookRes.ok && bookData.ok;
       
       // Refresh stats if any wedge was used
-      if ((useAudiobookWedge && audiobookSuccess) || (useBookWedge && bookSuccess)) {
+      if ((effectiveAudiobookWedge && audiobookSuccess) || (effectiveBookWedge && bookSuccess)) {
         fetchUserStats();
       }
       
       if (audiobookSuccess && bookSuccess) {
         // Both succeeded
         const wedgeInfo = [];
-        if (useAudiobookWedge) wedgeInfo.push('audiobook FL');
-        if (useBookWedge) wedgeInfo.push('book FL');
+        if (effectiveAudiobookWedge) wedgeInfo.push('audiobook FL');
+        if (effectiveBookWedge) wedgeInfo.push('book FL');
         const wedgeText = wedgeInfo.length > 0 ? ` (${wedgeInfo.join(', ')} applied)` : '';
         
         setMessage({ 
