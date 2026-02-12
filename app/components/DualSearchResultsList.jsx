@@ -87,6 +87,11 @@ export default function DualSearchResultsList({
   }
 
   // Download button component - matching search button style with icon
+  const hasWedges = userStats?.flWedges > 0;
+  const showBookWedge = hasWedges && selectedBook?.freeleech === false && !selectedBook?.vip;
+  const showAudiobookWedge = hasWedges && selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip;
+  const showWedges = showBookWedge || showAudiobookWedge;
+
   const downloadButton = (
     <button
       onClick={onDownload}
@@ -136,12 +141,12 @@ export default function DualSearchResultsList({
         
         {/* Row 2: FL Wedge toggles + Separator + Combined Info (only when both selected) */}
         {bothSelected && (
-          <div className="flex items-center justify-between text-sm mt-4">
+           <div className="flex items-center text-sm mt-4 gap-4">
             {/* FL Wedge toggles */}
-            {userStats?.flWedges > 0 && ((selectedBook?.freeleech === false && !selectedBook?.vip) || (selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip)) ? (
+            {showWedges && (
               <div className="flex items-center gap-3">
                 <span className="text-gray-600 dark:text-zinc-400 font-medium">Use FL Wedge:</span>
-                {!selectedBook?.freeleech && !selectedBook?.vip && (
+                {showBookWedge && (
                   <WedgeToggleButton
                     active={useBookWedge}
                     onClick={onToggleBookWedge}
@@ -149,7 +154,7 @@ export default function DualSearchResultsList({
                     size="large"
                   />
                 )}
-                {!selectedAudiobook?.freeleech && !selectedAudiobook?.vip && (
+                {showAudiobookWedge && (
                   <WedgeToggleButton
                     active={useAudiobookWedge}
                     onClick={onToggleAudiobookWedge}
@@ -158,16 +163,11 @@ export default function DualSearchResultsList({
                   />
                 )}
               </div>
-            ) : (
-              <div></div>
             )}
-            
-            {/* Center Separator */}
-            <div className="h-5 w-px bg-gray-300 dark:bg-zinc-600"></div>
             
             {/* Combined info */}
             {combinedInfo && (
-              <div className="flex items-center gap-4 text-gray-700 dark:text-zinc-300">
+              <div className="flex items-center gap-4 text-gray-700 dark:text-zinc-300 ml-auto">
                 <span className="flex items-center gap-1.5">
                   <span className="text-base">📦</span>
                   <span className="font-semibold text-gray-900 dark:text-zinc-100">{combinedInfo.totalSize}</span>
