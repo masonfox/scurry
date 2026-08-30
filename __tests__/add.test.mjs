@@ -74,7 +74,7 @@ describe('add route', () => {
     expect(userStatsRoute.bustStatsCache).not.toHaveBeenCalled();
   });
 
-  describe('FL via ?fl URL parameter', () => {
+  describe('FL via &fl URL parameter', () => {
     const BASE_URL = 'https://www.myanonamouse.net/tor/download.php/abc123token';
 
     beforeEach(() => {
@@ -96,10 +96,10 @@ describe('add route', () => {
       expect(json.ok).toBe(true);
       expect(json.wedgeUsed).toBe(true);
       const [, , urlPassed] = qbittorrent.qbAddUrl.mock.calls[0];
-      expect(urlPassed).toBe(`${BASE_URL}?fl`);
+      expect(urlPassed).toBe(`${BASE_URL}&fl`);
     });
 
-    it('does NOT append ?fl when useWedge is false', async () => {
+    it('does NOT append &fl when useWedge is false', async () => {
       const req = {
         json: async () => ({
           title: 'Test Book',
@@ -117,7 +117,7 @@ describe('add route', () => {
       expect(urlPassed).toBe(BASE_URL);
     });
 
-    it('does NOT append ?fl when useWedge is omitted', async () => {
+    it('does NOT append &fl when useWedge is omitted', async () => {
       const req = {
         json: async () => ({
           title: 'Test Book',
@@ -176,7 +176,7 @@ describe('add route', () => {
       await POST(req);
 
       const [, , urlPassed, categoryPassed] = qbittorrent.qbAddUrl.mock.calls[0];
-      expect(urlPassed).toBe(`${BASE_URL}?fl`);
+      expect(urlPassed).toBe(`${BASE_URL}&fl`);
       expect(categoryPassed).toBe('audiobooks');
     });
   });

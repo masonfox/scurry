@@ -26,14 +26,14 @@ export function buildMamDownloadUrl(dl) {
 }
 
 /**
- * Append the ?fl query parameter to a MAM download URL to force freeleech
- * on the download, bypassing the need for a personal FL wedge API call.
+ * Append &fl to a MAM download URL to force freeleech on the download,
+ * bypassing the need for a personal FL wedge API call.
  * @param {string} url - Existing MAM download URL
- * @returns {string|null} - URL with ?fl appended, or null if url is invalid
+ * @returns {string|null} - URL with &fl appended, or null if url is invalid
  */
 export function buildFLDownloadUrl(url) {
   if (!url || typeof url !== "string") return null;
-  return `${url}?fl`;
+  return `${url}&fl`;
 }
 
 export function buildMamTorrentUrl(id) {
