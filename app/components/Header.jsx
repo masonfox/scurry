@@ -38,7 +38,7 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
             </span>
             <span className="text-gray-800 dark:text-zinc-100">Scurry</span>
             <span className="text-xs font-normal text-gray-400 dark:text-zinc-500 ml-2.5 mt-2 self-center">
-              (v{process.env.NEXT_PUBLIC_APP_VERSION})
+              v{process.env.NEXT_PUBLIC_APP_VERSION}
             </span>
           </h1>
           <ThemeToggle />
