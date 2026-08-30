@@ -281,7 +281,6 @@ function SearchPage() {
         body: JSON.stringify({
           title: item.title,
           downloadUrl: item.downloadUrl,
-          torrentId: item.id,
           category: qbCategory,
           useWedge
         })
@@ -359,24 +358,22 @@ function SearchPage() {
         fetch('/api/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: selectedAudiobook.title,
-            downloadUrl: selectedAudiobook.downloadUrl,
-            torrentId: selectedAudiobook.id,
-            category: 'audiobooks',
-            useWedge: effectiveAudiobookWedge
-          })
+            body: JSON.stringify({
+              title: selectedAudiobook.title,
+              downloadUrl: selectedAudiobook.downloadUrl,
+              category: 'audiobooks',
+              useWedge: effectiveAudiobookWedge
+            })
         }),
         fetch('/api/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: selectedBook.title,
-            downloadUrl: selectedBook.downloadUrl,
-            torrentId: selectedBook.id,
-            category: 'books',
-            useWedge: effectiveBookWedge
-          })
+            body: JSON.stringify({
+              title: selectedBook.title,
+              downloadUrl: selectedBook.downloadUrl,
+              category: 'books',
+              useWedge: effectiveBookWedge
+            })
         })
       ]);
       
