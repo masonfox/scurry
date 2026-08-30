@@ -37,6 +37,14 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
               />
             </span>
             <span className="text-gray-800 dark:text-zinc-100">Scurry</span>
+            <a
+              href={`https://github.com/masonfox/scurry/releases/tag/v${process.env.NEXT_PUBLIC_APP_VERSION ?? ''}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-normal text-gray-400 dark:text-zinc-500 ml-2.5 mt-2 hover:text-gray-600 dark:hover:text-zinc-300 transition-colors"
+            >
+              v{process.env.NEXT_PUBLIC_APP_VERSION ?? '—'}
+            </a>
           </h1>
           <ThemeToggle />
         </div>
