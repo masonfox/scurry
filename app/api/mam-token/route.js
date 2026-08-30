@@ -24,7 +24,7 @@ export async function GET() {
       try {
         const stateFile = config.mouseholeStateFile;
         const state = JSON.parse(fs.readFileSync(stateFile, "utf8"));
-        const decodedToken = decodeURIComponent(state.currentCookie);
+        const decodedToken = decodeURIComponent(state.cookie ?? state.currentCookie);
         
         return NextResponse.json({
           exists: true,
