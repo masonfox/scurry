@@ -18,10 +18,10 @@ export async function POST(req) {
     return NextResponse.json({ ok: false, error: "No magnet or torrentUrl provided" }, { status: 400 });
   }
 
-  // When freeleech is requested, append ?fl to the download URL.
+  // When freeleech is requested, append &fl to the download URL.
   // This forces a personal freeleech on the download server-side without
   // requiring a separate bonusBuy API call (which is not allowed via API).
-  const urlOrMagnet = useWedge ? buildFLDownloadUrl(downloadUrl) : downloadUrl;
+  const urlOrMagnet = useWedge ? (buildFLDownloadUrl(downloadUrl) ?? downloadUrl) : downloadUrl;
   
   try {
     const cookie = await qbLogin(config.qbUrl, config.qbUser, config.qbPass);

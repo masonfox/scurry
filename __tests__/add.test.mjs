@@ -81,7 +81,7 @@ describe('add route', () => {
       vi.clearAllMocks();
     });
 
-    it('appends ?fl to the download URL when useWedge is true', async () => {
+    it('appends &fl to the download URL when useWedge is true', async () => {
       const req = {
         json: async () => ({
           title: 'Test Book',
