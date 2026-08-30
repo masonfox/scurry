@@ -25,6 +25,17 @@ export function buildMamDownloadUrl(dl) {
   return `${MAM_BASE}/tor/download.php/${dl}`;
 }
 
+/**
+ * Append the ?fl query parameter to a MAM download URL to force freeleech
+ * on the download, bypassing the need for a personal FL wedge API call.
+ * @param {string} url - Existing MAM download URL
+ * @returns {string|null} - URL with ?fl appended, or null if url is invalid
+ */
+export function buildFLDownloadUrl(url) {
+  if (!url || typeof url !== "string") return null;
+  return `${url}?fl`;
+}
+
 export function buildMamTorrentUrl(id) {
   if (!id) return null;
   return `${MAM_BASE}/t/${id}`;
