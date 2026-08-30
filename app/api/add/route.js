@@ -26,7 +26,7 @@ export async function POST(req) {
   try {
     const cookie = await qbLogin(config.qbUrl, config.qbUser, config.qbPass);
     await qbAddUrl(config.qbUrl, cookie, urlOrMagnet, category);
-    console.log(`Added to qBittorrent: ${title} (${category})${useWedge ? ' with FL (?fl)' : ''}`);
+    console.log(`Added to qBittorrent: ${title} (${category})${useWedge ? ' with FL (&fl)' : ''}`);
     
     // Bust user stats cache since download affects stats
     bustStatsCache();
