@@ -41,12 +41,6 @@ export default function DualSearchResultsList({
   const bothSelected = selectedAudiobook && selectedBook;
   const disabled = !bothSelected || downloadLoading;
 
-  // Download button component - matching search button style with icon
-  const hasWedges = userStats?.flWedges > 0;
-  const showBookWedge = hasWedges && selectedBook?.freeleech === false && !selectedBook?.vip && !selectedBook?.snatched;
-  const showAudiobookWedge = hasWedges && selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip && !selectedAudiobook?.snatched;
-  const showWedges = showBookWedge || showAudiobookWedge;
-
   const downloadButton = (
     <button
       onClick={onDownload}
@@ -86,7 +80,6 @@ export default function DualSearchResultsList({
           <div className="flex-shrink-0 ml-auto">
             {downloadButton}
           </div>
-        </div>
         </div>
       </div>
       
