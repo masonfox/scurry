@@ -298,7 +298,7 @@ function SettingsPage() {
     <main className="my-4 p-4 w-full max-w-4xl mx-auto">
       {/* Header with integrated navigation */}
       <div className="rounded-lg bg-gray-50 dark:bg-zinc-800 overflow-hidden">
-        <div className="p-7 pb-0 flex items-center gap-3">
+        <div className="pt-7 pr-7 pl-5 pb-0 flex items-center gap-2.5">
           <button
             onClick={handleBackClick}
             className="p-2 rounded-md hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors cursor-pointer"
