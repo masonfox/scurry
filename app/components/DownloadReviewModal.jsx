@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import PropTypes from 'prop-types';
 import { HardDrive, FileType, Users, UserMinus, Download, Calendar, ExternalLink } from 'lucide-react';
@@ -56,7 +56,7 @@ function formatAddedDate(dateStr) {
  * - items: array of { result, category, useWedge, onToggleWedge } objects (1 or 2)
  * - userStats: user stats for ratio projection
  * - settings: tag/category settings from API
- * - onConfirm: (items, selectedTags) => void
+ * - onConfirm: (items, perItemTags) => void  — perItemTags is an array parallel to items
  * - onCancel: () => void
  * - loading: boolean (download in progress)
  */
@@ -71,25 +71,16 @@ export default function DownloadReviewModal({
   const tagsEnabled = settings?.tags?.enabled || false;
   const availableTags = settings?.tags?.available || [];
 
-  // Determine default tags based on the items' categories
-  const getDefaultTags = useCallback(() => {
-    if (!tagsEnabled || availableTags.length === 0) return [];
+  // Determine default tags for a single item based on its category
+  const [selectedTagsPerItem, setSelectedTagsPerItem] = useState(() => {
+    if (!tagsEnabled || availableTags.length === 0) return items.map(() => []);
     const defaults = settings?.tags?.defaults || {};
-    const defaultSet = new Set();
-    for (const item of items) {
+    return items.map((item) => {
       const cat = item.category || '';
       const defs = defaults[cat] || [];
-      const defList = Array.isArray(defs) ? defs : [];
-      for (const def of defList) {
-        if (def && availableTags.includes(def)) {
-          defaultSet.add(def);
-        }
-      }
-    }
-    return [...defaultSet];
-  }, [tagsEnabled, availableTags, settings, items]);
-
-  const [selectedTags, setSelectedTags] = useState(getDefaultTags);
+      return Array.isArray(defs) ? defs.filter((d) => d && availableTags.includes(d)) : [];
+    });
+  });
   const [isClosing, setIsClosing] = useState(false);
   const backdropRef = useRef(null);
   const panelRef = useRef(null);
@@ -111,14 +102,18 @@ export default function DownloadReviewModal({
     return () => { document.body.style.overflow = ''; };
   }, []);
 
-  const handleToggleTag = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+  const handleToggleTag = (tag, itemIndex) => {
+    setSelectedTagsPerItem((prev) =>
+      prev.map((tags, i) =>
+        i === itemIndex
+          ? tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]
+          : tags
+      )
     );
   };
 
   const handleConfirm = () => {
-    onConfirm(items, selectedTags);
+    onConfirm(items, selectedTagsPerItem);
   };
 
   const handleClose = () => {
@@ -219,20 +214,12 @@ export default function DownloadReviewModal({
                 hasWedges={hasWedges}
                 isDual={isDual}
                 label={isDual ? (item.category === 'audiobooks' ? 'Audiobook' : 'Book') : null}
+                tagsEnabled={tagsEnabled}
+                availableTags={availableTags}
+                selectedTags={selectedTagsPerItem[idx]}
+                onToggleTag={(tag) => handleToggleTag(tag, idx)}
               />
             ))}
-
-            {/* Tag selection */}
-            {tagsEnabled && availableTags.length > 0 && (
-              <div className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600">
-                <label className="block text-xs font-medium text-gray-600 dark:text-zinc-300 mb-2">Tags</label>
-                <TagPills
-                  availableTags={availableTags}
-                  selectedTags={selectedTags}
-                  onToggleTag={handleToggleTag}
-                />
-              </div>
-            )}
 
             {/* Ratio impact */}
             {ratioInfo && (
@@ -290,7 +277,7 @@ export default function DownloadReviewModal({
 /**
  * Individual item card within the review modal.
  */
-function ItemCard({ item, userStats, hasWedges, isDual, label }) {
+function ItemCard({ item, userStats, hasWedges, isDual, label, tagsEnabled, availableTags, selectedTags, onToggleTag }) {
   const { result, useWedge, onToggleWedge } = item;
   const showWedgeToggle = hasWedges && !result.snatched && !result.freeleech && !result.vip;
   const addedDateDisplay = formatAddedDate(result.addedDate);
@@ -378,6 +365,18 @@ function ItemCard({ item, userStats, hasWedges, isDual, label }) {
           </div>
         )}
       </div>
+
+      {/* Per-item tag selection */}
+      {tagsEnabled && availableTags.length > 0 && (
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-600">
+          <label className="block text-xs font-medium text-gray-600 dark:text-zinc-300 mb-2">Tags</label>
+          <TagPills
+            availableTags={availableTags}
+            selectedTags={selectedTags}
+            onToggleTag={onToggleTag}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -393,6 +392,10 @@ ItemCard.propTypes = {
   hasWedges: PropTypes.bool,
   isDual: PropTypes.bool,
   label: PropTypes.string,
+  tagsEnabled: PropTypes.bool,
+  availableTags: PropTypes.arrayOf(PropTypes.string),
+  selectedTags: PropTypes.arrayOf(PropTypes.string),
+  onToggleTag: PropTypes.func,
 };
 
 DownloadReviewModal.propTypes = {

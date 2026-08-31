@@ -353,7 +353,7 @@ function SearchPage() {
   }, [selectedAudiobook, selectedBook]);
 
   // Review modal: confirm download(s)
-  const handleReviewConfirm = useCallback(async (items, selectedTags) => {
+  const handleReviewConfirm = useCallback(async (items, perItemTags) => {
     setReviewLoading(true);
     setMessage(null);
 
@@ -361,7 +361,7 @@ function SearchPage() {
       const isDual = items.length > 1;
 
       // Download all items in parallel
-      const fetchPromises = items.map((item) =>
+      const fetchPromises = items.map((item, i) =>
         fetch('/api/add', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -370,7 +370,7 @@ function SearchPage() {
             downloadUrl: item.result.downloadUrl,
             category: item.category,
             useWedge: item.useWedge,
-            tags: selectedTags,
+            tags: perItemTags[i] || [],
           }),
         })
       );
@@ -397,7 +397,8 @@ function SearchPage() {
           .filter((r) => r.item.useWedge)
           .map((r) => isDual ? `${r.item.category} FL` : 'FL Wedge');
         const wedgeText = wedgeInfo.length > 0 ? ` (${wedgeInfo.join(', ')} applied)` : '';
-        const tagText = selectedTags.length > 0 ? ` [${selectedTags.join(', ')}]` : '';
+        const allTags = [...new Set(perItemTags.flat())];
+        const tagText = allTags.length > 0 ? ` [${allTags.join(', ')}]` : '';
 
         if (isDual) {
           setMessage({
