@@ -26,13 +26,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn --frozen-lockfile
 
       - name: Run test suite with coverage
-        run: npm run test:coverage
+        run: yarn test:coverage
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5
