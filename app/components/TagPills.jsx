@@ -16,7 +16,7 @@ export default function TagPills({ availableTags, selectedTags, onToggleTag }) {
             key={tag}
             type="button"
             onClick={() => onToggleTag(tag)}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-150 cursor-pointer ${
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-sm font-medium transition-colors duration-150 cursor-pointer ${
               isSelected
                 ? 'bg-pink-400 text-white border border-pink-400'
                 : 'bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-300 border border-gray-200 dark:border-zinc-600 hover:bg-gray-200 dark:hover:bg-zinc-600'

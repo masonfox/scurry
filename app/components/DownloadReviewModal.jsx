@@ -223,8 +223,8 @@ export default function DownloadReviewModal({
 
             {/* Tag selection — single download only (dual renders tags inside each card) */}
             {!isDual && tagsEnabled && availableTags.length > 0 && (
-              <div className="px-3 py-2 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600">
-                <label className="block text-xs font-medium text-gray-600 dark:text-zinc-300 mb-2">Tags</label>
+              <div className="px-3 py-3 rounded-lg bg-gray-50 dark:bg-zinc-700/50 border border-gray-100 dark:border-zinc-600">
+                <label className="block text-xs font-medium text-gray-600 dark:text-zinc-300 mb-3">Tags</label>
                 <TagPills
                   availableTags={availableTags}
                   selectedTags={selectedTagsPerItem[0]}
@@ -381,7 +381,7 @@ function ItemCard({ item, userStats, hasWedges, isDual, label, tagsEnabled, avai
       {/* Per-item tag selection */}
       {tagsEnabled && availableTags.length > 0 && (
         <div className="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-600">
-          <label className="block text-xs font-medium text-gray-600 dark:text-zinc-300 mb-2">Tags</label>
+          <label className="block text-xs font-medium text-gray-600 dark:text-zinc-300 mb-3">Tags</label>
           <TagPills
             availableTags={availableTags}
             selectedTags={selectedTags}
