@@ -1,49 +1,58 @@
-import { jest } from '@jest/globals';
+// vi is available globally when vitest globals:true is configured.
+// vi.mock() must be hoisted to the top level of each test file — it cannot
+// be called inside class methods. This class therefore expects the caller to
+// pass already-mocked module references into setupMocks().
 import { TEST_CONFIG, MOCK_RESPONSES } from './test-constants.mjs';
 
 /**
- * Centralized mock setup for all E2E tests
- * Note: jest.mock() calls must be at the top level, not inside class methods
+ * Centralized mock manager for E2E tests (Vitest edition).
+ *
+ * Usage in a test file:
+ *   vi.mock('../../src/lib/qbittorrent', () => ({ qbLogin: vi.fn(), qbAddUrl: vi.fn() }));
+ *   import * as qb from '../../src/lib/qbittorrent';
+ *   const manager = createMockManager();
+ *   manager.setupMocks(qb.qbLogin, qb.qbAddUrl);
  */
 export class MockManager {
   constructor() {
     this.originalFetch = global.fetch;
+    this.mockQbLogin = null;
+    this.mockQbAddUrl = null;
   }
 
   /**
-   * Setup all mocks with sensible defaults
-   * This assumes jest.mock() calls are already made at the test file level
+   * Attach already-mocked qbittorrent functions and configure sensible defaults.
+   * @param {Function} mockQbLogin  - vi.fn() reference for qbLogin
+   * @param {Function} mockQbAddUrl - vi.fn() reference for qbAddUrl
    */
-  setupMocks() {
-    // Get references to already mocked functions
-    const { qbLogin, qbAddUrl } = require('../../src/lib/qbittorrent');
-    this.mockQbLogin = qbLogin;
-    this.mockQbAddUrl = qbAddUrl;
+  setupMocks(mockQbLogin, mockQbAddUrl) {
+    this.mockQbLogin = mockQbLogin;
+    this.mockQbAddUrl = mockQbAddUrl;
 
     // Setup default successful mocks
     this.mockQbLogin.mockResolvedValue(TEST_CONFIG.SESSION_COOKIE);
     this.mockQbAddUrl.mockResolvedValue(true);
-    
+
     // Mock fetch globally
-    global.fetch = jest.fn();
+    global.fetch = vi.fn();
   }
 
   /**
    * Reset all mocks to their default state
    */
   resetMocks() {
-    jest.clearAllMocks();
-    
+    vi.clearAllMocks();
+
     // Re-setup defaults
-    this.mockQbLogin.mockResolvedValue(TEST_CONFIG.SESSION_COOKIE);
-    this.mockQbAddUrl.mockResolvedValue(true);
+    if (this.mockQbLogin) this.mockQbLogin.mockResolvedValue(TEST_CONFIG.SESSION_COOKIE);
+    if (this.mockQbAddUrl) this.mockQbAddUrl.mockResolvedValue(true);
   }
 
   /**
    * Clean up mocks
    */
   cleanup() {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
     global.fetch = this.originalFetch;
   }
 
