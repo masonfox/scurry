@@ -306,12 +306,14 @@ function SearchPage() {
 
   // Dual-mode selection handlers
   const handleSelectAudiobook = useCallback((item) => {
+    if (item?.snatched) return;
     setSelectedAudiobook(prev => 
       prev?.id === item?.id ? null : item
     );
   }, []);
 
   const handleSelectBook = useCallback((item) => {
+    if (item?.snatched) return;
     setSelectedBook(prev => 
       prev?.id === item?.id ? null : item
     );
@@ -366,7 +368,6 @@ function SearchPage() {
           body: JSON.stringify({
             title: item.result.title,
             downloadUrl: item.result.downloadUrl,
-            torrentId: item.result.id,
             category: item.category,
             useWedge: item.useWedge,
             tags: selectedTags,

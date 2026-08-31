@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   buildMamDownloadUrl,
   buildMamTorrentUrl,
+  buildFLDownloadUrl,
   buildPayload,
   formatNumberWithCommas,
   parseAuthorInfo,
@@ -22,6 +23,33 @@ describe('utilities', () => {
     expect(buildMamTorrentUrl('456')).toContain('/t/456');
     expect(buildMamTorrentUrl(123)).toContain('/t/123');
     expect(buildMamTorrentUrl()).toBeNull();
+  });
+
+  describe('buildFLDownloadUrl', () => {
+    const VALID_URL = 'https://www.myanonamouse.net/tor/download.php/abc123token';
+
+    it('appends &fl to a valid MAM download URL', () => {
+      expect(buildFLDownloadUrl(VALID_URL)).toBe(`${VALID_URL}&fl`);
+    });
+
+    it('returns null for falsy input', () => {
+      expect(buildFLDownloadUrl(null)).toBeNull();
+      expect(buildFLDownloadUrl('')).toBeNull();
+      expect(buildFLDownloadUrl(undefined)).toBeNull();
+    });
+
+    it('returns null for non-string input', () => {
+      expect(buildFLDownloadUrl(123)).toBeNull();
+      expect(buildFLDownloadUrl({})).toBeNull();
+    });
+
+    it('returns null for magnet links (not a MAM download URL)', () => {
+      expect(buildFLDownloadUrl('magnet:?xt=urn:btih:abc123')).toBeNull();
+    });
+
+    it('returns null for non-MAM URLs', () => {
+      expect(buildFLDownloadUrl('https://example.com/download/file.torrent')).toBeNull();
+    });
   });
 
   // NOTE: this is bound to change as functionality evolves

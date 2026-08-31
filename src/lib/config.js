@@ -41,7 +41,7 @@ export function readMamToken() {
       } else {
         const state = JSON.parse(fs.readFileSync(stateFile, "utf8"));
         // URL-decode the token from mousehole's format
-        return decodeURIComponent(state.currentCookie);
+        return decodeURIComponent(state.cookie ?? state.currentCookie);
       }
     } catch (err) {
       console.warn("Failed to read from mousehole, falling back to static token:", err.message);

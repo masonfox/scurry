@@ -2,10 +2,10 @@ import Image from 'next/image';
 import PropTypes from 'prop-types';
 
 export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect }) {
-  const isClickable = !result.snatched;
+  const isSnatched = result.snatched;
 
   const handleClick = () => {
-    if (selectable && onSelect) {
+    if (selectable && onSelect && !isSnatched) {
       onSelect(result);
     } else if (!selectable && onAddItem && !result.snatched) {
       onAddItem(result);
@@ -23,10 +23,10 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
   return (
     <li 
       className={`px-4 py-3 rounded-md bg-gray-50 dark:bg-zinc-800 ${borderClasses} mb-4 transition-colors duration-200 relative`}
-      onClick={isClickable ? handleClick : undefined}
-      role={isClickable ? 'button' : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      onKeyDown={isClickable ? (e) => {
+      onClick={!isSnatched ? handleClick : undefined}
+      role={!isSnatched ? 'button' : undefined}
+      tabIndex={!isSnatched ? 0 : undefined}
+      onKeyDown={!isSnatched ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick();
