@@ -1,60 +1,32 @@
 import Image from 'next/image';
 import PropTypes from 'prop-types';
-import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff } from '@/src/lib/utilities';
-import WedgeToggleButton from './WedgeToggleButton';
 
-export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect, userStats, useWedge = false, onToggleWedge }) {
+export default function SearchResultItem({ result, onAddItem, selectable = false, selected = false, onSelect }) {
   const isSnatched = result.snatched;
 
   const handleClick = () => {
     if (selectable && onSelect && !isSnatched) {
       onSelect(result);
+    } else if (!selectable && onAddItem && !result.snatched) {
+      onAddItem(result);
     }
   };
 
-  const handleToggleWedge = (e) => {
-    e.stopPropagation(); // Prevent triggering parent click handlers
-    if (onToggleWedge) {
-      onToggleWedge(result.id);
-    }
-  };
-
-  const hasWedges = userStats?.flWedges > 0;
-
-  // Calculate projected ratio if user stats are available
-  let projectedRatioDisplay = null;
-  if (userStats && result.size) {
-    // If using FL wedge or torrent is already freeleech, show "No Change" as ratio doesn't change
-    if (useWedge || result.freeleech) {
-      projectedRatioDisplay = 'No Change';
-    } else {
-      const sizeBytes = parseSizeToBytes(result.size);
-      const uploadedBytes = parseSizeToBytes(userStats.uploaded);
-      const downloadedBytes = parseSizeToBytes(userStats.downloaded);
-      
-      if (sizeBytes && uploadedBytes !== null && downloadedBytes !== null) {
-        const newRatio = calculateNewRatio(uploadedBytes, downloadedBytes, sizeBytes);
-        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, sizeBytes);
-        projectedRatioDisplay = `${newRatio} (${diff})`;
-      }
-    }
-  }
-
-  const borderClasses = selectable
-    ? isSnatched
-      ? 'border-2 border-gray-100 dark:border-zinc-700 opacity-50 cursor-not-allowed'
-      : selected
+  const borderClasses = result.snatched
+    ? 'border-2 border-gray-100 dark:border-zinc-700 opacity-50 cursor-not-allowed'
+    : selectable
+      ? selected
         ? 'border-3 border-pink-300 dark:border-pink-600 cursor-pointer'
         : 'border-2 border-gray-100 dark:border-zinc-700 hover:border-pink-200 dark:hover:border-pink-700 cursor-pointer'
-    : 'border-2 border-gray-100 dark:border-zinc-700 hover:border-pink-200 dark:hover:border-pink-700';
+      : 'border-2 border-gray-100 dark:border-zinc-700 hover:border-pink-200 dark:hover:border-pink-700 cursor-pointer';
 
   return (
     <li 
-      className={`px-4 py-3 rounded-md ${borderClasses} mb-4 transition-colors duration-200 relative`}
-      onClick={selectable && !isSnatched ? handleClick : undefined}
-      role={selectable && !isSnatched ? 'button' : undefined}
-      tabIndex={selectable && !isSnatched ? 0 : undefined}
-      onKeyDown={selectable && !isSnatched ? (e) => {
+      className={`px-4 py-3 rounded-md bg-gray-50 dark:bg-zinc-800 ${borderClasses} mb-4 transition-colors duration-200 relative`}
+      onClick={!isSnatched ? handleClick : undefined}
+      role={!isSnatched ? 'button' : undefined}
+      tabIndex={!isSnatched ? 0 : undefined}
+      onKeyDown={!isSnatched ? (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           handleClick();
@@ -129,47 +101,6 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
             </svg>
           </div>
         )}
-        {/* Torrent action buttons */}
-        {!selectable && (
-          <div className="flex flex-col gap-2 items-end flex-shrink-0 mt-1 md:mt-0">
-            <div className="flex gap-2 md:gap-3 items-center justify-between w-full md:w-auto md:justify-end">
-              {/* FL Wedge toggle button - left on mobile */}
-              {hasWedges && !result.snatched && !result.freeleech && !result.vip && (
-                <WedgeToggleButton
-                  active={useWedge}
-                  onClick={handleToggleWedge}
-                  size="small"
-                />
-              )}
-              {/* Projected ratio - center on mobile, below on desktop */}
-              {projectedRatioDisplay && !result.snatched && (
-                <div className="text-xs text-gray-400 dark:text-zinc-500 cursor-default md:hidden flex-1 text-center" title="New ratio after download">
-                  {projectedRatioDisplay}
-                </div>
-              )}
-              {/* Download button - right on mobile */}
-              <button
-                className="rounded-md bg-pink-400 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-pink-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 cursor-pointer flex items-center gap-1.5"
-                disabled={result.snatched}
-                onClick={() => onAddItem(result)}
-                aria-label={`Download ${result.title}`}
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                <span>Download</span>
-              </button>
-            </div>
-            {/* Projected ratio - below on desktop */}
-            {projectedRatioDisplay && !result.snatched && (
-              <div className="text-xs text-gray-400 dark:text-zinc-500 cursor-default hidden md:block" title="New ratio after download">
-                {projectedRatioDisplay}
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </li>
   );
@@ -193,13 +124,5 @@ SearchResultItem.propTypes = {
   onAddItem: PropTypes.func,
   selectable: PropTypes.bool,
   selected: PropTypes.bool,
-  onSelect: PropTypes.func,
-  userStats: PropTypes.shape({
-    uploaded: PropTypes.string,
-    downloaded: PropTypes.string,
-    ratio: PropTypes.string,
-    flWedges: PropTypes.number
-  }),
-  useWedge: PropTypes.bool,
-  onToggleWedge: PropTypes.func
+  onSelect: PropTypes.func
 };

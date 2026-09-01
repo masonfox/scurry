@@ -1,8 +1,6 @@
 import SearchResultItem from './SearchResultItem';
 import ProgressIndicator from './ProgressIndicator';
-import WedgeToggleButton from './WedgeToggleButton';
 import PropTypes from 'prop-types';
-import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
 export default function DualSearchResultsList({
   audiobookResults,
@@ -13,12 +11,7 @@ export default function DualSearchResultsList({
   onSelectBook,
   loading,
   onDownload,
-  downloadLoading,
-  userStats,
-  useAudiobookWedge,
-  useBookWedge,
-  onToggleAudiobookWedge,
-  onToggleBookWedge
+  downloadLoading
 }) {
   if (loading) {
     return (
@@ -48,50 +41,6 @@ export default function DualSearchResultsList({
   const bothSelected = selectedAudiobook && selectedBook;
   const disabled = !bothSelected || downloadLoading;
 
-  // Calculate combined size and projected ratio when both are selected
-  let combinedInfo = null;
-  if (bothSelected && userStats) {
-    const audiobookBytes = parseSizeToBytes(selectedAudiobook.size);
-    const bookBytes = parseSizeToBytes(selectedBook.size);
-    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
-    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
-    
-    if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
-      const totalBytes = audiobookBytes + bookBytes;
-      
-      // Calculate bytes that will affect ratio (exclude items with FL wedge or already freeleech)
-      let bytesForRatio = 0;
-      const isBookFreeleech = useBookWedge || selectedBook.freeleech;
-      const isAudiobookFreeleech = useAudiobookWedge || selectedAudiobook.freeleech;
-      
-      if (!isBookFreeleech) bytesForRatio += bookBytes;
-      if (!isAudiobookFreeleech) bytesForRatio += audiobookBytes;
-      
-      // If both are freeleech, show "No Change" as ratio doesn't change
-      if (bytesForRatio === 0) {
-        combinedInfo = {
-          totalSize: formatBytesToSize(totalBytes),
-          projectedRatio: 'No Change',
-          diff: null
-        };
-      } else {
-        const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, bytesForRatio);
-        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, bytesForRatio);
-        combinedInfo = {
-          totalSize: formatBytesToSize(totalBytes),
-          projectedRatio,
-          diff
-        };
-      }
-    }
-  }
-
-  // Download button component - matching search button style with icon
-  const hasWedges = userStats?.flWedges > 0;
-  const showBookWedge = hasWedges && selectedBook?.freeleech === false && !selectedBook?.vip && !selectedBook?.snatched;
-  const showAudiobookWedge = hasWedges && selectedAudiobook?.freeleech === false && !selectedAudiobook?.vip && !selectedAudiobook?.snatched;
-  const showWedges = showBookWedge || showAudiobookWedge;
-
   const downloadButton = (
     <button
       onClick={onDownload}
@@ -109,12 +58,7 @@ export default function DualSearchResultsList({
         </>
       ) : (
         <>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="7 10 12 15 17 10"></polyline>
-            <line x1="12" y1="15" x2="12" y2="3"></line>
-          </svg>
-          <span>Download</span>
+          <span>Review</span>
         </>
       )}
     </button>
@@ -122,9 +66,8 @@ export default function DualSearchResultsList({
 
   return (
     <div className="mt-6">
-      {/* Integrated Header: 2-Row Layout */}
+      {/* Integrated Header: Progress + Download Button */}
       <div className="mb-8 p-5 bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700">
-        {/* Row 1: Progress + Download Button */}
         <div className="flex items-center gap-6">
           <ProgressIndicator 
             currentStep={currentStep}
@@ -138,51 +81,6 @@ export default function DualSearchResultsList({
             {downloadButton}
           </div>
         </div>
-        
-        {/* Row 2: FL Wedge toggles + Separator + Combined Info (only when both selected) */}
-        {bothSelected && (
-           <div className="flex items-center text-sm mt-4 gap-4">
-            {/* FL Wedge toggles */}
-            {showWedges && (
-              <div className="flex items-center gap-3">
-                <span className="text-gray-600 dark:text-zinc-400 font-medium">Use FL Wedge:</span>
-                {showBookWedge && (
-                  <WedgeToggleButton
-                    active={useBookWedge}
-                    onClick={onToggleBookWedge}
-                    label="Book"
-                    size="large"
-                  />
-                )}
-                {showAudiobookWedge && (
-                  <WedgeToggleButton
-                    active={useAudiobookWedge}
-                    onClick={onToggleAudiobookWedge}
-                    label="Audiobook"
-                    size="large"
-                  />
-                )}
-              </div>
-            )}
-            
-            {/* Combined info */}
-            {combinedInfo && (
-              <div className="flex items-center gap-4 text-gray-700 dark:text-zinc-300 ml-auto">
-                <span className="flex items-center gap-1.5">
-                  <span className="text-base">📦</span>
-                  <span className="font-semibold text-gray-900 dark:text-zinc-100">{combinedInfo.totalSize}</span>
-                </span>
-                <span className="text-gray-400 dark:text-zinc-500">•</span>
-                <span className="flex items-center gap-1.5">
-                  <span className="text-base">📊</span>
-                  <span className="font-semibold text-gray-900 dark:text-zinc-100">
-                    {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
-                  </span>
-                </span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
       
       {/* Two-column grid for results */}
@@ -204,7 +102,6 @@ export default function DualSearchResultsList({
                 selectable={true}
                 selected={selectedBook?.id === result.id}
                 onSelect={onSelectBook}
-                userStats={userStats}
               />
             ))}
           </ul>
@@ -228,7 +125,6 @@ export default function DualSearchResultsList({
                 selectable={true}
                 selected={selectedAudiobook?.id === result.id}
                 onSelect={onSelectAudiobook}
-                userStats={userStats}
               />
             ))}
           </ul>
@@ -263,15 +159,5 @@ DualSearchResultsList.propTypes = {
   onSelectBook: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
   onDownload: PropTypes.func.isRequired,
-  downloadLoading: PropTypes.bool.isRequired,
-  userStats: PropTypes.shape({
-    uploaded: PropTypes.string,
-    downloaded: PropTypes.string,
-    ratio: PropTypes.string,
-    flWedges: PropTypes.number
-  }),
-  useAudiobookWedge: PropTypes.bool,
-  useBookWedge: PropTypes.bool,
-  onToggleAudiobookWedge: PropTypes.func,
-  onToggleBookWedge: PropTypes.func
+  downloadLoading: PropTypes.bool.isRequired
 };

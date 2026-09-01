@@ -13,10 +13,25 @@ vi.mock('../src/lib/qbittorrent', () => ({
 vi.mock('../app/api/user-stats/route.js', () => ({
   bustStatsCache: vi.fn()
 }));
+vi.mock('../src/lib/settings', () => ({
+  readSettings: vi.fn(() => ({
+    qbittorrent: { url: 'http://qb', username: 'user', password: 'pass' },
+    tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+    categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } }
+  }))
+}));
+
+import * as settingsMod from '../src/lib/settings';
 
 describe('add route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Reset to default settings (categories and tags disabled)
+    settingsMod.readSettings.mockReturnValue({
+      qbittorrent: { url: 'http://qb', username: 'user', password: 'pass' },
+      tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+      categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } }
+    });
   });
 
   it('returns 400 if no downloadUrl provided', async () => {
@@ -74,11 +89,105 @@ describe('add route', () => {
     expect(userStatsRoute.bustStatsCache).not.toHaveBeenCalled();
   });
 
+  describe('tags and categories', () => {
+    it('passes tags when tags are enabled in settings', async () => {
+      settingsMod.readSettings.mockReturnValue({
+        qbittorrent: { url: 'http://qb', username: 'user', password: 'pass' },
+        tags: { enabled: true, available: ['fiction', 'favorites'], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } }
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          tags: ['fiction', 'favorites']
+        })
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(true);
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
+        'http://qb', 'cookie', 'magnet:?xt=...',
+        expect.objectContaining({ tags: ['fiction', 'favorites'] })
+      );
+    });
+
+    it('does not pass tags when tags are disabled in settings', async () => {
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          tags: ['fiction']
+        })
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(true);
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
+        'http://qb', 'cookie', 'magnet:?xt=...',
+        expect.objectContaining({ tags: undefined })
+      );
+    });
+
+    it('passes category when categories are enabled', async () => {
+      settingsMod.readSettings.mockReturnValue({
+        qbittorrent: { url: 'http://qb', username: 'user', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: true, defaults: { books: 'books', audiobooks: 'audiobooks' } }
+      });
+
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          category: 'books'
+        })
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(true);
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
+        'http://qb', 'cookie', 'magnet:?xt=...',
+        expect.objectContaining({ category: 'books' })
+      );
+    });
+
+    it('omits category when categories are disabled', async () => {
+      const req = {
+        json: async () => ({
+          title: 'Test Book',
+          downloadUrl: 'magnet:?xt=...',
+          category: 'books'
+        })
+      };
+
+      const res = await POST(req);
+      const json = await res.json();
+
+      expect(json.ok).toBe(true);
+      expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
+        'http://qb', 'cookie', 'magnet:?xt=...',
+        expect.objectContaining({ category: undefined })
+      );
+    });
+  });
+
   describe('FL via &fl URL parameter', () => {
     const BASE_URL = 'https://www.myanonamouse.net/tor/download.php/abc123token';
-
     beforeEach(() => {
       vi.clearAllMocks();
+      settingsMod.readSettings.mockReturnValue({
+        qbittorrent: { url: 'http://qb', username: 'user', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } }
+      });
     });
 
     it('appends &fl to the download URL when useWedge is true', async () => {
@@ -164,6 +273,11 @@ describe('add route', () => {
     });
 
     it('passes correct category with FL URL for audiobooks', async () => {
+      settingsMod.readSettings.mockReturnValue({
+        qbittorrent: { url: 'http://qb', username: 'user', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: true, defaults: { books: 'books', audiobooks: 'audiobooks' } }
+      });
       const req = {
         json: async () => ({
           title: 'Test Audiobook',
@@ -175,9 +289,9 @@ describe('add route', () => {
 
       await POST(req);
 
-      const [, , urlPassed, categoryPassed] = qbittorrent.qbAddUrl.mock.calls[0];
+      const [, , urlPassed, optionsPassed] = qbittorrent.qbAddUrl.mock.calls[0];
       expect(urlPassed).toBe(`${BASE_URL}&fl`);
-      expect(categoryPassed).toBe('audiobooks');
+      expect(optionsPassed?.category).toBe('audiobooks');
     });
   });
 });

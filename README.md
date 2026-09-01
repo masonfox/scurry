@@ -95,6 +95,38 @@ npm run dev
 # visit http://localhost:3000
 ```
 
+## Docker User Permissions (PUID/PGID)
+
+Scurry supports runtime user/group ID configuration to prevent permission issues with mounted volumes. This is especially important when using bind mounts, as the container needs to match your host user's UID/GID to properly read and write files.
+
+**Default Behavior:**
+- The container runs as UID `1000` and GID `1000` by default (most common user ID on Linux systems)
+- Files created in mounted volumes will be owned by this UID/GID
+
+**Custom Configuration:**
+If your host user has a different UID/GID, set the `PUID` and `PGID` environment variables:
+
+```bash
+# Find your UID/GID on the host
+id
+
+# Add to docker-compose.yml or docker run command
+PUID=1001
+PGID=1001
+```
+
+**Example with Custom PUID/PGID:**
+```yaml
+services:
+  scurry:
+    environment:
+      PUID: 1001
+      PGID: 1001
+      # ... other environment variables
+```
+
+The container will display the active UID/GID on startup for verification.
+
 ## Production
 I recommend that you leverage the [docker image](https://github.com/masonfox/scurry/pkgs/container/scurry/) for production.
 
@@ -106,12 +138,15 @@ services:
     ports:
       - "3000:3000"
     environment:
+      PUID: 1000 # optional, defaults to 1000
+      PGID: 1000 # optional, defaults to 1000
       APP_PASSWORD: # remove for no auth
       APP_QB_URL: # qbittorrent URL
       APP_QB_USERNAME: # qbittorrent user
       APP_QB_PASSWORD: # qbittorrent password
     volumes:
       - ./secrets:/app/secrets
+      - ./config:/app/config
     restart: unless-stopped
 ```
 
@@ -121,11 +156,14 @@ docker run -d \
   --name scurry \
   --pull=always \
   -p 3000:3000 \
+  -e PUID=1000 \
+  -e PGID=1000 \
   -e APP_PASSWORD=PASSWORD \
   -e APP_QB_URL=URL \
   -e APP_QB_USERNAME=admin \
   -e APP_QB_PASSWORD=PASSWORD \
-  -v /VOLUME/scurry:/app/secrets \
+  -v /VOLUME/scurry/secrets:/app/secrets \
+  -v /VOLUME/scurry/config:/app/config \
   --restart always \
   ghcr.io/masonfox/scurry:latest
 ```

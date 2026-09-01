@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import SearchResultItem from './SearchResultItem';
 import MobileBottomSheet from './MobileBottomSheet';
 import PropTypes from 'prop-types';
-import { parseSizeToBytes, calculateNewRatio, calculateRatioDiff, formatBytesToSize } from '@/src/lib/utilities';
 
 // Delay before auto-scrolling to next section (ms)
 const AUTO_SCROLL_DELAY_MS = 100;
@@ -15,13 +14,9 @@ export default function SequentialSearchResults({
   onSelectAudiobook,
   onSelectBook,
   loading,
-  userStats,
   onDownload,
   downloadLoading,
-  useAudiobookWedge,
-  useBookWedge,
-  onToggleAudiobookWedge,
-  onToggleBookWedge
+  hideBottomSheet
 }) {
   const bookSectionRef = useRef(null);
   const audiobookSectionRef = useRef(null);
@@ -76,46 +71,8 @@ export default function SequentialSearchResults({
   const progress = selectedBook && selectedAudiobook ? 100 : selectedBook ? 50 : 0;
   const currentStep = selectedBook ? 2 : 1;
 
-  // Calculate combined size and projected ratio when both are selected
-  let combinedInfo = null;
-  if (selectedBook && selectedAudiobook && userStats) {
-    const audiobookBytes = parseSizeToBytes(selectedAudiobook.size);
-    const bookBytes = parseSizeToBytes(selectedBook.size);
-    const uploadedBytes = parseSizeToBytes(userStats.uploaded);
-    const downloadedBytes = parseSizeToBytes(userStats.downloaded);
-    
-    if (audiobookBytes && bookBytes && uploadedBytes !== null && downloadedBytes !== null) {
-      const totalBytes = audiobookBytes + bookBytes;
-      
-      // Calculate bytes that will affect ratio (exclude items with FL wedge or already freeleech)
-      let bytesForRatio = 0;
-      const isBookFreeleech = useBookWedge || selectedBook.freeleech;
-      const isAudiobookFreeleech = useAudiobookWedge || selectedAudiobook.freeleech;
-      
-      if (!isBookFreeleech) bytesForRatio += bookBytes;
-      if (!isAudiobookFreeleech) bytesForRatio += audiobookBytes;
-      
-      // If both are freeleech, show "No Change" as ratio doesn't change
-      if (bytesForRatio === 0) {
-        combinedInfo = {
-          totalSize: formatBytesToSize(totalBytes),
-          projectedRatio: 'No Change',
-          diff: null
-        };
-      } else {
-        const projectedRatio = calculateNewRatio(uploadedBytes, downloadedBytes, bytesForRatio);
-        const diff = calculateRatioDiff(uploadedBytes, downloadedBytes, bytesForRatio);
-        combinedInfo = {
-          totalSize: formatBytesToSize(totalBytes),
-          projectedRatio,
-          diff
-        };
-      }
-    }
-  }
-
   return (
-    <div className="mt-6 pb-40">
+    <div className={`mt-6 ${selectedBook && selectedAudiobook ? 'pb-20' : 'pb-36'}`}>
       {/* Mobile bottom sheet with progress indicator and download button */}
       <MobileBottomSheet
         currentStep={currentStep}
@@ -123,27 +80,8 @@ export default function SequentialSearchResults({
         bothSelected={!!(selectedBook && selectedAudiobook)}
         onDownload={onDownload}
         loading={downloadLoading}
-        userStats={userStats}
-        useAudiobookWedge={useAudiobookWedge}
-        useBookWedge={useBookWedge}
-        onToggleAudiobookWedge={onToggleAudiobookWedge}
-        onToggleBookWedge={onToggleBookWedge}
-        selectedBook={selectedBook}
-        selectedAudiobook={selectedAudiobook}
+        hidden={hideBottomSheet}
       />
-
-      {/* Combined info display when both selected */}
-      {combinedInfo && (
-        <div className="mb-4 px-4 py-2 bg-pink-50 dark:bg-pink-900/20 border border-pink-200 dark:border-pink-800/40 rounded-lg text-center text-sm">
-          <span className="text-gray-700 dark:text-zinc-300">Combined: </span>
-          <span className="font-semibold text-gray-900 dark:text-zinc-100">{combinedInfo.totalSize}</span>
-          <span className="text-gray-500 dark:text-zinc-500 mx-2">•</span>
-          <span className="text-gray-700 dark:text-zinc-300">New ratio: </span>
-          <span className="font-semibold text-gray-900 dark:text-zinc-100">
-            {combinedInfo.diff ? `${combinedInfo.projectedRatio} (${combinedInfo.diff})` : combinedInfo.projectedRatio}
-          </span>
-        </div>
-      )}
 
       {/* Step 1: Book Selection */}
       <div ref={bookSectionRef} className={selectedBook ? 'mb-6' : ''}>
@@ -168,7 +106,6 @@ export default function SequentialSearchResults({
                 selectable={true}
                 selected={true}
                 onSelect={onSelectBook}
-                userStats={userStats}
               />
             </ul>
           </div>
@@ -190,7 +127,6 @@ export default function SequentialSearchResults({
                     selectable={true}
                     selected={false}
                     onSelect={onSelectBook}
-                    userStats={userStats}
                   />
                 ))}
               </ul>
@@ -223,7 +159,6 @@ export default function SequentialSearchResults({
                   selectable={true}
                   selected={true}
                   onSelect={onSelectAudiobook}
-                  userStats={userStats}
                 />
               </ul>
             </div>
@@ -245,7 +180,6 @@ export default function SequentialSearchResults({
                       selectable={true}
                       selected={false}
                       onSelect={onSelectAudiobook}
-                      userStats={userStats}
                     />
                   ))}
                 </ul>
@@ -281,16 +215,7 @@ SequentialSearchResults.propTypes = {
   onSelectAudiobook: PropTypes.func.isRequired,
   onSelectBook: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
-  userStats: PropTypes.shape({
-    uploaded: PropTypes.string,
-    downloaded: PropTypes.string,
-    ratio: PropTypes.string,
-    flWedges: PropTypes.number
-  }),
   onDownload: PropTypes.func.isRequired,
   downloadLoading: PropTypes.bool.isRequired,
-  useAudiobookWedge: PropTypes.bool,
-  useBookWedge: PropTypes.bool,
-  onToggleAudiobookWedge: PropTypes.func,
-  onToggleBookWedge: PropTypes.func
+  hideBottomSheet: PropTypes.bool
 };
