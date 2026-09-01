@@ -39,9 +39,23 @@ export async function POST(req) {
       );
     }
 
-    // If password is masked, read the real one from settings
+    // If password is masked, read the real one from settings. Only do this
+    // when testing the already-saved URL/username, so a masked password
+    // can't be used to leak the real credentials to an arbitrary host.
     if (password === PASSWORD_MASK) {
       const settings = readSettings();
+      if (
+        url.trim() !== settings.qbittorrent.url ||
+        username.trim() !== settings.qbittorrent.username
+      ) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: "Cannot use saved password with a different URL or username",
+          },
+          { status: 400 }
+        );
+      }
       password = settings.qbittorrent.password;
     }
 

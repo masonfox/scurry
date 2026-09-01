@@ -71,6 +71,28 @@ describe('POST /api/settings/test-connection', () => {
     expect(json.ok).toBe(true);
   });
 
+  it('rejects PASSWORD_MASK when the url does not match the saved url', async () => {
+    const res = await POST(
+      makeReq({ url: 'http://attacker.example.com', username: QB_USER, password: PASSWORD_MASK })
+    );
+    const json = await res.json();
+
+    expect(qb.qbLogin).not.toHaveBeenCalled();
+    expect(res.status).toBe(400);
+    expect(json.ok).toBe(false);
+  });
+
+  it('rejects PASSWORD_MASK when the username does not match the saved username', async () => {
+    const res = await POST(
+      makeReq({ url: QB_URL, username: 'someone-else', password: PASSWORD_MASK })
+    );
+    const json = await res.json();
+
+    expect(qb.qbLogin).not.toHaveBeenCalled();
+    expect(res.status).toBe(400);
+    expect(json.ok).toBe(false);
+  });
+
   it('does not call readSettings when a real password is provided', async () => {
     await POST(makeReq({ url: QB_URL, username: QB_USER, password: QB_PASS }));
     expect(settingsMod.readSettings).not.toHaveBeenCalled();
