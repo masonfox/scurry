@@ -313,10 +313,12 @@ function SettingsPage() {
         </div>
 
         {/* Tab Navigation */}
-        <nav className="flex gap-0 px-7 mt-5" aria-label="Settings tabs">
+        <nav className="px-7 mt-5" aria-label="Settings tabs">
+          <div role="tablist" className="flex gap-0">
           {TABS.map((tab) => (
             <button
               key={tab.id}
+              id={`tab-${tab.id}`}
               onClick={() => handleTabChange(tab.id)}
               className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
@@ -324,11 +326,13 @@ function SettingsPage() {
                   : "border-transparent text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-300 hover:border-gray-300 dark:hover:border-zinc-600"
               }`}
               aria-selected={activeTab === tab.id}
+              aria-controls={`panel-${tab.id}`}
               role="tab"
             >
               {tab.label}
             </button>
           ))}
+          </div>
         </nav>
       </div>
 
@@ -347,7 +351,7 @@ function SettingsPage() {
       <div className="mt-6">
         {/* qBittorrent Tab */}
         {activeTab === "qbittorrent" && (
-          <div className="space-y-6">
+          <div role="tabpanel" id="panel-qbittorrent" aria-labelledby="tab-qbittorrent" className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-zinc-100 mb-1">qBittorrent Connection</h2>
               <p className="text-sm text-gray-500 dark:text-zinc-400">Configure your qBittorrent Web UI connection details.</p>
@@ -429,13 +433,11 @@ function SettingsPage() {
 
         {/* Tags Tab */}
         {activeTab === "tags" && (
-          <div className="space-y-6">
+          <div role="tabpanel" id="panel-tags" aria-labelledby="tab-tags" className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-zinc-100 mb-1">Tag Management</h2>
               <p className="text-sm text-gray-500 dark:text-zinc-400">Configure tags that can be applied to torrents when downloading. Tags are sent to qBittorrent.</p>
             </div>
-
-            {/* Enable toggle */}
             <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
               <div>
                 <p className="text-sm font-medium text-gray-700 dark:text-zinc-300">Enable Tags</p>
@@ -571,7 +573,7 @@ function SettingsPage() {
 
         {/* Categories Tab */}
         {activeTab === "categories" && (
-          <div className="space-y-6">
+          <div role="tabpanel" id="panel-categories" aria-labelledby="tab-categories" className="space-y-6">
             <div>
               <h2 className="text-lg font-semibold text-gray-800 dark:text-zinc-100 mb-1">Category Management</h2>
               <p className="text-sm text-gray-500 dark:text-zinc-400">Configure qBittorrent categories assigned to downloads by medium type.</p>
@@ -641,7 +643,7 @@ function SettingsPage() {
 
         {/* MAM Token Tab */}
         {activeTab === "token" && (
-          <div>
+          <div role="tabpanel" id="panel-token" aria-labelledby="tab-token">
             <TokenManager onTokenUpdate={() => {}} />
           </div>
         )}

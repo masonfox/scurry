@@ -76,10 +76,16 @@ export function writeSettings(settings) {
     throw new Error(`Invalid settings: ${errors.join(", ")}`);
   }
 
+  // Clone to avoid mutating the caller's object
+  const toWrite = {
+    ...settings,
+    qbittorrent: { ...settings.qbittorrent },
+  };
+
   // If password is the mask string, keep the existing password
-  if (settings.qbittorrent?.password === PASSWORD_MASK) {
+  if (toWrite.qbittorrent?.password === PASSWORD_MASK) {
     const existing = readSettings();
-    settings.qbittorrent.password = existing.qbittorrent.password;
+    toWrite.qbittorrent.password = existing.qbittorrent.password;
   }
 
   // Ensure the config directory exists
@@ -88,8 +94,8 @@ export function writeSettings(settings) {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(settings, null, 2), "utf8");
-  return settings;
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(toWrite, null, 2), "utf8");
+  return toWrite;
 }
 
 /**

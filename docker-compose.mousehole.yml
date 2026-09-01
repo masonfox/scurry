@@ -32,7 +32,6 @@ services:
       APP_QB_USERNAME: ${APP_QB_USERNAME:-admin}
       APP_QB_PASSWORD: ${APP_QB_PASSWORD:-adminadmin}
       APP_MAM_USER_AGENT: ${APP_MAM_USER_AGENT:-Scurry/2.0 (+contact)}
-      NEXT_PUBLIC_DEFAULT_CATEGORY: ${NEXT_PUBLIC_DEFAULT_CATEGORY:-books}
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
     volumes:

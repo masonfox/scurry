@@ -24,13 +24,18 @@ export async function POST(req) {
   // requiring a separate bonusBuy API call (which is not allowed via API).
   const urlOrMagnet = useWedge ? (buildFLDownloadUrl(downloadUrl) ?? downloadUrl) : downloadUrl;
   
-  // Read settings to determine category and tag behavior
-  let settings;
+  // Read settings once to determine qBittorrent credentials, category, and tag behavior
+  let settings = null;
   try {
     settings = readSettings();
   } catch {
     settings = null;
   }
+
+  // Derive qBittorrent connection details from settings (if available) or fall back to config
+  const qbUrl = settings?.qbittorrent?.url || config.qbUrl;
+  const qbUser = settings?.qbittorrent?.username || config.qbUser;
+  const qbPass = settings?.qbittorrent?.password || config.qbPass;
 
   // Determine category: use settings if available, otherwise fall back to request/config
   let category;
@@ -52,8 +57,8 @@ export async function POST(req) {
   }
 
   try {
-    const cookie = await qbLogin(config.qbUrl, config.qbUser, config.qbPass);
-    await qbAddUrl(config.qbUrl, cookie, urlOrMagnet, {
+    const cookie = await qbLogin(qbUrl, qbUser, qbPass);
+    await qbAddUrl(qbUrl, cookie, urlOrMagnet, {
       category: category || undefined,
       tags: effectiveTags.length > 0 ? effectiveTags : undefined,
     });

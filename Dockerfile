@@ -16,8 +16,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ARG APP_QB_URL
 ENV APP_QB_URL=$APP_QB_URL
-# Add bash and su-exec for entrypoint
-RUN apk add --no-cache bash su-exec
+# Add bash, su-exec, and shadow (for usermod/groupmod used by entrypoint)
+RUN apk add --no-cache bash su-exec shadow
 # Create app user (will be modified by entrypoint based on PUID/PGID)
 RUN addgroup -S app && adduser -S app -G app
 # Create secrets and config directories (ownership fixed by entrypoint)

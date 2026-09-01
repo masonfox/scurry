@@ -23,6 +23,22 @@ export async function POST(req) {
       );
     }
 
+    // Validate URL scheme to prevent SSRF
+    try {
+      const parsed = new URL(url.trim());
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        return NextResponse.json(
+          { ok: false, error: "URL must use http or https" },
+          { status: 400 }
+        );
+      }
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: "URL is not valid" },
+        { status: 400 }
+      );
+    }
+
     // If password is masked, read the real one from settings
     if (password === PASSWORD_MASK) {
       const settings = readSettings();

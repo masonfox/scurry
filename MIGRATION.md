@@ -4,12 +4,12 @@ This guide helps existing Scurry users upgrade to versions that use the new `con
 
 ## What Changed?
 
-Starting with this version, Scurry separates **secrets** from **configuration**:
+Starting with this version, Scurry introduces a **`config/`** directory for persistent application settings:
 
-- **`secrets/`** - Contains actual secrets (MAM API token, mousehole state)
-- **`config/`** - Contains application settings (qBittorrent connection, tags, categories)
+- **`secrets/`** - Contains actual secrets (MAM API token, mousehole state) — unchanged
+- **`config/`** - **New**: Contains application settings (qBittorrent connection, tags, categories)
 
-Previously, `settings.json` was stored in `secrets/`, but it has been moved to `config/` for better semantic clarity.
+`config/settings.json` is a **new file** created by this version. There is no prior `secrets/settings.json` to migrate from. On a fresh upgrade you only need to add the volume mount; the settings file will be created automatically when you configure settings via the UI.
 
 ### PUID/PGID Support
 
@@ -23,13 +23,11 @@ If you experience permission issues after upgrading, verify your UID/GID matches
 
 ## Who Needs to Migrate?
 
-**You need to migrate if:**
-- You're using Docker or Docker Compose
-- You have an existing `secrets/settings.json` file
+**You need to update your setup if:**
+- You're using Docker or Docker Compose (you need to add the `config/` volume mount)
 
-**You DON'T need to migrate if:**
-- You're doing a fresh installation
-- You're using environment variables only (no `settings.json` file)
+**You DON'T need to do anything if:**
+- You're doing a fresh installation (just follow the normal setup)
 
 ## Migration Steps
 
@@ -45,14 +43,7 @@ If you experience permission issues after upgrading, verify your UID/GID matches
    mkdir config
    ```
 
-3. **Move your settings file (if it exists):**
-   ```bash
-   mv secrets/settings.json config/settings.json
-   ```
-   
-   If the file doesn't exist, skip this step - the app will create it when you configure settings via the UI.
-
-4. **Update your `docker-compose.yml`:**
+3. **Update your `docker-compose.yml`:**
    
    Add the config volume mount:
    ```yaml
@@ -61,10 +52,12 @@ If you experience permission issues after upgrading, verify your UID/GID matches
      - ./config:/app/config  # ADD THIS LINE
    ```
 
-5. **Start your container:**
+4. **Start your container:**
    ```bash
    docker-compose up -d
    ```
+
+   The app will create `config/settings.json` automatically when you configure settings via the UI (`/settings`).
 
 ### For Docker Run Users
 
@@ -79,12 +72,7 @@ If you experience permission issues after upgrading, verify your UID/GID matches
    mkdir -p /VOLUME/scurry/config
    ```
 
-3. **Move your settings file (if it exists):**
-   ```bash
-   mv /VOLUME/scurry/secrets/settings.json /VOLUME/scurry/config/settings.json
-   ```
-
-4. **Start the container with the new volume mount:**
+3. **Start the container with the new volume mount:**
    ```bash
    docker run -d \
      --name scurry \
@@ -99,6 +87,8 @@ If you experience permission issues after upgrading, verify your UID/GID matches
      --restart always \
      ghcr.io/masonfox/scurry:latest
    ```
+
+   The app will create `config/settings.json` automatically when you configure settings via the UI.
 
 ### For Mousehole Integration Users
 
