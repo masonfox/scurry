@@ -109,7 +109,10 @@ export function validateSettings(settings) {
     errors.push("qBittorrent URL is required");
   } else {
     try {
-      new URL(settings.qbittorrent.url);
+      const parsed = new URL(settings.qbittorrent.url);
+      if (!["http:", "https:"].includes(parsed.protocol)) {
+        errors.push("qBittorrent URL must use http or https");
+      }
     } catch {
       errors.push("qBittorrent URL is not a valid URL");
     }

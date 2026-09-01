@@ -136,6 +136,15 @@ describe('settings.js', () => {
       expect(errors.some(e => e.includes('not a valid URL'))).toBe(true);
     });
 
+    it('rejects non-http/https URL scheme', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'ftp://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } }
+      });
+      expect(errors.some(e => e.includes('http or https'))).toBe(true);
+    });
+
     it('rejects tags longer than 50 characters', () => {
       const errors = validateSettings({
         qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },

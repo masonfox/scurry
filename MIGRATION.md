@@ -163,8 +163,8 @@ After migration, verify everything works:
 If you need to rollback to the previous version:
 
 1. Stop the container
-2. Move settings back: `mv config/settings.json secrets/settings.json`
-3. Remove the config volume mount from docker-compose.yml
+2. Remove the `config/` volume mount from your `docker-compose.yml` or `docker run` command
+3. Settings will fall back to environment variables automatically on the next start
 4. Start the container with the previous image version
 
 ## Need Help?
