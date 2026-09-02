@@ -188,3 +188,40 @@ export function calculateRatioDiff(uploadedBytes, downloadedBytes, additionalByt
 export function generateTimestamp() {
   return Date.now();
 }
+
+/**
+ * Convert a settings wedge threshold ({ value, unit }) to bytes
+ * @param {{value: number|null, unit: string}} threshold - Threshold value and unit ("MB" or "GB")
+ * @returns {number|null} - Threshold in bytes, or null if not configured/invalid
+ */
+export function thresholdToBytes(threshold) {
+  if (!threshold) return null;
+  const { value, unit } = threshold;
+  if (value === null || value === undefined) return null;
+  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return null;
+
+  const multipliers = { KB: 1024, MB: 1024 * 1024, GB: 1024 * 1024 * 1024 };
+  const multiplier = multipliers[unit];
+  if (!multiplier) return null;
+
+  return Math.round(value * multiplier);
+}
+
+/**
+ * Decide whether a download item's freeleech wedge toggle should default to active.
+ * @param {object} params
+ * @param {number|null} params.sizeBytes - Item's file size in bytes
+ * @param {number|null} params.thresholdBytes - Configured auto-apply threshold in bytes for the item's medium
+ * @param {boolean} params.vip - Whether the item is VIP (wedges cannot be applied)
+ * @param {boolean} params.freeleech - Whether the item is already freeleech
+ * @param {boolean} params.snatched - Whether the item has already been snatched
+ * @param {boolean} params.wedgesAvailable - Whether the user has at least one freeleech wedge available
+ * @returns {boolean} - Whether the wedge toggle should default to active
+ */
+export function shouldAutoApplyWedge({ sizeBytes, thresholdBytes, vip, freeleech, snatched, wedgesAvailable }) {
+  if (thresholdBytes === null || thresholdBytes === undefined) return false;
+  if (sizeBytes === null || sizeBytes === undefined) return false;
+  if (vip || freeleech || snatched) return false;
+  if (!wedgesAvailable) return false;
+  return sizeBytes >= thresholdBytes;
+}

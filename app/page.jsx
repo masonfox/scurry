@@ -9,6 +9,7 @@ import DualSearchResultsList from './components/DualSearchResultsList';
 import SequentialSearchResults from './components/SequentialSearchResults';
 import UserStatsBar from './components/UserStatsBar';
 import DownloadReviewModal from './components/DownloadReviewModal';
+import { parseSizeToBytes, thresholdToBytes, shouldAutoApplyWedge } from '@/src/lib/utilities';
 
 const SUCCESS_MESSAGE_DURATION_MS = 5000;
 
@@ -277,13 +278,28 @@ function SearchPage() {
     }
   };
 
+  // Determine whether an item's freeleech wedge should default to active
+  // based on the configured per-medium auto-apply threshold.
+  const computeAutoWedge = useCallback((item, medium) => {
+    if (!appSettings?.wedges?.enabled) return false;
+    const thresholdBytes = thresholdToBytes(appSettings.wedges.thresholds?.[medium]);
+    return shouldAutoApplyWedge({
+      sizeBytes: parseSizeToBytes(item?.size),
+      thresholdBytes,
+      vip: !!item?.vip,
+      freeleech: !!item?.freeleech,
+      snatched: !!item?.snatched,
+      wedgesAvailable: (userStats?.flWedges || 0) > 0,
+    });
+  }, [appSettings, userStats]);
+
   // Single-mode: open review modal instead of downloading directly
   const openSingleReview = useCallback((item) => {
     const qbCategory = searchCategory === "audiobooks" ? "audiobooks" : "books";
     setReviewItems([{
       result: item,
       category: qbCategory,
-      useWedge: false,
+      useWedge: computeAutoWedge(item, qbCategory),
       onToggleWedge: () => {
         setReviewItems((prev) => {
           if (!prev) return prev;
@@ -293,7 +309,7 @@ function SearchPage() {
         });
       },
     }]);
-  }, [searchCategory]);
+  }, [searchCategory, computeAutoWedge]);
 
   const clearResults = useCallback(() => {
     setResults([]);
@@ -326,7 +342,7 @@ function SearchPage() {
       {
         result: selectedBook,
         category: 'books',
-        useWedge: false,
+        useWedge: computeAutoWedge(selectedBook, 'books'),
         onToggleWedge: () => {
           setReviewItems((prev) => {
             if (!prev) return prev;
@@ -339,7 +355,7 @@ function SearchPage() {
       {
         result: selectedAudiobook,
         category: 'audiobooks',
-        useWedge: false,
+        useWedge: computeAutoWedge(selectedAudiobook, 'audiobooks'),
         onToggleWedge: () => {
           setReviewItems((prev) => {
             if (!prev) return prev;
@@ -350,7 +366,7 @@ function SearchPage() {
         },
       },
     ]);
-  }, [selectedAudiobook, selectedBook]);
+  }, [selectedAudiobook, selectedBook, computeAutoWedge]);
 
   // Review modal: confirm download(s)
   const handleReviewConfirm = useCallback(async (items, perItemTags) => {
