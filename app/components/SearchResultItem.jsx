@@ -62,9 +62,9 @@ export default function SearchResultItem({ result, onAddItem, selectable = false
                   />
                 </span>
               )}
-              <span>{result.title}</span>
+              <span className="mr-1">{result.title}</span>
               <span className="text-gray-600 dark:text-zinc-400 font-normal">
-                <span className="mx-1">by</span>
+                <span className="mr-1">by</span>
                 <span>{result.author}</span>
                 {result.narrator && <span> ({result.narrator})</span>}
               </span>
