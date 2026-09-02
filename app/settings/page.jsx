@@ -19,16 +19,22 @@ const normalizeThresholdValue = (str) => {
   return Number.isFinite(num) ? num : null;
 };
 
-/** Describe a single medium's threshold in plain English ("over 300 MB" or "of any size" for 0) */
+/** A threshold value is only meaningful for auto-apply once it's a valid zero-or-positive number */
+const isValidThresholdValue = (value) => {
+  const num = normalizeThresholdValue(value);
+  return num !== null && num >= 0;
+};
+
+/** Describe a single medium's threshold in plain English ("300 MB or larger" or "of any size" for 0) */
 const describeThreshold = (value, unit) => {
   const num = normalizeThresholdValue(value);
-  return num === 0 ? "of any size" : `over ${value.trim()} ${unit}`;
+  return num === 0 ? "of any size" : `${value.trim()} ${unit} or larger`;
 };
 
 /** Build a plain-English summary of the configured wedge thresholds */
 const summarizeWedgeThresholds = ({ bookValue, bookUnit, audiobookValue, audiobookUnit }) => {
-  const bookSet = normalizeThresholdValue(bookValue) !== null;
-  const audiobookSet = normalizeThresholdValue(audiobookValue) !== null;
+  const bookSet = isValidThresholdValue(bookValue);
+  const audiobookSet = isValidThresholdValue(audiobookValue);
 
   if (bookSet && audiobookSet) {
     return `Books ${describeThreshold(bookValue, bookUnit)} and audiobooks ${describeThreshold(audiobookValue, audiobookUnit)} will auto-apply freeleech wedges.`;
@@ -41,6 +47,42 @@ const summarizeWedgeThresholds = ({ bookValue, bookUnit, audiobookValue, audiobo
   }
   return "No thresholds are set, so auto-apply won't trigger for either medium yet.";
 };
+
+/** A size-threshold input: a number field paired with a KB/MB/GB unit dropdown */
+function ThresholdInput({ id, label, value, onValueChange, unit, onUnitChange }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm text-gray-600 dark:text-zinc-400 mb-1">{label}</label>
+      <div className="flex gap-2">
+        <input
+          id={id}
+          type="number"
+          min="0"
+          step="any"
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          placeholder="e.g. 500"
+          className="flex-1 min-w-0 p-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm"
+        />
+        <select
+          aria-label={`${label} threshold unit`}
+          value={unit}
+          onChange={(e) => onUnitChange(e.target.value)}
+          className="flex-shrink-0 w-20 pl-2.5 pr-7 py-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm cursor-pointer appearance-none bg-no-repeat bg-right"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundPosition: 'right 0.5rem center',
+            backgroundSize: '16px 16px',
+          }}
+        >
+          <option value="KB">KB</option>
+          <option value="MB">MB</option>
+          <option value="GB">GB</option>
+        </select>
+      </div>
+    </div>
+  );
+}
 
 function SettingsPage() {
   const searchParams = useSearchParams();
@@ -725,7 +767,7 @@ function SettingsPage() {
             </div>
 
             <div className="p-3 rounded-md text-sm bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
-              MAM offers its own (beta) <a href="https://www.myanonamouse.net/preferences/index.php?view=search#flwedge" target="_blank" className="underline">auto-wedge feature</a>. Use either Scurry&apos;s below or MAM&apos;s own &mdash; not both at the same time.
+              MAM offers its own (beta) <a href="https://www.myanonamouse.net/preferences/index.php?view=search#flwedge" target="_blank" rel="noopener noreferrer" className="underline">auto-wedge feature</a>. Use either Scurry&apos;s below or MAM&apos;s own &mdash; not both at the same time.
             </div>
 
             {/* Enable toggle */}
@@ -753,66 +795,22 @@ function SettingsPage() {
                 <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-300">Size Thresholds</h3>
                 <p className="text-xs text-gray-500 dark:text-zinc-400 -mt-2">Leave a threshold blank to never auto-apply a wedge for that medium. Set to 0 KB/MB/GB to always apply a wedge.</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="wedge-books-value" className="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Books</label>
-                    <div className="flex gap-2">
-                      <input
-                        id="wedge-books-value"
-                        type="number"
-                        min="0"
-                        step="any"
-                        value={bookThresholdValue}
-                        onChange={(e) => setBookThresholdValue(e.target.value)}
-                        placeholder="e.g. 500"
-                        className="flex-1 min-w-0 p-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm"
-                      />
-                      <select
-                        aria-label="Books threshold unit"
-                        value={bookThresholdUnit}
-                        onChange={(e) => setBookThresholdUnit(e.target.value)}
-                        className="flex-shrink-0 w-20 pl-2.5 pr-7 py-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm cursor-pointer appearance-none bg-no-repeat bg-right"
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                          backgroundPosition: 'right 0.5rem center',
-                          backgroundSize: '16px 16px',
-                        }}
-                      >
-                        <option value="KB">KB</option>
-                        <option value="MB">MB</option>
-                        <option value="GB">GB</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label htmlFor="wedge-audiobooks-value" className="block text-sm text-gray-600 dark:text-zinc-400 mb-1">Audiobooks</label>
-                    <div className="flex gap-2">
-                      <input
-                        id="wedge-audiobooks-value"
-                        type="number"
-                        min="0"
-                        step="any"
-                        value={audiobookThresholdValue}
-                        onChange={(e) => setAudiobookThresholdValue(e.target.value)}
-                        placeholder="e.g. 500"
-                        className="flex-1 min-w-0 p-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm"
-                      />
-                      <select
-                        aria-label="Audiobooks threshold unit"
-                        value={audiobookThresholdUnit}
-                        onChange={(e) => setAudiobookThresholdUnit(e.target.value)}
-                        className="flex-shrink-0 w-20 pl-2.5 pr-7 py-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm cursor-pointer appearance-none bg-no-repeat bg-right"
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                          backgroundPosition: 'right 0.5rem center',
-                          backgroundSize: '16px 16px',
-                        }}
-                      >
-                        <option value="KB">KB</option>
-                        <option value="MB">MB</option>
-                        <option value="GB">GB</option>
-                      </select>
-                    </div>
-                  </div>
+                  <ThresholdInput
+                    id="wedge-books-value"
+                    label="Books"
+                    value={bookThresholdValue}
+                    onValueChange={setBookThresholdValue}
+                    unit={bookThresholdUnit}
+                    onUnitChange={setBookThresholdUnit}
+                  />
+                  <ThresholdInput
+                    id="wedge-audiobooks-value"
+                    label="Audiobooks"
+                    value={audiobookThresholdValue}
+                    onValueChange={setAudiobookThresholdValue}
+                    unit={audiobookThresholdUnit}
+                    onUnitChange={setAudiobookThresholdUnit}
+                  />
                 </div>
 
                 <p className="p-3 mt-6 rounded-md text-sm bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300">

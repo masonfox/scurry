@@ -191,20 +191,19 @@ export function generateTimestamp() {
 
 /**
  * Convert a settings wedge threshold ({ value, unit }) to bytes
- * @param {{value: number|null, unit: string}} threshold - Threshold value and unit ("MB" or "GB")
+ * @param {{value: number|null, unit: string}} threshold - Threshold value and unit ("KB", "MB", or "GB")
  * @returns {number|null} - Threshold in bytes, or null if not configured/invalid
  */
 export function thresholdToBytes(threshold) {
   if (!threshold) return null;
   const { value, unit } = threshold;
   if (value === null || value === undefined) return null;
-  if (typeof value !== "number" || !Number.isFinite(value) || value < 0) return null;
+  if (typeof value !== "number" || !Number.isFinite(value)) return null;
+  if (unit !== "KB" && unit !== "MB" && unit !== "GB") return null;
 
-  const multipliers = { KB: 1024, MB: 1024 * 1024, GB: 1024 * 1024 * 1024 };
-  const multiplier = multipliers[unit];
-  if (!multiplier) return null;
-
-  return Math.round(value * multiplier);
+  // Delegate to parseSizeToBytes so unit math has one source of truth;
+  // its number-only regex also rejects negative values for us.
+  return parseSizeToBytes(`${value} ${unit}`);
 }
 
 /**
