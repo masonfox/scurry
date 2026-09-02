@@ -29,6 +29,13 @@ export function getDefaults() {
         audiobooks: "audiobooks",
       },
     },
+    wedges: {
+      enabled: false,
+      thresholds: {
+        books: { value: null, unit: "MB" },
+        audiobooks: { value: null, unit: "MB" },
+      },
+    },
   };
 }
 
@@ -164,6 +171,23 @@ export function validateSettings(settings) {
       const cat = settings.categories.defaults[medium];
       if (cat && (typeof cat !== "string" || cat.length > 50)) {
         errors.push(`Category for ${medium} must be a string under 50 characters`);
+      }
+    }
+  }
+
+  // Wedges
+  if (settings.wedges?.thresholds) {
+    for (const medium of ["books", "audiobooks"]) {
+      const threshold = settings.wedges.thresholds[medium];
+      if (!threshold) continue;
+      const { value, unit } = threshold;
+      if (value !== null && value !== undefined) {
+        if (typeof value !== "number" || !Number.isFinite(value) || value < 0) {
+          errors.push(`Wedge threshold for ${medium} must be zero or a positive number`);
+        }
+      }
+      if (unit !== undefined && unit !== "KB" && unit !== "MB" && unit !== "GB") {
+        errors.push(`Wedge threshold unit for ${medium} must be "KB", "MB", or "GB"`);
       }
     }
   }

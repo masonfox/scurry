@@ -7,8 +7,82 @@ const TABS = [
   { id: "qbittorrent", label: "qBittorrent" },
   { id: "tags", label: "Tags" },
   { id: "categories", label: "Categories" },
+  { id: "wedges", label: "Auto Wedge" },
   { id: "token", label: "MAM Token" },
 ];
+
+/** Parse a threshold input string into a number, or null when blank/invalid */
+const normalizeThresholdValue = (str) => {
+  const trimmed = String(str ?? "").trim();
+  if (trimmed === "") return null;
+  const num = Number(trimmed);
+  return Number.isFinite(num) ? num : null;
+};
+
+/** A threshold value is only meaningful for auto-apply once it's a valid zero-or-positive number */
+const isValidThresholdValue = (value) => {
+  const num = normalizeThresholdValue(value);
+  return num !== null && num >= 0;
+};
+
+/** Describe a single medium's threshold in plain English ("300 MB or larger" or "of any size" for 0) */
+const describeThreshold = (value, unit) => {
+  const num = normalizeThresholdValue(value);
+  return num === 0 ? "of any size" : `${value.trim()} ${unit} or larger`;
+};
+
+/** Build a plain-English summary of the configured wedge thresholds */
+const summarizeWedgeThresholds = ({ bookValue, bookUnit, audiobookValue, audiobookUnit }) => {
+  const bookSet = isValidThresholdValue(bookValue);
+  const audiobookSet = isValidThresholdValue(audiobookValue);
+
+  if (bookSet && audiobookSet) {
+    return `Books ${describeThreshold(bookValue, bookUnit)} and audiobooks ${describeThreshold(audiobookValue, audiobookUnit)} will auto-apply freeleech wedges.`;
+  }
+  if (bookSet) {
+    return `Books ${describeThreshold(bookValue, bookUnit)} will auto-apply freeleech wedges. Audiobooks won't auto-apply since no threshold is set.`;
+  }
+  if (audiobookSet) {
+    return `Audiobooks ${describeThreshold(audiobookValue, audiobookUnit)} will auto-apply freeleech wedges. Books won't auto-apply since no threshold is set.`;
+  }
+  return "No thresholds are set, so auto-apply won't trigger for either medium yet.";
+};
+
+/** A size-threshold input: a number field paired with a KB/MB/GB unit dropdown */
+function ThresholdInput({ id, label, value, onValueChange, unit, onUnitChange }) {
+  return (
+    <div>
+      <label htmlFor={id} className="block text-sm text-gray-600 dark:text-zinc-400 mb-1">{label}</label>
+      <div className="flex gap-2">
+        <input
+          id={id}
+          type="number"
+          min="0"
+          step="any"
+          value={value}
+          onChange={(e) => onValueChange(e.target.value)}
+          placeholder="e.g. 500"
+          className="flex-1 min-w-0 p-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 placeholder:text-gray-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm"
+        />
+        <select
+          aria-label={`${label} threshold unit`}
+          value={unit}
+          onChange={(e) => onUnitChange(e.target.value)}
+          className="flex-shrink-0 w-20 pl-2.5 pr-7 py-2.5 border border-gray-300 dark:border-zinc-600 rounded-md bg-white dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-pink-200 dark:focus:ring-pink-800 text-sm cursor-pointer appearance-none bg-no-repeat bg-right"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+            backgroundPosition: 'right 0.5rem center',
+            backgroundSize: '16px 16px',
+          }}
+        >
+          <option value="KB">KB</option>
+          <option value="MB">MB</option>
+          <option value="GB">GB</option>
+        </select>
+      </div>
+    </div>
+  );
+}
 
 function SettingsPage() {
   const searchParams = useSearchParams();
@@ -39,6 +113,13 @@ function SettingsPage() {
   const [defaultBookCategory, setDefaultBookCategory] = useState("books");
   const [defaultAudiobookCategory, setDefaultAudiobookCategory] = useState("audiobooks");
 
+  // Wedges form state
+  const [wedgesEnabled, setWedgesEnabled] = useState(false);
+  const [bookThresholdValue, setBookThresholdValue] = useState("");
+  const [bookThresholdUnit, setBookThresholdUnit] = useState("MB");
+  const [audiobookThresholdValue, setAudiobookThresholdValue] = useState("");
+  const [audiobookThresholdUnit, setAudiobookThresholdUnit] = useState("MB");
+
   const fetchSettings = useCallback(async () => {
     try {
       const res = await fetch("/api/settings");
@@ -56,6 +137,13 @@ function SettingsPage() {
         setCategoriesEnabled(data.settings.categories?.enabled || false);
         setDefaultBookCategory(data.settings.categories?.defaults?.books || "books");
         setDefaultAudiobookCategory(data.settings.categories?.defaults?.audiobooks || "audiobooks");
+        setWedgesEnabled(data.settings.wedges?.enabled || false);
+        const bookThreshold = data.settings.wedges?.thresholds?.books;
+        setBookThresholdValue(bookThreshold?.value != null ? String(bookThreshold.value) : "");
+        setBookThresholdUnit(bookThreshold?.unit || "MB");
+        const audiobookThreshold = data.settings.wedges?.thresholds?.audiobooks;
+        setAudiobookThresholdValue(audiobookThreshold?.value != null ? String(audiobookThreshold.value) : "");
+        setAudiobookThresholdUnit(audiobookThreshold?.unit || "MB");
       }
     } catch (err) {
       console.error("Failed to load settings:", err);
@@ -97,14 +185,23 @@ function SettingsPage() {
     defaultAudiobookCategory.trim() !== (settings.categories?.defaults?.audiobooks || "audiobooks")
   );
 
+  const isWedgesDirty = settings && (
+    wedgesEnabled !== (settings.wedges?.enabled || false) ||
+    normalizeThresholdValue(bookThresholdValue) !== (settings.wedges?.thresholds?.books?.value ?? null) ||
+    bookThresholdUnit !== (settings.wedges?.thresholds?.books?.unit || "MB") ||
+    normalizeThresholdValue(audiobookThresholdValue) !== (settings.wedges?.thresholds?.audiobooks?.value ?? null) ||
+    audiobookThresholdUnit !== (settings.wedges?.thresholds?.audiobooks?.unit || "MB")
+  );
+
   // Overall dirty state (for beforeunload)
-  const isDirty = isQbDirty || isTagsDirty || isCategoriesDirty;
+  const isDirty = isQbDirty || isTagsDirty || isCategoriesDirty || isWedgesDirty;
 
   // Current tab dirty state (for tab switching)
-  const isCurrentTabDirty = 
+  const isCurrentTabDirty =
     (activeTab === "qbittorrent" && isQbDirty) ||
     (activeTab === "tags" && isTagsDirty) ||
-    (activeTab === "categories" && isCategoriesDirty);
+    (activeTab === "categories" && isCategoriesDirty) ||
+    (activeTab === "wedges" && isWedgesDirty);
 
   // Guard: Browser close / refresh
   useEffect(() => {
@@ -245,6 +342,19 @@ function SettingsPage() {
     });
   };
 
+  const handleSaveWedges = () => {
+    saveSettings({
+      ...buildCurrentSettings(),
+      wedges: {
+        enabled: wedgesEnabled,
+        thresholds: {
+          books: { value: normalizeThresholdValue(bookThresholdValue), unit: bookThresholdUnit },
+          audiobooks: { value: normalizeThresholdValue(audiobookThresholdValue), unit: audiobookThresholdUnit },
+        },
+      },
+    });
+  };
+
   /** Build the current settings object from form state */
   const buildCurrentSettings = () => ({
     qbittorrent: {
@@ -265,6 +375,13 @@ function SettingsPage() {
       defaults: {
         books: defaultBookCategory.trim(),
         audiobooks: defaultAudiobookCategory.trim(),
+      },
+    },
+    wedges: {
+      enabled: wedgesEnabled,
+      thresholds: {
+        books: { value: normalizeThresholdValue(bookThresholdValue), unit: bookThresholdUnit },
+        audiobooks: { value: normalizeThresholdValue(audiobookThresholdValue), unit: audiobookThresholdUnit },
       },
     },
   });
@@ -632,6 +749,84 @@ function SettingsPage() {
             <div className="flex justify-end">
               <button
                 onClick={handleSaveCategories}
+                disabled={saving}
+                className="px-4 py-2 text-sm font-medium bg-pink-500 text-white rounded-md hover:bg-pink-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Wedges Tab */}
+        {activeTab === "wedges" && (
+          <div role="tabpanel" id="panel-wedges" aria-labelledby="tab-wedges" className="space-y-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-zinc-100 mb-1">Freeleech Wedges</h2>
+              <p className="text-sm text-gray-500 dark:text-zinc-400">Automatically select the freeleech wedge toggle in the download review step when a file meets a per-medium size threshold.</p>
+            </div>
+
+            <div className="p-3 rounded-md text-sm bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800/40">
+              MAM offers its own (beta) <a href="https://www.myanonamouse.net/preferences/index.php?view=search#flwedge" target="_blank" rel="noopener noreferrer" className="underline">auto-wedge feature</a>. Use either Scurry&apos;s below or MAM&apos;s own &mdash; not both at the same time.
+            </div>
+
+            {/* Enable toggle */}
+            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-zinc-300">Enable Auto-Apply Wedges</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">When enabled, eligible downloads meeting the size threshold below default to using a freeleech wedge</p>
+              </div>
+              <button
+                onClick={() => setWedgesEnabled(!wedgesEnabled)}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                  wedgesEnabled ? "bg-pink-400" : "bg-gray-300 dark:bg-zinc-600"
+                }`}
+                role="switch"
+                aria-checked={wedgesEnabled}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                  wedgesEnabled ? "translate-x-6" : "translate-x-1"
+                }`} />
+              </button>
+            </div>
+
+            {wedgesEnabled && (
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-zinc-300">Size Thresholds</h3>
+                <p className="text-xs text-gray-500 dark:text-zinc-400 -mt-2">Leave a threshold blank to never auto-apply a wedge for that medium. Set to 0 KB/MB/GB to always apply a wedge.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ThresholdInput
+                    id="wedge-books-value"
+                    label="Books"
+                    value={bookThresholdValue}
+                    onValueChange={setBookThresholdValue}
+                    unit={bookThresholdUnit}
+                    onUnitChange={setBookThresholdUnit}
+                  />
+                  <ThresholdInput
+                    id="wedge-audiobooks-value"
+                    label="Audiobooks"
+                    value={audiobookThresholdValue}
+                    onValueChange={setAudiobookThresholdValue}
+                    unit={audiobookThresholdUnit}
+                    onUnitChange={setAudiobookThresholdUnit}
+                  />
+                </div>
+
+                <p className="p-3 mt-6 rounded-md text-sm bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300">
+                  {summarizeWedgeThresholds({
+                    bookValue: bookThresholdValue,
+                    bookUnit: bookThresholdUnit,
+                    audiobookValue: audiobookThresholdValue,
+                    audiobookUnit: audiobookThresholdUnit,
+                  })}
+                </p>
+              </div>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                onClick={handleSaveWedges}
                 disabled={saving}
                 className="px-4 py-2 text-sm font-medium bg-pink-500 text-white rounded-md hover:bg-pink-600 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >

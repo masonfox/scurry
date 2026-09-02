@@ -35,6 +35,10 @@ describe('settings.js', () => {
       expect(defaults.tags.available).toEqual([]);
       expect(defaults.tags.defaults.books).toEqual([]);
       expect(defaults.tags.defaults.audiobooks).toEqual([]);
+      expect(defaults).toHaveProperty('wedges');
+      expect(defaults.wedges.enabled).toBe(false);
+      expect(defaults.wedges.thresholds.books).toEqual({ value: null, unit: 'MB' });
+      expect(defaults.wedges.thresholds.audiobooks).toEqual({ value: null, unit: 'MB' });
     });
   });
 
@@ -67,12 +71,16 @@ describe('settings.js', () => {
       fs.readFileSync.mockReturnValue(JSON.stringify({
         qbittorrent: { url: 'http://test:8080', username: 'admin', password: 'pass' },
         tags: { enabled: true, available: ['fiction'], defaults: { books: ['fiction'], audiobooks: [] } }
-        // categories key is missing
+        // categories and wedges keys are missing, simulating a settings file saved before this change
       }));
 
       const settings = readSettings();
       expect(settings.categories).toBeDefined();
       expect(settings.categories.enabled).toBe(false);
+      expect(settings.wedges).toBeDefined();
+      expect(settings.wedges.enabled).toBe(false);
+      expect(settings.wedges.thresholds.books).toEqual({ value: null, unit: 'MB' });
+      expect(settings.wedges.thresholds.audiobooks).toEqual({ value: null, unit: 'MB' });
     });
 
     it('falls back to defaults on parse error', () => {
@@ -179,6 +187,66 @@ describe('settings.js', () => {
         categories: { enabled: false, defaults: { books: '', audiobooks: '' } }
       });
       expect(errors.some(e => e.includes('non-empty strings'))).toBe(true);
+    });
+
+    it('returns no errors for valid wedge thresholds', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } },
+        wedges: { enabled: true, thresholds: { books: { value: 500, unit: 'KB' }, audiobooks: { value: 1, unit: 'GB' } } }
+      });
+      expect(errors).toHaveLength(0);
+    });
+
+    it('returns no errors for null wedge threshold values', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } },
+        wedges: { enabled: false, thresholds: { books: { value: null, unit: 'MB' }, audiobooks: { value: null, unit: 'MB' } } }
+      });
+      expect(errors).toHaveLength(0);
+    });
+
+    it('accepts a zero wedge threshold value (always auto-apply for that medium)', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } },
+        wedges: { enabled: true, thresholds: { books: { value: 0, unit: 'MB' }, audiobooks: { value: null, unit: 'MB' } } }
+      });
+      expect(errors).toHaveLength(0);
+    });
+
+    it('rejects a negative wedge threshold value', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } },
+        wedges: { enabled: true, thresholds: { books: { value: -1, unit: 'MB' }, audiobooks: { value: null, unit: 'MB' } } }
+      });
+      expect(errors.some(e => e.includes('zero or a positive number'))).toBe(true);
+    });
+
+    it('rejects a non-numeric wedge threshold value', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } },
+        wedges: { enabled: true, thresholds: { books: { value: 'lots', unit: 'MB' }, audiobooks: { value: null, unit: 'MB' } } }
+      });
+      expect(errors.some(e => e.includes('zero or a positive number'))).toBe(true);
+    });
+
+    it('rejects an invalid wedge threshold unit', () => {
+      const errors = validateSettings({
+        qbittorrent: { url: 'http://localhost:8080', username: 'admin', password: 'pass' },
+        tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+        categories: { enabled: false, defaults: { books: '', audiobooks: '' } },
+        wedges: { enabled: true, thresholds: { books: { value: 500, unit: 'TB' }, audiobooks: { value: null, unit: 'MB' } } }
+      });
+      expect(errors.some(e => e.includes('"KB", "MB", or "GB"'))).toBe(true);
     });
   });
 

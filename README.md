@@ -39,7 +39,7 @@ Dual fetch allows you to fetch _both_ ebook and audibooks at the same time in a 
 ### Key Features
 
 - 🔎 **Search MAM**: Clean, responsive interface to search MyAnonamouse's extensive library
-- ⚡  **Freeleach Wedges**: Redeem freeleach wedges before downloading and check your wedge count
+- ⚡  **Freeleach Wedges**: Redeem freeleach wedges before downloading (manually or auto-applied by file size), and check your wedge count
 - 🌟 **Dual-Fetch Mode**: Search and download both ebook and audiobook simultaneously with streamlined selection workflow
 - 👉️ **One-click Downloads**: Instantly send torrents to your qBittorrent instance with a single click
 - 🤝 **Direct Integration**: Automatically authenticates with both MAM and qBittorrent APIs
