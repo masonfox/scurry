@@ -139,6 +139,7 @@ const resultShape = PropTypes.shape({
   id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   title: PropTypes.string.isRequired,
   author: PropTypes.string.isRequired,
+  narrator: PropTypes.string,
   size: PropTypes.string.isRequired,
   filetypes: PropTypes.string.isRequired,
   seeders: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,

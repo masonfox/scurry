@@ -90,6 +90,7 @@ export async function GET(req) {
     freeleech: Boolean(item.free == 1),
     snatched: Boolean(item.my_snatched == 1),
     author: parseAuthorInfo(item.author_info),
+    narrator: categoryId === MAM_CATEGORIES.AUDIOBOOKS ? parseAuthorInfo(item.narrator_info) : null,
     seeders: formatNumberWithCommas(item.seeders ?? 0),
     leechers: formatNumberWithCommas(item.leechers ?? 0),
     downloads: formatNumberWithCommas(item.times_completed ?? 0),

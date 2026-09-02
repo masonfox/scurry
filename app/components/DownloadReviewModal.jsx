@@ -332,7 +332,7 @@ function ItemCard({ item, userStats, hasWedges, isDual, label, tagsEnabled, avai
             )}
           </div>
           <div className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
-            by {result.author}
+            by {result.author}{result.narrator && ` · narrated by ${result.narrator}`}
           </div>
         </div>
 
