@@ -12,8 +12,12 @@ The system SHALL let a user enable or disable auto-apply wedges, and independent
 - **THEN** the system saves the setting, and future book downloads are never auto-selected for a wedge while audiobook downloads are evaluated against the configured threshold
 
 #### Scenario: Rejecting an invalid threshold
-- **WHEN** the user enters a non-positive or non-numeric threshold value for a medium and attempts to save
+- **WHEN** the user enters a negative or non-numeric threshold value for a medium and attempts to save
 - **THEN** the system rejects the save and reports a validation error for that medium
+
+#### Scenario: A zero threshold always auto-applies
+- **WHEN** the user sets a medium's threshold to 0
+- **THEN** the system accepts the value, and every eligible download of that medium auto-applies a wedge regardless of file size
 
 ### Requirement: Advisory about MAM's own auto-wedge feature
 The Settings UI SHALL display advisory copy explaining that MAM offers its own equivalent auto-wedge feature, and that the user should use only one of Scurry's auto-apply or MAM's own feature at a time, not both.

@@ -24,8 +24,8 @@
 - [x] 4.1 In `app/page.jsx`, extract a small local helper that takes an item + its medium/category and returns the initial `useWedge` boolean using `appSettings.wedges`, `userStats.flWedges`, and the item's `size`/`vip`/`freeleech`/`snatched` fields via `thresholdToBytes`/`shouldAutoApplyWedge`
 - [x] 4.2 Update `openSingleReview` to use that helper instead of hardcoding `useWedge: false`, and add `appSettings`/`userStats` to its `useCallback` dependency array
 - [x] 4.3 Update `openDualReview` to apply the helper independently to both the book and audiobook items (each against its own medium's threshold), and add `appSettings`/`userStats` to its `useCallback` dependency array
-- [ ] 4.4 Manually verify: single audiobook flow, single ebook flow, and dual flow each pre-select the wedge toggle when the configured threshold is met, leave it off when not configured/not met, and never pre-select for a VIP or already-freeleech result
-- [ ] 4.5 Manually verify the toggle remains user-editable after auto-apply (click to deselect an auto-applied wedge, confirm the download proceeds without a wedge for that item)
+- [x] 4.4 Manually verify: single audiobook flow, single ebook flow, and dual flow each pre-select the wedge toggle when the configured threshold is met, leave it off when not configured/not met, and never pre-select for a VIP or already-freeleech result
+- [x] 4.5 Manually verify the toggle remains user-editable after auto-apply (click to deselect an auto-applied wedge, confirm the download proceeds without a wedge for that item)
 
 ## 5. Final checks
 
