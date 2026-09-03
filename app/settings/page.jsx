@@ -555,14 +555,14 @@ function SettingsPage() {
               <h2 className="text-lg font-semibold text-gray-800 dark:text-zinc-100 mb-1">Tag Management</h2>
               <p className="text-sm text-gray-500 dark:text-zinc-400">Configure tags that can be applied to torrents when downloading. Tags are sent to qBittorrent.</p>
             </div>
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
-              <div>
+            <div className="flex items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-zinc-300">Enable Tags</p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">When enabled, you can select tags during the download review step</p>
               </div>
               <button
                 onClick={() => setTagsEnabled(!tagsEnabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                   tagsEnabled ? "bg-pink-400" : "bg-gray-300 dark:bg-zinc-600"
                 }`}
                 role="switch"
@@ -697,14 +697,14 @@ function SettingsPage() {
             </div>
 
             {/* Enable toggle */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
-              <div>
+            <div className="flex items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-zinc-300">Enable Categories</p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">When enabled, downloads are assigned a qBittorrent category based on medium type</p>
               </div>
               <button
                 onClick={() => setCategoriesEnabled(!categoriesEnabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                   categoriesEnabled ? "bg-pink-400" : "bg-gray-300 dark:bg-zinc-600"
                 }`}
                 role="switch"
@@ -771,14 +771,14 @@ function SettingsPage() {
             </div>
 
             {/* Enable toggle */}
-            <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
-              <div>
+            <div className="flex items-center justify-between gap-4 p-4 bg-gray-50 dark:bg-zinc-800 rounded-lg border border-gray-200 dark:border-zinc-700">
+              <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-700 dark:text-zinc-300">Enable Auto-Apply Wedges</p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">When enabled, eligible downloads meeting the size threshold below default to using a freeleech wedge</p>
               </div>
               <button
                 onClick={() => setWedgesEnabled(!wedgesEnabled)}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer ${
+                className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                   wedgesEnabled ? "bg-pink-400" : "bg-gray-300 dark:bg-zinc-600"
                 }`}
                 role="switch"
