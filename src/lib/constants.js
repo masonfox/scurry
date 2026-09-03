@@ -21,3 +21,9 @@ export const QBITTORRENT_CATEGORIES = {
 
 // MAM token file path
 export const MAM_TOKEN_FILE = "secrets/mam_api_token";
+
+// Settings file path
+export const SETTINGS_FILE = "config/settings.json";
+
+// Password mask for API responses
+export const PASSWORD_MASK = "••••••••";
