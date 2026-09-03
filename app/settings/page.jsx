@@ -429,8 +429,8 @@ function SettingsPage() {
           <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100">Settings</h1>
         </div>
 
-        {/* Tab Navigation */}
-        <nav className="px-7 mt-5" aria-label="Settings tabs">
+        {/* Tab Navigation (desktop/wide) */}
+        <nav className="hidden sm:block px-7 mt-5" aria-label="Settings tabs">
           <div role="tablist" className="flex gap-0">
           {TABS.map((tab) => (
             <button
@@ -451,6 +451,26 @@ function SettingsPage() {
           ))}
           </div>
         </nav>
+
+        {/* Tab Navigation (narrow screens) */}
+        <div className="sm:hidden px-5 mt-5 pb-4">
+          <label htmlFor="settings-tab-select" className="sr-only">Settings section</label>
+          <div className="relative">
+            <select
+              id="settings-tab-select"
+              value={activeTab}
+              onChange={(e) => handleTabChange(e.target.value)}
+              className="w-full appearance-none px-3 py-2.5 pr-9 text-sm font-medium rounded-md border border-gray-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-pink-500 dark:text-pink-400 cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400"
+            >
+              {TABS.map((tab) => (
+                <option key={tab.id} value={tab.id}>{tab.label}</option>
+              ))}
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-zinc-400">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </div>
+        </div>
       </div>
 
       {/* Message Banner */}
