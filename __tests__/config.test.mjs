@@ -1,5 +1,17 @@
 import { describe, it, test, expect, beforeEach, afterEach, vi } from 'vitest';
-import { config, readMamToken } from '../src/lib/config.js';
+import fs from 'node:fs';
+import { SETTINGS_FILE } from '../src/lib/constants.js';
+
+// Intercept the settings file check so on-disk settings.json
+// doesn't override env vars during tests.
+const _realExistsSync = fs.existsSync;
+vi.spyOn(fs, 'existsSync').mockImplementation((p) => {
+  if (p === SETTINGS_FILE) return false;
+  return _realExistsSync(p);
+});
+
+// Import config AFTER the spy is in place
+const { config, readMamToken } = await import('../src/lib/config.js');
 
 describe('config', () => {
   const originalEnv = process.env;
@@ -64,13 +76,13 @@ describe('config', () => {
     expect(freshConfig.mamUA).toBe('Custom/1.0');
   });
 
-  test('should throw error when required environment variable is missing', async () => {
+  test('should fall back to default qbUrl when APP_QB_URL is not set', async () => {
     delete process.env.APP_QB_URL;
     
     vi.resetModules();
-    await expect(async () => {
-      await import('../src/lib/config.js?t=' + Date.now());
-    }).rejects.toThrow('Missing env: APP_QB_URL');
+    const { config: freshConfig } = await import('../src/lib/config.js?t=' + Date.now());
+    // With settings-file-first config, missing env vars fall back to defaults
+    expect(freshConfig.qbUrl).toBe('http://qbittorrent:8080');
   });
 });
 

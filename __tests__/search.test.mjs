@@ -36,6 +36,48 @@ describe('search route', () => {
     expect(json.results.length).toBeGreaterThan(0);
   });
 
+  it('includes narrator for audiobook category results', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [{
+          id: '123', dl: 'abc', title: 'Test', size: '1MB', filetype: 'm4b', added: '2025-08-14',
+          vip: 0, my_snatched: 0, author_info: '{"author":"Author"}', narrator_info: '{"narrator":"Narrator Name"}',
+          seeders: 10, leechers: 2, times_completed: 5
+        }]
+      }),
+      text: async () => "",
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test&category=audiobooks' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(json.results[0].narrator).toBe('Narrator Name');
+  });
+
+  it('omits narrator for book category results', async () => {
+    global.fetch.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        data: [{
+          id: '123', dl: 'abc', title: 'Test', size: '1MB', filetype: 'epub', added: '2025-08-14',
+          vip: 0, my_snatched: 0, author_info: '{"author":"Author"}', narrator_info: '{"narrator":"Narrator Name"}',
+          seeders: 10, leechers: 2, times_completed: 5
+        }]
+      }),
+      text: async () => "",
+    });
+
+    const req = { url: 'http://localhost/api/search?q=test&category=books' };
+    const res = await GET(req);
+    const json = await res.json();
+
+    expect(json.results[0].narrator).toBeNull();
+  });
+
   it('handles search results with missing/null fields', async () => {
     global.fetch.mockResolvedValueOnce({
       ok: true,

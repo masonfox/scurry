@@ -32,10 +32,13 @@ services:
       APP_QB_USERNAME: ${APP_QB_USERNAME:-admin}
       APP_QB_PASSWORD: ${APP_QB_PASSWORD:-adminadmin}
       APP_MAM_USER_AGENT: ${APP_MAM_USER_AGENT:-Scurry/2.0 (+contact)}
-      NEXT_PUBLIC_DEFAULT_CATEGORY: ${NEXT_PUBLIC_DEFAULT_CATEGORY:-books}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
     volumes:
       # Mount the same volume where mousehole stores state.json (read-only)
       - mam_secrets:/app/secrets:ro
+      # Mount config directory for application settings
+      - ./config:/app/config
     ports:
       - "3000:3000"  # Scurry web UI
     depends_on:

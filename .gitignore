@@ -3,6 +3,7 @@ node_modules
 out
 .env
 secrets/
+config/
 npm-debug.log*
 yarn-debug.log*
 pnpm-debug.log*

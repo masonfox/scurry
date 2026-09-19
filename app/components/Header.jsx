@@ -1,23 +1,13 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import TokenManager from './TokenManager';
+import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
 
 export default function Header({ onTokenUpdate, mamTokenExists }) {
-  const [showTokenManager, setShowTokenManager] = useState(false);
-
   const handleLogout = async () => {
     await fetch('/api/logout', { method: 'POST' });
     window.location.href = '/login';
-  };
-
-  const handleTokenUpdate = (tokenExists) => {
-    onTokenUpdate?.(tokenExists);
-    // Auto-hide token manager after successful token addition
-    if (tokenExists && !mamTokenExists) {
-      setShowTokenManager(false);
-    }
   };
 
   return (
@@ -51,17 +41,21 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
         <p className="mt-2 text-gray-500 dark:text-zinc-400">A nimble little mouse that scurries through MyAnonamouse (MAM) and whisks books & audiobooks into qBittorrent</p>
         
         <div className="mt-4 flex gap-3">
-          <button
-            onClick={() => setShowTokenManager(!showTokenManager)}
-            className={`py-2 px-4 rounded font-semibold transition-colors cursor-pointer ${
+          <Link
+            href={mamTokenExists ? "/settings" : "/settings?tab=token"}
+            className={`py-2 px-4 rounded font-semibold transition-colors cursor-pointer inline-flex items-center gap-2 ${
               mamTokenExists 
-                ? 'bg-green-100 hover:bg-green-200 text-green-700 dark:bg-green-900/40 dark:hover:bg-green-900/60 dark:text-green-400' 
+                ? 'bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-zinc-700 dark:hover:bg-zinc-600 dark:text-zinc-200' 
                 : 'bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/40 dark:hover:bg-orange-900/60 dark:text-orange-400'
             }`}
-            title={mamTokenExists ? 'Manage MAM Token' : 'MAM Token Missing - Click to Add'}
+            title={mamTokenExists ? 'Settings' : 'MAM Token Missing - Click to configure'}
           >
-            🔑 {mamTokenExists ? 'Token' : 'Add Token'}
-          </button>
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+            {mamTokenExists ? 'Settings' : 'Setup Required'}
+          </Link>
           
           <button
             onClick={handleLogout}
@@ -70,12 +64,6 @@ export default function Header({ onTokenUpdate, mamTokenExists }) {
             Logout
           </button>
         </div>
-
-        {showTokenManager && (
-          <div className="mt-6">
-            <TokenManager onTokenUpdate={handleTokenUpdate} />
-          </div>
-        )}
       </div>
     </div>
   );

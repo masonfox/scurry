@@ -19,6 +19,14 @@ vi.mock('../src/lib/qbittorrent', () => ({
   qbAddUrl: vi.fn()
 }));
 
+vi.mock('../src/lib/settings', () => ({
+  readSettings: vi.fn(() => ({
+    qbittorrent: { url: 'http://localhost:8080', username: 'testuser', password: 'testpass' },
+    tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+    categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } },
+  })),
+}));
+
 global.fetch = vi.fn();
 
 describe('E2E Integration Tests - Advanced Scenarios', () => {
@@ -222,7 +230,7 @@ describe('E2E Integration Tests - Advanced Scenarios', () => {
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
-        'audiobooks'
+        { category: undefined, tags: undefined }
       );
     });
   });
@@ -448,7 +456,7 @@ describe('E2E Integration Tests - Advanced Scenarios', () => {
         
         // Verify category was passed correctly
         const lastCall = qbittorrent.qbAddUrl.mock.calls[qbittorrent.qbAddUrl.mock.calls.length - 1];
-        expect(lastCall[3]).toBe(category); // Category is 4th parameter
+        expect(lastCall[3]).toEqual({ category: undefined, tags: undefined });
         
         vi.clearAllMocks();
       }

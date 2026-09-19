@@ -20,6 +20,14 @@ vi.mock('../src/lib/qbittorrent', () => ({
   qbAddUrl: vi.fn()
 }));
 
+vi.mock('../src/lib/settings', () => ({
+  readSettings: vi.fn(() => ({
+    qbittorrent: { url: 'http://localhost:8080', username: 'testuser', password: 'testpass' },
+    tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+    categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } },
+  })),
+}));
+
 global.fetch = vi.fn();
 
 describe('Dual-Fetch Feature Tests', () => {
@@ -354,20 +362,20 @@ describe('Dual-Fetch Feature Tests', () => {
       expect(qbittorrent.qbLogin).toHaveBeenCalledTimes(2);
       expect(qbittorrent.qbAddUrl).toHaveBeenCalledTimes(2);
 
-      // Verify book was added with 'books' category
+      // Verify book was added (categories disabled in settings, so category is undefined)
       expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/book-download-link-1',
-        'books'
+        { category: undefined, tags: undefined }
       );
 
-      // Verify audiobook was added with 'audiobooks' category
+      // Verify audiobook was added (categories disabled in settings, so category is undefined)
       expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/audiobook-download-link-1',
-        'audiobooks'
+        { category: undefined, tags: undefined }
       );
     });
 
@@ -632,19 +640,19 @@ describe('Dual-Fetch Feature Tests', () => {
       expect(audioDownloadRes.status).toBe(200);
       expect(audioDownloadData.ok).toBe(true);
 
-      // Verify custom categories were used
+      // Verify categories are undefined (categories disabled in settings)
       expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
-        'fiction-books'
+        { category: undefined, tags: undefined }
       );
 
       expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
-        'fiction-audiobooks'
+        { category: undefined, tags: undefined }
       );
     });
   });

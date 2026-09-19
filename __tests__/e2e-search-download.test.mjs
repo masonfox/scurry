@@ -21,6 +21,14 @@ vi.mock('../src/lib/qbittorrent', () => ({
   qbAddUrl: vi.fn()
 }));
 
+vi.mock('../src/lib/settings', () => ({
+  readSettings: vi.fn(() => ({
+    qbittorrent: { url: 'http://localhost:8080', username: 'testuser', password: 'testpass' },
+    tags: { enabled: false, available: [], defaults: { books: [], audiobooks: [] } },
+    categories: { enabled: false, defaults: { books: 'books', audiobooks: 'audiobooks' } },
+  })),
+}));
+
 // Mock fetch globally for MAM API calls
 global.fetch = vi.fn();
 
@@ -136,7 +144,7 @@ describe('E2E Search and Download Integration Tests', () => {
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/test-download-link-abc123',
-        'books'
+        { category: undefined, tags: undefined }
       );
     });
 
@@ -190,7 +198,7 @@ describe('E2E Search and Download Integration Tests', () => {
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/audiobook-download-link',
-        'audiobooks'
+        { category: undefined, tags: undefined }
       );
     });
 
@@ -386,7 +394,7 @@ describe('E2E Search and Download Integration Tests', () => {
         'http://localhost:8080',
         'test-session-cookie',
         expect.any(String),
-        'books' // Should use config.qbCategory as fallback
+        { category: undefined, tags: undefined }
       );
     });
   });
@@ -472,7 +480,7 @@ describe('E2E Search and Download Integration Tests', () => {
         'http://localhost:8080',
         testCookie,
         expect.any(String),
-        'books'
+        { category: undefined, tags: undefined }
       );
     });
 
@@ -640,14 +648,14 @@ describe('E2E Search and Download Integration Tests', () => {
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/book-download-link-abc',
-        'books'
+        { category: undefined, tags: undefined }
       );
 
       expect(qbittorrent.qbAddUrl).toHaveBeenCalledWith(
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/audiobook-download-link-def',
-        'audiobooks'
+        { category: undefined, tags: undefined }
       );
     });
 
@@ -846,7 +854,7 @@ describe('E2E Search and Download Integration Tests', () => {
         'http://localhost:8080',
         'test-session-cookie',
         'https://www.myanonamouse.net/tor/download.php/book-link-retry',
-        'books'
+        { category: undefined, tags: undefined }
       );
     });
   });

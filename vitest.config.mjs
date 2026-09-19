@@ -16,7 +16,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
-      include: ['app/**/*.{js,jsx}', 'src/**/*.{js,jsx}'],
+      include: ['app/**/*.{js,jsx}', 'src/**/*.{js,jsx}', 'proxy.ts'],
       exclude: [
         '**/__tests__/**',
         '**/*.test.{js,jsx,mjs}',
@@ -30,6 +30,7 @@ export default defineConfig({
         'app/components/**',
         'app/page.jsx',
         'app/login/page.jsx',
+        'app/settings/page.jsx',
       ],
       all: true,
       clean: true,
